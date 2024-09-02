@@ -40,8 +40,12 @@ class Faculty extends Model
         return $this->hasMany(chapterInBook::class);
     }
 
-   // public function research(){
-   //     return $this->hasMany(research::class);
-   // }
+    public function research(){
+       return $this->hasMany(research::class);
+    }
+
+    public function trainingAttended(){
+        return $this->hasMany(TrainingAttended::class);
+    }
 
 }

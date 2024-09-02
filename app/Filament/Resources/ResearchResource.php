@@ -8,8 +8,10 @@ use App\Models\Research;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\RichEditor;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
@@ -17,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Columns\IconColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -56,7 +59,9 @@ class ResearchResource extends Resource
 
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
-                TextInput::make('event_highlight')->label('Event highlight'),
+
+                RichEditor::make('event_highlight')->columnSpan('full'),
+
                 Select::make('has_gender_component')->label('Has gender component')
                 ->options([
                     'yes' => 'Yes',
@@ -69,8 +74,8 @@ class ResearchResource extends Resource
                     'On-going' => 'On-going',
                 ])->required()->default('On-going'),
 
-                TextInput::make('objectives'),
-                TextInput::make('expected_output'),
+                RichEditor::make('objectives')->columnSpan('full'),
+                RichEditor::make('expected_output')->columnSpan('full'),
                 TextInput::make('no_months_orig_timeframe')->default('N/A')->label('Months No. from original timeframe'),
                 TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
 
@@ -92,7 +97,7 @@ class ResearchResource extends Resource
                     'In-house' => 'In-house',
                 ])->required(),
 
-                TextInput::make('pdf_image_1')->default('N/A'),
+                FileUpload::make('pdf_image_1')->preserveFilenames(),
                 DatePicker::make('completed_date')->label('Completed Date')
                     ->format('Y/m/d')->nullable(),
 
@@ -148,6 +153,12 @@ class ResearchResource extends Resource
                     ->sortable()->searchable(),
                 TextColumn::make('end_date')
                     ->sortable()->searchable(),
+
+                IconColumn::make('pbms_upload_status')
+                     ->icon(fn (string $state): string => match ($state) {
+                            'uploaded' => 'heroicon-o-check-badge',
+                            'pending' => 'heroicon-o-clock',
+                })
 
 
               //  $table->foreignId('faculty_id');

@@ -24,8 +24,8 @@ return new class extends Migration
             $table->string('has_gender_component');
             $table->string('status');
 
-            $table->string('objectives');
-            $table->string('expected_output');
+            $table->Text('objectives');
+            $table->Text('expected_output');
             $table->string('no_months_orig_timeframe');
             $table->string('name_of_researchers');
 

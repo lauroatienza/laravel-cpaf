@@ -141,7 +141,23 @@ class FacultyResource extends Resource
                           ->format('Y/m/d')->nullable(),
                     ])
                     ->defaultItems(0)
-                    ->columns(2)
+                    ->columns(2),
+
+                    Repeater::make('trainingAttended')
+                    ->relationship()
+                    ->columnSpanFull()
+                    ->label('Training Attended')
+                    ->schema([
+                        TextInput::make('training_title')->nullable()->columnSpanFull(),
+                        TextInput::make('venue')->nullable()->columnSpanFull(),
+                        TextInput::make('num_hours')->nullable()->columnSpanFull(),
+                        DatePicker::make('start_date')->label('Start Date')
+                          ->format('Y/m/d')->nullable(),
+                          DatePicker::make('end_date')->label('End Date')
+                          ->format('Y/m/d')->nullable(), 
+                    ])
+                    ->defaultItems(0)
+                    ->columns(2),
               //  $table->string('fulltime_partime');
              //   $table->string('rating')->nullable();
               //  $table->string('citations')->nullable();
@@ -162,6 +178,7 @@ class FacultyResource extends Resource
                 TextColumn::make('middle_name')->label('Middle Name')->searchable()->sortable(),
                 TextColumn::make('designation')->label('Designation')->searchable()->sortable(),
                 TextColumn::make('employee_category')->label('Category')->searchable()->sortable(),
+                TextColumn::make('research_count')->badge()->counts('research'),
             ])
             ->filters([
                 SelectFilter::make('employee_category')

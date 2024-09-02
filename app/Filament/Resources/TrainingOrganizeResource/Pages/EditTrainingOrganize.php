@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\RepsResource\Pages;
+namespace App\Filament\Resources\TrainingOrganizeResource\Pages;
 
-use App\Filament\Resources\RepsResource;
+use App\Filament\Resources\TrainingOrganizeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditReps extends EditRecord
+class EditTrainingOrganize extends EditRecord
 {
-    protected static string $resource = RepsResource::class;
+    protected static string $resource = TrainingOrganizeResource::class;
 
     protected function getHeaderActions(): array
     {
