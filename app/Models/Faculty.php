@@ -48,4 +48,8 @@ class Faculty extends Model
         return $this->hasMany(TrainingAttended::class);
     }
 
+    public function fsrorrsr(){
+        return $this->hasMany(FSRorRSR::class);
+    }
+
 }

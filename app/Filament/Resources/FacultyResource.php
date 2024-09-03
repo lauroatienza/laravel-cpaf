@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Columns\TextColumn;
@@ -25,7 +26,7 @@ class FacultyResource extends Resource
 {
     protected static ?string $model = Faculty::class;
     
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationLabel = 'Faculty and REPS';
     protected static ?string $navigationGroup = 'Staff and Faculty';
 
@@ -155,6 +156,22 @@ class FacultyResource extends Resource
                           ->format('Y/m/d')->nullable(),
                           DatePicker::make('end_date')->label('End Date')
                           ->format('Y/m/d')->nullable(), 
+                    ])
+                    ->defaultItems(0)
+                    ->columns(2),
+
+                    Repeater::make('fsrorrsr')
+                    ->relationship()
+                    ->columnSpanFull()
+                    ->label('FSR/RSR Attachment')
+                    ->schema([
+                        FileUpload::make('file_upload')->preserveFilenames()->columnSpan('full'),
+                        TextInput::make('year')->nullable()->columnSpanFull(),
+                        Select::make('sem')->label('Coverage')
+                            ->options([
+                            'Jan-Jun' => 'Jan-Jun',
+                            'Jul-Dec' => 'Jul-Dec',
+                         ])->nullable()->columnSpanFull(),
                     ])
                     ->defaultItems(0)
                     ->columns(2),

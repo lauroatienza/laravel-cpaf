@@ -22,7 +22,7 @@ class StudentsResource extends Resource
 {
     protected static ?string $model = Students::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-identification';
     protected static ?string $navigationGroup = 'Academic Group';
     public static function getNavigationBadge(): ?string
     {

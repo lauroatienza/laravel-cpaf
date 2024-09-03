@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ClassesResource\Pages;
-use App\Filament\Resources\ClassesResource\RelationManagers;
-use App\Models\Classes;
+use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
@@ -15,22 +16,21 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ClassesResource extends Resource
+class UserResource extends Resource
 {
-    protected static ?string $model = Classes::class;
+    protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';
-    protected static ?string $navigationGroup = 'Academic Group';
-    public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count();
-    }
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name'),
+                TextInput::make('name')->label('Name')->required(),
+                TextInput::make('email')->label('Email')->required(),
+                TextInput::make('password')->label('Password')->required()->password(),
             ]);
     }
 
@@ -38,9 +38,10 @@ class ClassesResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('Name'),
-                TextColumn::make('sections.name')->badge()->counts('sections'),
-                TextColumn::make('students_count')->badge()->counts('students'),
+                TextColumn::make('name')->label('Name')
+                ->sortable()->searchable(),
+                TextColumn::make('email')->label('Email')
+                ->sortable()->searchable(),
             ])
             ->filters([
                 //
@@ -58,16 +59,16 @@ class ClassesResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RolesRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListClasses::route('/'),
-            'create' => Pages\CreateClasses::route('/create'),
-            'edit' => Pages\EditClasses::route('/{record}/edit'),
+            'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

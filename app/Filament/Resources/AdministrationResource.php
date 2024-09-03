@@ -20,7 +20,7 @@ class AdministrationResource extends Resource
 {
     protected static ?string $model = Administration::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
     protected static ?string $navigationLabel = 'Admins';
     protected static ?string $navigationGroup = 'Staff and Faculty';
 
