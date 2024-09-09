@@ -165,7 +165,7 @@ class FacultyResource extends Resource
                     ->columnSpanFull()
                     ->label('FSR/RSR Attachment')
                     ->schema([
-                        FileUpload::make('file_upload')->preserveFilenames()->columnSpan('full'),
+                        FileUpload::make('file_upload')->preserveFilenames()->columnSpan('full')->downloadable()->previewable(),
                         TextInput::make('year')->nullable()->columnSpanFull(),
                         Select::make('sem')->label('Coverage')
                             ->options([
@@ -202,7 +202,16 @@ class FacultyResource extends Resource
                     ->options([
                         'Faculty' => 'Faculty',
                         'REPS' => 'REPS',
-                    ])->label("Filter by Employee Category")
+                    ])->label("Filter by Employee Category"),
+
+                SelectFilter::make('ms_phd')
+                    ->options([
+                        'BS' => 'BS',
+                        'MS' => 'MS',
+                        'PhD' => 'PhD',
+                    ])->label("Filter by Educational Attainment"),
+
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

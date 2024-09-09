@@ -17,6 +17,7 @@ class Administration extends Model
         "designation",
         "employment_status",
         "unit",
+        "highest_degree_attained",
     ];
     
 }

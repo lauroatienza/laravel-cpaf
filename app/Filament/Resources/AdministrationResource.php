@@ -38,6 +38,13 @@ class AdministrationResource extends Resource
                 TextInput::make('middle_name')->label('Middle Name')->required(),
                 TextInput::make('designation')->label('Designation')->required(),
 
+                Select::make('highest_degree_attained')->label('Highest Degree Attained')
+                ->options([
+                        'BS' => 'BS',
+                        'MS' => 'MS',
+                        'PhD' => 'PhD',
+                ])->required(),
+
                 Select::make('employment_status')->label('Employment Status')
                 ->options([
                     'Permanent' => 'Permanent',

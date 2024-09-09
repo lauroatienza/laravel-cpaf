@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('designation');
             $table->string('employment_status');
             $table->string('unit');
+            $table->string('highest_degree_attained');
           //  $table->string('rating')->nullable();
          //   $table->string('citations')->nullable();
           //  $table->string('with_phd');
