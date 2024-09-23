@@ -147,7 +147,7 @@ class ResearchResource extends Resource
                     ->sortable()->searchable(),
                 TextColumn::make('title')->label('Title')
                     ->sortable()->searchable(),
-                TextColumn::make('faculty.first_name')->label("Project Leader")
+                TextColumn::make('faculty.fullname')->label("Project Leader")
                     ->sortable()->searchable(),
                 TextColumn::make('start_date')
                     ->sortable()->searchable(),

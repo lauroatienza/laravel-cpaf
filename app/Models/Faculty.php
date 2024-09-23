@@ -14,6 +14,7 @@ class Faculty extends Model
         "research_id",
         "last_name",
         "middle_name",
+        "fullname",
         "employee_category",
         "employment_status",
         "unit",

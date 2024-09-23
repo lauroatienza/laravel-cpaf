@@ -42,6 +42,7 @@ class FacultyResource extends Resource
                 TextInput::make('first_name')->label('First Name')->required(),
                 TextInput::make('last_name')->label('Last Name')->required(),
                 TextInput::make('middle_name')->label('Middle Name')->required(),
+                TextInput::make('fullname')->label('Full Name')->required(),
                 TextInput::make('designation')->label('Designation')->required(),
 
                 Select::make('employee_category')->label('Employee Category')
@@ -190,10 +191,11 @@ class FacultyResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('first_name')->label('First Name')->searchable()->sortable(),
-                TextColumn::make('last_name')->label('Last Name')->searchable()->sortable(),
-                TextColumn::make('middle_name')->label('Middle Name')->searchable()->sortable(),
-                TextColumn::make('designation')->label('Designation')->searchable()->sortable(),
+              //  TextColumn::make('first_name')->label('First Name')->searchable()->sortable(),
+               // TextColumn::make('last_name')->label('Last Name')->searchable()->sortable(),
+               // TextColumn::make('middle_name')->label('Middle Name')->searchable()->sortable(),
+               TextColumn::make('fullname')->label('Full Name')->searchable()->sortable(),
+               TextColumn::make('designation')->label('Designation')->searchable()->sortable(),
                 TextColumn::make('employee_category')->label('Category')->searchable()->sortable(),
                 TextColumn::make('research_count')->badge()->counts('research'),
             ])
