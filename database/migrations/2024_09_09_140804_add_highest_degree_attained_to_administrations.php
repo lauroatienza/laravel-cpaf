@@ -10,11 +10,13 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::table('administrations', function (Blueprint $table) {
+{
+    Schema::table('administrations', function (Blueprint $table) {
+        if (!Schema::hasColumn('administrations', 'highest_degree_attained')) {
             $table->string('highest_degree_attained')->after('designation');
-        });
-    }
+        }
+    });
+}
 
     /**
      * Reverse the migrations.

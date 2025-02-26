@@ -6,10 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use  HasRoles , HasFactory, Notifiable; 
 
     /**
      * The attributes that are mass assignable.
@@ -20,6 +20,15 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'last_name',
+        'middle_name',
+        'employment_status',
+        'designation',
+        'unit',
+        'ms_phd',
+        'fulltime_partime',
+
     ];
 
     /**
@@ -47,13 +56,33 @@ class User extends Authenticatable
 
 
     }
+    
+    protected static function boot()
+    {
+        parent::boot();
 
+        static::saving(function ($user) {
+            // Check if the user has 'admin' in their role column
+            if ($user->role === 'admin') {
+                $adminRole = Role::firstOrCreate(['name' => 'admin']); // Ensure role exists
+                
+                $user->assignRole('admin'); // Assign the admin role
+                
+                // Give all permissions to admin
+                $user->syncPermissions(Permission::all()); 
+            }
+        });
+    }
     public function roles(){
         return $this->belongsToMany(Role::class);
     }
 
     public function hasPermission(string $permission) : bool
     {
+        if($this->hasRole('admin'))
+        {
+            return true;
+        }
         $permissionsArray = [];
 
         foreach ($this->roles as $role){

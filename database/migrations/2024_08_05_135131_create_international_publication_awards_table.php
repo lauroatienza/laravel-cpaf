@@ -1,26 +1,29 @@
 <?php
 
-use App\Models\Faculty;
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+
 
 return new class extends Migration
 {
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('international_publication_awards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('faculty_id')->nullable();
-            $table->string("title")->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('title');
+            $table->date('date_published');
             $table->date('date_awarded')->nullable();
-            $table->date('date_published')->nullable();
+            $table->string('certificate_path')->nullable();
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
