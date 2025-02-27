@@ -38,15 +38,15 @@ class FacultyResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $facultyCount = static::$model::where('role', 'faculty')->count();
-        $staffCount = static::$model::where('role', 'staff')->count();
+        $facultyCount = static::$model::where('staff', 'faculty')->count();
+        $staffCount = static::$model::where('staff', 'staff')->count();
     
         return $facultyCount + $staffCount;
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('role', 'faculty');
+        return parent::getEloquentQuery()->where('staff', 'faculty');
     }
 
 
@@ -81,7 +81,7 @@ class FacultyResource extends Resource
             ->headerActions([
                 Action::make('Export')
                 ->action(function () {
-                    $users = User::where('role', 'faculty')->get();
+                    $users = User::where('staff', 'faculty')->get();
                     
                     $pdf = Pdf::loadView('exports.faculty', compact('users'));
 

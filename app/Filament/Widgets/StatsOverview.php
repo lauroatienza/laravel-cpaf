@@ -27,7 +27,7 @@ class StatsOverview extends BaseWidget
         return [
             Stat::make('Total: Faculty and REPS', 
             User::
-             where('role', ['faculty', 'representatives']) // Count both roles
+             where('staff', ['faculty', 'representatives']) // Count both roles
             ->count()
            
             )

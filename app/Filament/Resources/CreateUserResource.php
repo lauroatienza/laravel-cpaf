@@ -85,13 +85,22 @@ class CreateUserResource extends Resource
                 'MS' => 'MS',
                 'PhD' => 'PhD',
             ])->required(),
-            Select::make('role')
+            Select::make('staff')
             ->options([
                 'admin' => 'Admin',
                 'faculty' => 'Faculty',
                 'representative' => 'Representative',
             ])
             ->default('faculty')
+            ->required(),
+
+            Select::make('systemrole')
+            ->options([
+                'admin' => 'Admin',
+                'user' => 'User',
+                
+            ])
+            ->default('user')
             ->required(),
 
             ])->columns(3);

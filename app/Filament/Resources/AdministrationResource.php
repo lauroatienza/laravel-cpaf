@@ -28,12 +28,12 @@ class AdministrationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::where('role','admin')->count();
+        return static::$model::where('staff','admin')->count();
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('role', 'admin');
+        return parent::getEloquentQuery()->where('staff', 'admin');
     }
     public static function form(Form $form): Form
     {
@@ -65,7 +65,7 @@ class AdministrationResource extends Resource
             ->headerActions([
                 Action::make('Export')
                 ->action(function () {
-                    $users = User::where('role', 'admin')->get();
+                    $users = User::where('staff', 'admin')->get();
                     
                     $pdf = Pdf::loadView('exports.faculty', compact('users'));
 
