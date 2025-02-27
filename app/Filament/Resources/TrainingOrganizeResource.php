@@ -34,7 +34,65 @@ class TrainingOrganizeResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Hidden::make('user_id')
+                ->default(\Illuminate\Support\Facades\Auth::user()->id)
+                ->required(),
+
+            Forms\Components\TextInput::make('training_title')
+                ->label('Attended Training/Seminar/Workshop/Conference Title')
+                ->required(),
+
+            Forms\Components\TextInput::make('full_name')
+                ->label('Full Name')
+                ->required(),
+
+            Forms\Components\Select::make('unit_center')
+                ->label('Unit/Center')
+                ->options([
+                    'CSPPS' => 'CSPPS',
+                    'CISC' => 'CISC',
+                    'IGRD' => 'IGRD',
+                    'CPAF' => 'CPAF',
+                ])
+                ->required(),
+
+            Forms\Components\DatePicker::make('start_date')->required(),
+            Forms\Components\DatePicker::make('end_date')->required(),
+
+            Forms\Components\Select::make('category')
+                ->label('Category')
+                ->options([
+                    'Workshop' => 'Workshop',
+                    'Training' => 'Training',
+                    'Conference' => 'Conference',
+                    'Seminar' => 'Seminar',
+                    'Forum' => 'Forum',
+                    'Symposium' => 'Symposium',
+                    'Other' => 'Other',
+                ])
+                ->live(),
+
+            Forms\Components\TextInput::make('specific_title')
+                ->label('Specific Title')
+                ->visible(fn ($get) => $get('category') === 'Other'),
+
+            Forms\Components\Textarea::make('highlights')
+                ->label('Highlights of Event')
+                ->rows(4)
+                ->nullable(),
+
+            Forms\Components\Radio::make('has_gender_component')
+                ->label('Has Gender Component?')
+                ->options([
+                    true => 'Yes',
+                    false => 'No',
+                ])
+                ->required(),
+
+            Forms\Components\TextInput::make('total_hours')
+                ->label('Total Hrs. Spent')
+                ->numeric()
+                ->required(),
             ]);
     }
 
