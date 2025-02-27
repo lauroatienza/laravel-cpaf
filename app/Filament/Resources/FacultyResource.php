@@ -33,83 +33,76 @@ class FacultyResource extends Resource
     protected static ?string $model = User::class;
     
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationLabel = 'Faculty and REPS';
+    protected static ?string $navigationLabel = 'Admin, Faculty, and REPS';
     protected static ?string $navigationGroup = 'Staff and Faculty';
 
+    // ✅ Fix: Correct badge count for all roles
     public static function getNavigationBadge(): ?string
     {
-        $facultyCount = static::$model::where('staff', 'faculty')->count();
-        $staffCount = static::$model::where('staff', 'staff')->count();
-    
-        return $facultyCount + $staffCount;
+        return static::$model::whereIn('staff', ['faculty', 'representative', 'admin'])->count();
     }
 
+    // ✅ Fix: Show records for admin, faculty, and representatives
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('staff', 'faculty');
+        return parent::getEloquentQuery()->whereIn('staff', ['faculty', 'representative', 'admin']);
     }
-
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-              
+                // Define form fields here if needed
             ]);
     }
+
     public static function canCreate(): bool
-{
-    return false;
-}
+    {
+        return false;
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('last_name'),
-                Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('role'),
+                TextColumn::make('name')->label('First Name')->sortable(),
+                TextColumn::make('last_name')->label('Last Name')->sortable(),
+                TextColumn::make('email')->sortable(),
+                TextColumn::make('staff')->label('Staff')->sortable(),
             ])
             ->filters([
-             
-
-
+                // Add filters if needed
             ])
             ->actions([
-              
+                // Define actions if needed
             ])
             ->headerActions([
+                // ✅ Fix: Pass correct data for export
                 Action::make('Export')
-                ->action(function () {
-                    $users = User::where('staff', 'faculty')->get();
-                    
-                    $pdf = Pdf::loadView('exports.faculty', compact('users'));
+                    ->action(function () {
+                        $users = User::whereIn('staff', ['faculty', 'representative', 'admin'])->get();
+                        $pdf = Pdf::loadView('exports.faculty', compact('users'));
 
-                    return response()->streamDownload(
-                        fn () => print($pdf->output()),
-                        'faculty_list.pdf'
-                    );
-                })
-            ])
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            'faculty_list.pdf'
+                        );
+                    }),            ])
             ->bulkActions([
-                
+                // Define bulk actions if needed
             ]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListFaculties::route('/'),
-            //'create' => Pages\CreateFaculty::route('/create'),
             'view' => Pages\ViewFaculty::route('/{record}'),
-            //'edit' => Pages\EditFaculty::route('/{record}/edit'),
         ];
     }
 }

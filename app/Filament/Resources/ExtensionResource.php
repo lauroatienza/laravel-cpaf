@@ -4,7 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExtensionResource\Pages;
 use App\Filament\Resources\ExtensionResource\RelationManagers;
-use App\Models\Extension;
+use App\Models\Extensionnew;
+use App\Models\Users;
+use Doctrine\DBAL\Schema\Column;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
@@ -19,139 +21,72 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Radio;
+use Illuminate\Support\Facades\Auth;
+
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\TimePicker;
+
 
 class ExtensionResource extends Resource
 {
-    protected static ?string $model = Extension::class;
+    protected static ?string $model = Extensionnew::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationGroup = 'Programs';
 
-    protected static ?int $navigationSort = 3;
-
+    protected static ?string $navigationLabel = 'Extension Involvements';    protected static ?int $navigationSort = 3;
+    protected static ?string $pluralLabel = 'Extension Involvements';
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return static::$model::where('user_id', auth()->id())->count();
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Select::make('contributing_unit')->label('Contributing unit')
+                TextInput::make('name')
+                    ->label('Full Name')
+                    ->default(auth()->user()->name. ' ' . auth()->user()->last_name) // Gets logged-in user's name
+                    ->hidden()
+                    ->required(),
+
+                Select::make('extension_involvement')
+                ->label('Type of Extension Involvement')
                 ->options([
-                    'CSPPS' => 'CSPPS',
-                    'CISC' => 'CISC',
-                    'CPAf' => 'CPAf',
-                    'IGRD' => 'IGRD',
-                ])->required()->default('CPAf'),
-                TextInput::make('title')->label('Title')->required(),
+                    'Resource Person' => 'Resource Person',
+                    'Seminar Speaker' => 'Seminar Speaker',
+                    'Reviewer' => 'Reviewer',
+                    'Evaluator' => 'Evaluator',
+                    'Moderator' => 'Moderator',
+                    'Session Chair' => 'Session Chair',
+                    'Editor' => 'Editor',
+                    'Examiner' => 'Examiner',
+                    'Other' => 'Other (Specify)', // Adds "Other" as an option
+                ])
+                ->reactive(), // Allows dynamic updates based on selection
 
-                Select::make('faculty_id')
-                     ->relationship('faculty','first_name')->label('Project Lead'),
+            TextInput::make('custom_involvement')
+                ->label('Specify Other')
+                ->hidden(fn ($get) => $get('type_of_involvement') !== 'Other') // Show only if "Other" is selected
+                ->maxLength(255),
 
-                DatePicker::make('start_date')->label('Start Date')
-                    ->format('Y/m/d')->required(),
-                DatePicker::make('end_date')->label('End Date')
-                    ->format('Y/m/d')->required(),
-
-                DatePicker::make('extension_date')->label('Extension Date')
-                    ->format('Y/m/d')->nullable(),
-                Select::make('has_gender_component')->label('Has gender component')
-                ->options([
-                    'yes' => 'Yes',
-                    'no' => 'No',
-                ])->required()->default('no'),
+                TextInput::make('event_title')
+                ->label("Event Title"),
                 
-                Select::make('status')->label('Status')
-                ->options([
-                    'Completed' => 'Completed',
-                    'On-going' => 'On-going',
-                ])->required()->default('On-going'),
+                DatePicker::make('activity_date')
+                ->label('Activity Date'),
 
-                RichEditor::make('objectives')->columnSpan('full'),
-                RichEditor::make('expected_output')->columnSpan('full'),
-                TextInput::make('no_months_orig_timeframe')->default('N/A')->label('Months No. from original timeframe'),
-                TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
-
-                TextInput::make('source_funding')->required(),
-                Select::make('category_source_funding')->label('Source of Funding Category')
-                ->options([
-                    'UP Entity' => 'UP Entity',
-                    'RP Gov' => 'RP Government Entity or Public Sector Entity',
-                    'RP Priv' => 'RP Private Sector Entity',
-                    'Foreign Non-Dom' => 'Foreign or Non-Domestic Entity',
-                ])->required(),
-
-                TextInput::make('budget')->numeric()->label('Budget (in Philippine Peso)'),
-                Select::make('type_funding')->label('Type of Funding')
-                ->options([
-                    'Externally Funded' => 'Externally Funded',
-                    'UPLB Basic Research' => 'UPLB Basic Research',
-                    'UP System' => 'UP System',
-                    'In-house' => 'In-house',
-                ])->required(),
-                TextInput::make('source_majority_share_of_funding')->default('N/A'),
-                TextInput::make('role_of_unit')->default('N/A'),
-
-                //TextInput::make('pdf_image_1')->default('N/A'),
-                FileUpload::make('pdf_image_1')->preserveFilenames()->columnSpan('full'),
-                TextInput::make('training_courses')->default('N/A'),
-                TextInput::make('technical_advisory_service')->default('N/A'),
-                TextInput::make('info_dissemination')->default('N/A'),
-                TextInput::make('consultancy_external_clients')->default('N/A'),
-                TextInput::make('community_outreach')->default('N/A'),
-                TextInput::make('tech_transfer')->default('N/A'),
-                TextInput::make('organizing_conference_eg')->default('N/A'),
-                TextInput::make('delivery_units_academic_degree')->default('N/A'),
-                TextInput::make('target_beneficiary_number')->default('N/A'),
-                TextInput::make('target_beneficiary_group')->default('N/A'),
-                DatePicker::make('completed_date')->label('Completed Date')
-                    ->format('Y/m/d')->nullable(),
-
-                TextInput::make('sdg_theme')->default('N/A')->label('SDG Theme'),
-                TextInput::make('agora_theme')->default('N/A')->label('AGORA Theme'),
-
-                Select::make('climate_ccam_initiative')->label('Climate Initiative')
-                ->options([
-                    'yes' => 'Yes',
-                    'no' => 'No',
-                ])->required()->default("no"),
-                Select::make('disaster_risk_reduction')->label('Disaster Risk Reduction')
-
-                ->options([
-                    'yes' => 'Yes',
-                    'no' => 'No',
-                ])->required()->default("no"),
-
-                Select::make('flagship_theme')->label('UP Flagship Theme')
-                ->options([
-                    'FP1' => 'FP1: Academic Excellence',
-                    'FP2' => 'FP2: Inclusive University Admissions',
-                    'FP3' => 'FP3: Innovation Hubs, S&T Parks',
-                    'FP4' => 'FP4: ODeL',
-                    'FP5' => 'FP5: Archipelagic & Ocean Virtual University',
-                    'FP6' => 'FP6: Active and Collaborative Partnerships',
-                    'FP7' => 'FP7: Arts and Culture',
-                    'FP8' => 'FP8: Expansion of Public Service',
-                    'FP9' => 'FP9: QMSQA',
-                    'FP10' => 'FP10: Digital Transformation',
-                ])->required()->nullable(),
-
-                Select::make('pbms_upload_status')->label('PBMS Upload Status')
-                ->options([
-                    'uploaded' => 'Uploaded',
-                    'pending' => 'Pending',
-                ])->required()->default("pending"),
-            ]);
-    }
+            ])->columns(1);
+    }  
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('contributing_unit')->label('Contributing Unit')
+                /*TextColumn::make('contributing_unit')->label('Contributing Unit')
                 ->sortable()->searchable(),
                 TextColumn::make('title')->label('Title')
                 ->sortable()->searchable(),
@@ -161,13 +96,18 @@ class ExtensionResource extends Resource
                 ->sortable()->searchable(),
                 TextColumn::make('end_date')
                 ->sortable()->searchable(),
-
-                IconColumn::make('pbms_upload_status')
-                ->icon(fn (string $state): string => match ($state) {
-                       'uploaded' => 'heroicon-o-check-badge',
-                       'pending' => 'heroicon-o-clock',
-                    })
-
+                */
+               // IconColumn::make('pbms_upload_status')
+               // ->icon(fn (string $state): string => match ($state) {
+                   //   'uploaded' => 'heroicon-o-check-badge',
+                   //  'pending' => 'heroicon-o-clock',
+                      
+                  //  })
+                  TextColumn::make('name')->label('Name')
+                  ->sortable()->searchable(),
+                  TextColumn::make('event_title')->label('Event Title')
+                  ->sortable()->searchable(),
+                 
             ])
             ->filters([
                 //
@@ -181,7 +121,7 @@ class ExtensionResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
+        }
 
     public static function getRelations(): array
     {
@@ -199,4 +139,9 @@ class ExtensionResource extends Resource
             'edit' => Pages\EditExtension::route('/{record}/edit'),
         ];
     }
+    public static function getEloquentQuery(): Builder
+{
+    return parent::getEloquentQuery()->where('user_id', auth()->id());
+}
+
 }

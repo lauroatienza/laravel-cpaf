@@ -20,13 +20,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'staff',
         'last_name',
         'middle_name',
         'employment_status',
         'designation',
         'unit',
         'ms_phd',
+        'systemrole',
         'fulltime_partime',
 
     ];
@@ -63,7 +64,7 @@ class User extends Authenticatable
 
         static::saving(function ($user) {
             // Check if the user has 'admin' in their role column
-            if ($user->role === 'admin') {
+            if ($user->systemrole === 'admin') {
                 $adminRole = Role::firstOrCreate(['name' => 'admin']); // Ensure role exists
                 
                 $user->assignRole('admin'); // Assign the admin role

@@ -95,6 +95,7 @@ class CreateUserResource extends Resource
             ->required(),
 
             Select::make('systemrole')
+            ->label("System Role")
             ->options([
                 'admin' => 'Admin',
                 'user' => 'User',

@@ -10,6 +10,8 @@ class Extension extends Model
     use HasFactory;
 
     protected $fillable = [
+        "name",
+        "event_title",  
         "contributing_unit",
         "faculty_id",
         "title",
