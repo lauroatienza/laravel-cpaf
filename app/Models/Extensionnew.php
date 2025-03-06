@@ -16,6 +16,8 @@ class Extensionnew extends Model
         'extension_involvement', 
         'event_title',
         'activity_date',
+        'venue',
+        'location',
         
     ];
 

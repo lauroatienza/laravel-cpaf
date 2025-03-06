@@ -67,6 +67,17 @@ class ExtensionResource extends Resource
                     'Other' => 'Other (Specify)', // Adds "Other" as an option
                 ])
                 ->reactive(), // Allows dynamic updates based on selection
+                
+                Select::make('location')
+                ->label('Type of Extension')
+                ->options([
+                    'Training' => 'Training',
+                    'Conference' => 'Conference',
+                    'Editorial Team/Board' => 'Editorial Team/Board',
+                    'Workshop' => 'Workshop',
+                    'Other' => 'Other (Specify)', // Adds "Other" as an option
+                ])
+                ->reactive(), // Allows dynamic updates based on selection
 
             TextInput::make('custom_involvement')
                 ->label('Specify Other')
@@ -75,6 +86,9 @@ class ExtensionResource extends Resource
 
                 TextInput::make('event_title')
                 ->label("Event Title"),
+
+                TextInput::make('venue')
+                ->label("Venue and Location"),
                 
                 DatePicker::make('activity_date')
                 ->label('Activity Date'),
@@ -101,13 +115,15 @@ class ExtensionResource extends Resource
                // ->icon(fn (string $state): string => match ($state) {
                    //   'uploaded' => 'heroicon-o-check-badge',
                    //  'pending' => 'heroicon-o-clock',
-                      
+                
                   //  })
-                  TextColumn::make('name')->label('Name')
-                  ->sortable()->searchable(),
-                  TextColumn::make('event_title')->label('Event Title')
-                  ->sortable()->searchable(),
-                 
+                TextColumn::make('extension_involvement')->label('Type of Extension Involvement')
+                ->sortable()->searchable(),
+                TextColumn::make('location')->label('Type of Extension')
+                ->sortable()->searchable(),
+                TextColumn::make('event_title')->label('Event Title')
+                ->sortable()->searchable(),
+                
             ])
             ->filters([
                 //
