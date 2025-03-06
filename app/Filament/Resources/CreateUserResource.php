@@ -91,6 +91,7 @@ class CreateUserResource extends Resource
                     'admin' => 'Admin',
                     'super-admin' => 'Super Admin',
                     'user' => 'User',
+                    'secretary' => 'Secretary',
                 ])
                 ->default('user')
                 ->reactive()
