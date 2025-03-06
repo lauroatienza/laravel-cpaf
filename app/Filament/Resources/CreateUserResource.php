@@ -26,81 +26,81 @@ class CreateUserResource extends Resource
     protected static ?string $navigationGroup = 'User Management';
     public static function form(Form $form): Form
     {
+       
         return $form
-            ->schema([
-                Section::make('Primary Information')
+        ->schema([
+            Section::make('Primary Information')
                 ->description('Fill up the following:')
                 ->schema([
-                TextInput::make('name') 
-                -> label('First Name')
+                    TextInput::make('name')->label('First Name')->required(),
+                    TextInput::make('email')->label('Email')->email()->required(),
+                    TextInput::make('last_name')->label('Last Name')->required(),
+                    TextInput::make('password')
+                        ->password()
+                        ->revealable()
+                        ->minLength(6)
+                        ->same('password_confirmation')
+                        ->dehydrated(fn ($state) => filled($state))
+                        ->rule(Password::default()),
+                    TextInput::make('middle_name')->label('Middle Name'),
+                    TextInput::make('password_confirmation')
+                        ->password()
+                        ->revealable()
+                        ->label('Confirm Password'),
+                ])->columns(2),
+
+            Select::make('employment_status')->label('Employment Status'),
+            Select::make('designation')->label('Designation'),
+            Select::make('unit')
+                ->label('Unit')
+                ->options([
+                    'DO' => 'DO',
+                    'KMO' => 'KMO',
+                    'IGRD' => 'IGRD',
+                    'CISC' => 'CISC',
+                    'CSPPS' => 'CSPPS',
+                ])
                 ->required(),
-                TextInput::make('email') -> label('Email')
-            ->email()
-            ->required(),
-              
-                TextInput::make('last_name') 
-                -> label('Last Name')
+            Select::make('fulltime_partime')
+                ->label('Employment Type')
+                ->options([
+                    'Full Time' => 'Full Time',
+                    'Part Time' => 'Part Time',
+                ])
                 ->required(),
-                
-                TextInput::make('password')
-                ->password()
-                -> revealable()
-                
-                ->minLength(6)
-                ->same('password_confirmation') // 👈 Ensure password matches
-                ->dehydrated(fn ($state) => filled($state)) // Avoid saving empty passwords when editing
-                ->rule(Password::default()),
-                
-           TextInput::make('middle_name') 
-                -> label('Middle Name'),
-            TextInput::make('password_confirmation')
-            ->password()
-            -> revealable()
-            
-            ->label('Confirm Password'),
-                
-            
-            ])->columns(2),
-            
-            TextInput::make('employment_status') 
-            -> label('Employment Status'),
-            TextInput::make('designation') 
-            -> label('Designation'),
-            Select::make('unit')->label('Unit')
-            ->options([
-                'DO' => 'DO',
-                'KMO' => 'KMO',
-                'IGRD' => 'IGRD',
-                'CISC' => 'CISC',
-                'CSPPS' => 'CSPPS',
-            ])->required(),
-            Select::make('fulltime_partime')->label('Employment Type')
-            ->options([
-                'Full Time' => 'Full Time',
-                'Part Time' => 'Part Time',
-            ])->required(),
-            Select::make('ms_phd')->label('Highest Degree Attained')
-            ->options([
-                'BS' => 'BS',
-                'MS' => 'MS',
-                'PhD' => 'PhD',
-            ])->required(),
+            Select::make('ms_phd')
+                ->label('Highest Degree Attained')
+                ->options([
+                    'BS' => 'BS',
+                    'MS' => 'MS',
+                    'PhD' => 'PhD',
+                ])
+                ->required(),
             Select::make('staff')
-            ->options([
-                'admin' => 'Admin',
-                'faculty' => 'Faculty',
-                'representative' => 'Representative',
-            ])
-            ->default('faculty')
-            ->required(),
+                ->options([
+                    'admin' => 'Admin',
+                    'faculty' => 'Faculty',
+                    'representative' => 'Representative',
+                ])
+                ->default('faculty')
+                ->required(),
 
             Select::make('systemrole')
-            ->label('User Role')
-            ->multiple() // Allow multiple roles
-            ->relationship('roles', 'name') // Uses Spatie roles
-            ->preload(), // Load roles in dropdown
-
-            ])->columns(3);
+                ->label('User Role')
+                ->options([
+                    'admin' => 'Admin',
+                    'super-admin' => 'Super Admin',
+                    'user' => 'User',
+                ])
+                ->default('user')
+                ->reactive()
+                ->afterStateUpdated(function ($state, $set, $get, $record) {
+                    if ($record) {
+                        $record->update(['systemrole' => $state]);
+                        $record->syncRoles([$state]); // ✅ Sync Spatie role
+                    }
+                }),
+        ]);
     }
 
     public static function table(Table $table): Table

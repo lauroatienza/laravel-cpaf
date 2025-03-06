@@ -60,6 +60,17 @@ class FacultyResource extends Resource
     {
         return false;
     }
+    public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist
+        ->schema([
+            TextEntry::make('name')->label('First Name'),
+            TextEntry::make('last_name')->label('Last Name'),
+            TextEntry::make('email')->label('Email'),
+            TextEntry::make('staff')->label('Staff Type'),
+        ]);
+}
+
 
     public static function table(Table $table): Table
     {

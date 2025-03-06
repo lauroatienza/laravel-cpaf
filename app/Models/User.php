@@ -22,7 +22,7 @@ class User extends Authenticatable
         'designation',
         'unit',
         'ms_phd',
-        'systemrole',
+        'systemrole', // ✅ Ensure systemrole is handled properly
         'fulltime_partime',
     ];
 
@@ -39,22 +39,27 @@ class User extends Authenticatable
         ];
     }
 
-    // 🚀 Ensure Role Syncing on User Creation & Update
+    // 🚀 Sync Spatie Roles When User is Created or Updated
     protected static function booted()
     {
         static::saving(function ($user) {
+            // Sync Spatie roles based on systemrole field before saving
             $user->syncRoleFromSystemRole();
         });
     }
-
+    
     private function syncRoleFromSystemRole()
     {
-        if ($this->systemrole === 'admin') {
-            $this->syncRoles(['admin']);
-        } elseif ($this->systemrole === 'super-admin') {
-            $this->syncRoles(['super-admin']);
+        $validRoles = ['super-admin', 'admin', 'user'];
+    
+        // Ensure the systemrole is valid before proceeding
+        if (in_array($this->systemrole, $validRoles)) {
+            $this->syncRoles([$this->systemrole]); // Spatie syncRoles for single role
         } else {
-            $this->syncRoles([$this->systemrole]); // Assign other roles dynamically
+            \Log::error('Invalid systemrole', ['systemrole' => $this->systemrole]);
         }
     }
+    
+    
+    
 }
