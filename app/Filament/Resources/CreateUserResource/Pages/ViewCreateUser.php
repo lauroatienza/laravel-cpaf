@@ -4,17 +4,16 @@ namespace App\Filament\Resources\CreateUserResource\Pages;
 
 use App\Filament\Resources\CreateUserResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ViewRecord;
 
-class EditCreateUser extends EditRecord
+class ViewCreateUser extends ViewRecord
 {
     protected static string $resource = CreateUserResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\EditAction::make(),
         ];
     }
 }

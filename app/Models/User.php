@@ -2,20 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+
 class User extends Authenticatable
 {
-    use  HasRoles , HasFactory, Notifiable; 
+    use HasRoles, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -29,68 +24,37 @@ class User extends Authenticatable
         'ms_phd',
         'systemrole',
         'fulltime_partime',
-
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'email',
         ];
-
-
     }
-    
-    protected static function boot()
-    {
-        parent::boot();
 
+    // 🚀 Ensure Role Syncing on User Creation & Update
+    protected static function booted()
+    {
         static::saving(function ($user) {
-            // Check if the user has 'admin' in their role column
-            if ($user->systemrole === 'admin') {
-                $adminRole = Role::firstOrCreate(['name' => 'admin']); // Ensure role exists
-                
-                $user->assignRole('admin'); // Assign the admin role
-                
-                // Give all permissions to admin
-                $user->syncPermissions(Permission::all()); 
-            }
+            $user->syncRoleFromSystemRole();
         });
     }
-    public function roles(){
-        return $this->belongsToMany(Role::class);
-    }
 
-    public function hasPermission(string $permission) : bool
+    private function syncRoleFromSystemRole()
     {
-        if($this->hasRole('admin'))
-        {
-            return true;
+        if ($this->systemrole === 'admin') {
+            $this->syncRoles(['admin']);
+        } elseif ($this->systemrole === 'super-admin') {
+            $this->syncRoles(['super-admin']);
+        } else {
+            $this->syncRoles([$this->systemrole]); // Assign other roles dynamically
         }
-        $permissionsArray = [];
-
-        foreach ($this->roles as $role){
-            foreach ($role->permissions as $singlePermission){
-                $permissionsArray[] = $singlePermission->name;
-            }
-        }
-        return collect($permissionsArray)->unique()->contains($permission);
     }
 }

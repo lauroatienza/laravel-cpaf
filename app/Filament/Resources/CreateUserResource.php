@@ -95,14 +95,10 @@ class CreateUserResource extends Resource
             ->required(),
 
             Select::make('systemrole')
-            ->label("System Role")
-            ->options([
-                'admin' => 'Admin',
-                'user' => 'User',
-                
-            ])
-            ->default('user')
-            ->required(),
+            ->label('User Role')
+            ->multiple() // Allow multiple roles
+            ->relationship('roles', 'name') // Uses Spatie roles
+            ->preload(), // Load roles in dropdown
 
             ])->columns(3);
     }
@@ -164,6 +160,7 @@ class CreateUserResource extends Resource
             'index' => Pages\ListCreateUsers::route('/'),
             'create' => Pages\CreateCreateUser::route('/create'),
             'edit' => Pages\EditCreateUser::route('/{record}/edit'),
+            'view' => Pages\ViewCreateUser::route('/{record}'),
         ];
     }
 }
