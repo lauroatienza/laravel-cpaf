@@ -165,7 +165,7 @@ class PublicationResource extends Resource
                 Section::make('Section 3 of 5')
                     ->schema([
                         Textarea::make('collection_database')
-                            ->label('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized:
+                            ->helperText('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized:
                                     (Do not leave the box blank. Please put "NA" if you have no answers. Thank you)')
                             ->placeholder('Description (optional)')
                             ->required(),
@@ -224,7 +224,7 @@ class PublicationResource extends Resource
                 Section::make('Section 4 of 5')
                     ->schema([
                         Placeholder::make('proofs_instruction')
-                            ->content('Kindly input the link to the proofs below.
+                            ->helperText('Kindly input the link to the proofs below.
                                        Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')
                             ->columnSpan('full'),
 
@@ -241,7 +241,7 @@ class PublicationResource extends Resource
                 Section::make('Section 5 of 5')
                     ->schema([
                         Placeholder::make('awards_instruction')
-                            ->content('Do not leave the box blank.
+                            ->helperText('Do not leave the box blank.
                                        Please put "NA" if you have no answers. Thank you!')
                             ->columnSpan('full'),
 
