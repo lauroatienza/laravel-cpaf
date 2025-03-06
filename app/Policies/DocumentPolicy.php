@@ -13,7 +13,7 @@ class DocumentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyPermission(['Secetary_View',  'SuperAdmin_View']);
+        return $user->hasAnyPermission(['Secretary_View',  'SuperAdmin_View']);
     }
 
     /**
@@ -21,7 +21,7 @@ class DocumentPolicy
      */
     public function view(User $user, Document $document): bool
     {
-        return $user->hasAnyPermission(['Secetary_View',  'SuperAdmin_View']);
+        return $user->hasAnyPermission(['Secretary_View',  'SuperAdmin_View']);
     }
 
     /**
@@ -29,7 +29,7 @@ class DocumentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyPermission(['Secetary_Create',  'SuperAdmin_Create']);
+        return $user->hasAnyPermission(['Secretary_Create',  'SuperAdmin_Create']);
     }
 
     /**
@@ -37,7 +37,7 @@ class DocumentPolicy
      */
     public function update(User $user, Document $document): bool
     {
-        return $user->hasAnyPermission(['Secetary_Edit',  'SuperAdmin_Edit']);
+        return $user->hasAnyPermission(['Secretary_Edit',  'SuperAdmin_Edit']);
     }
 
     /**
@@ -45,7 +45,7 @@ class DocumentPolicy
      */
     public function delete(User $user, Document $document): bool
     {
-        return $user->hasAnyPermission(['Secetary_Delete',  'SuperAdmin_Edit']);
+        return $user->hasAnyPermission(['Secretary_Delete',  'SuperAdmin_Edit']);
     }
 
     /**
