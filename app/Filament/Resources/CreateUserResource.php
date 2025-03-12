@@ -61,8 +61,22 @@ class CreateUserResource extends Resource
                         ->label('Confirm Password'),
                 ])->columns(2),
 
-            Select::make('employment_status')->label('Employment Status'),
-            Select::make('designation')->label('Designation'),
+            Select::make('employment_status')->label('Employment Status')
+                ->options([
+                    'Part-Time' => 'Part-Time',
+                    'Full Time' => 'Full Time',
+                ])
+                ->required(),
+            Select::make('designation')
+                ->label('Designation')
+                ->options([
+                    'INTERN' => 'intern',
+                    'SA KANTO' => 'Dyan sa Kanto',
+                    'CPAF' => 'CPAF',
+                    'CUBAO' => 'CUBAO',
+                    'MALACOCO' => 'MALACOCO',
+                ])
+                ->required(),
             Select::make('unit')
                 ->label('Unit')
                 ->options([

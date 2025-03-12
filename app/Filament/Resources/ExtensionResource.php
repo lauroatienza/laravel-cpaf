@@ -40,7 +40,7 @@ class ExtensionResource extends Resource
     protected static ?string $pluralLabel = 'Extension Involvements';
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::where('user_id', auth()->id())->count();
+        return static::$model::where('user_id', Auth::id())->count();
     }
     public static function getNavigationBadgeColor(): string
     {
@@ -52,7 +52,7 @@ class ExtensionResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->label('Full Name')
-                    ->default(auth()->user()->name. ' ' . auth()->user()->last_name) // Gets logged-in user's name
+                    ->default(Auth::user()->name. ' ' . Auth::user()->last_name) // Gets logged-in user's name
                     ->hidden()
                     ->required(),
 
@@ -160,7 +160,7 @@ class ExtensionResource extends Resource
     }
     public static function getEloquentQuery(): Builder
 {
-    return parent::getEloquentQuery()->where('user_id', auth()->id());
+    return parent::getEloquentQuery()->where('user_id', Auth::user()->id);
 }
 
 }
