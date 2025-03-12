@@ -42,7 +42,10 @@ class ExtensionResource extends Resource
     {
         return static::$model::where('user_id', auth()->id())->count();
     }
-
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'secondary'; 
+    }
     public static function form(Form $form): Form
     {
         return $form
