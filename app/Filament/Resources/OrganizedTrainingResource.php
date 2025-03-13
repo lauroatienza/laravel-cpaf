@@ -21,9 +21,39 @@ class OrganizedTrainingResource extends Resource
     protected static ?int $navigationSort = 4;
 
     public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count(); 
+{
+    $user = Auth::user();
+
+    // If the user is an admin, show the total count
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return static::$model::count();
     }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and extra spaces
+    $normalizeName = function ($name) use ($titles) {
+        return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return static::$model::where(function ($query) use ($user, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+        $query->whereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(middle_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedFullName%"])
+              ->orWhereRaw("LOWER(CONCAT(TRIM(last_name), ', ', TRIM(first_name), ' ', TRIM(middle_name))) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+              ->orWhereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+    })->count();
+}
+
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
@@ -133,5 +163,41 @@ class OrganizedTrainingResource extends Resource
             'edit' => Pages\EditOrganizedTraining::route('/{record}/edit'),
         ];
     }
+    public static function getEloquentQuery(): Builder
+{
+    $user = Auth::user();
+
+    // If the user is an admin, return all records
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return parent::getEloquentQuery();
+    }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and extra spaces
+    $normalizeName = function ($name) use ($titles) {
+        return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return parent::getEloquentQuery()
+        ->where(function ($query) use ($user, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+            $query->whereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(middle_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                  ->orWhereRaw("LOWER(CONCAT(TRIM(last_name), ', ', TRIM(first_name), ' ', TRIM(middle_name))) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                  ->orWhereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        });
+}
+
+    
     
 }
