@@ -10,9 +10,14 @@ class chapterInBook extends Model
     use HasFactory;
 
     protected $fillable = [
-        "first_name",
+        "user_id",
         "title",
         "co-authors",
         "date_publication",
-    ];
+    ];  
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

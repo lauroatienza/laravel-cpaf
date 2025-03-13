@@ -12,10 +12,15 @@ class NewAppointment extends Model
     protected $table = 'new_appointments'; // Ensures correct table mapping
 
     protected $fillable = [
+        'created_at',   
+        'updated_at',
         'type_of_appointments',
         'position',
         'appointment',
         'appointment_effectivity_date',
+        'name',
         'photo_url',
+        'created_at',
+        'updated_at',
     ];
 }

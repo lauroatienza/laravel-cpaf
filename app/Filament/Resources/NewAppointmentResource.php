@@ -39,6 +39,10 @@ class NewAppointmentResource extends Resource
     {
         return static::$model::count();
     }
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'secondary'; 
+    }
 
     public static function form(Form $form): Form
     {

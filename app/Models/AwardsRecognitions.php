@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OtherNotableAwards extends Model
+class AwardsRecognitions extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         "award_title",
         "award_desc",

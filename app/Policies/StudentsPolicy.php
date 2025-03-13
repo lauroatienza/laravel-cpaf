@@ -13,7 +13,7 @@ class StudentsPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('Permission_View');
+        return false;
     }
 
     /**

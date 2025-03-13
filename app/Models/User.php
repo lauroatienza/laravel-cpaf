@@ -50,7 +50,7 @@ class User extends Authenticatable
     
     private function syncRoleFromSystemRole()
     {
-        $validRoles = ['super-admin', 'admin', 'user'];
+        $validRoles = ['super-admin', 'admin', 'user', 'secretary'];
     
         // Ensure the systemrole is valid before proceeding
         if (in_array($this->systemrole, $validRoles)) {

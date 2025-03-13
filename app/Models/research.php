@@ -37,8 +37,6 @@ class research extends Model
         "pbms_upload_status",
     ];
 
-     public function faculty(){
-         return $this->belongsTo(Faculty::class);
-     }
+     
 
 }

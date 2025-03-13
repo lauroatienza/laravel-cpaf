@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;;
 use Illuminate\Support\Facades\DB;
 use League\Csv\Reader;
+use Carbon\Carbon;
 
 class NewappointmentSeeder extends Seeder
 {
@@ -14,29 +15,20 @@ class NewappointmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $filePath = storage_path('app/appointments.csv');
+        $csv = Reader::createFromPath(storage_path('app/newappointment_data.csv'), 'r');
+        $csv->setHeaderOffset(0);
 
-        if (!file_exists($filePath)) {
-            echo "CSV file not found!";
-            return;
-        }
-
-        // Read CSV file
-        $csvData = array_map('str_getcsv', file($filePath));
-        array_shift($csvData); // Remove header row
-
-        foreach ($csvData as $row) {
+        foreach ($csv as $row) {
             DB::table('appointments')->insert([
-                'dtype' => $row[2], // Type of Appointment
-                'of_appointmentsposition' => $row[3], // Position
-                'appointment' => $row[4], // Appointment
-                'appointment_effectivity_date' => Carbon::createFromFormat('m/d/Y', $row[5])->toDateString(),
-                'photo_url' => $row[6] ?? null,
-                'created_at' => now(),
+                'created_at' => Carbon::parse($row['Timestamp'])->format('Y-m-d H:i:s'),
+                'name' => $row['Full name (First Name, MI, Last Name)'],
+                'type_of_appointments' =>  $row['Type of Appointment'], // Type of Appointment
+                'position' => $row['Position'], // Position
+                'appointment' => $row['Appointment'], // Appointment
+                'appointment_effectivity_date' => Carbon::parse($row['Appointment Effectivity Date'])->format('Y-m-d'),
+                'photo_url' => $row['Photo File or URL Link'] ?? null,
                 'updated_at' => now(),
             ]);
         }
-
-        echo "Data imported successfully!";
     }
 }

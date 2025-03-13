@@ -1,0 +1,20 @@
+/* Change sidebar title and text color */
+.filament-sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filament-sidebar-header img {
+    height: 40px; /* Adjust the size of your logo */
+}
+
+/* Change button color */
+.filament-button {
+    background-color: #3b82f6 !important; /* Blue color */
+    color: white !important;
+}
+
+.filament-button:hover {
+    background-color: #2563eb !important; /* Darker blue on hover */
+}

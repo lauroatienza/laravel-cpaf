@@ -12,10 +12,13 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\Action;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rules\Password;
 class CreateUserResource extends Resource
 {
@@ -24,6 +27,15 @@ class CreateUserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-plus';
     protected static ?string $navigationGroup = 'User Management';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::$model::count();
+    }
+    public static function getNavigationBadgeColor(): string
+{
+    return 'secondary'; 
+}
     public static function form(Form $form): Form
     {
        
@@ -49,8 +61,14 @@ class CreateUserResource extends Resource
                         ->label('Confirm Password'),
                 ])->columns(2),
 
-            Select::make('employment_status')->label('Employment Status'),
-            Select::make('designation')->label('Designation'),
+            Select::make('employment_status')->label('Employment Status')
+                ->options([
+                    'Part-Time' => 'Part-Time',
+                    'Full Time' => 'Full Time',
+                ])
+                ->required(),
+            TextInput::make('designation')->label('Designation')
+            ->required(),
             Select::make('unit')
                 ->label('Unit')
                 ->options([
@@ -91,6 +109,7 @@ class CreateUserResource extends Resource
                     'admin' => 'Admin',
                     'super-admin' => 'Super Admin',
                     'user' => 'User',
+                    'secretary' => 'Secretary',
                 ])
                 ->default('user')
                 ->reactive()
@@ -119,13 +138,24 @@ class CreateUserResource extends Resource
                 ->label('Unit')
                 ->sortable()
                 ->searchable(),
+                BadgeColumn::make('staff')
+                ->label('Position')
+                ->sortable()
+                ->searchable()
+                ->formatStateUsing(fn (string $state): string => ucfirst(strtolower($state))),
                 TextColumn::make('fulltime_partime')
                 ->label('Employment Type')
                 ->sortable()
                 ->searchable(),
-                TextColumn::make('ms_phd')
+                BadgeColumn::make('ms_phd')
                 ->label('Highest Degree Attained')
                 ->sortable()
+                ->color('secondary')
+                ->searchable(),
+                BadgeColumn::make('systemrole')
+                ->label('User Role')
+                ->sortable()
+                ->color('secondary')
                 ->searchable(),
                 TextColumn::make('email')
                 ->label('Contact')
@@ -137,9 +167,40 @@ class CreateUserResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\CreateAction::make(), // ✅ Add this line
+                Tables\Actions\EditAction::make()
+                ->color('secondary'),
+                
+                
             ])
+            ->headerActions([
+                
+                
+                Action::make('Export')
+                    ->form([
+                        Forms\Components\Select::make('role')
+                            ->label('Export Type')
+                            ->options([
+                                'admin' => 'Admin',
+                                'faculty' => 'Faculty',
+                                'representative' => 'Representative',
+                            ])
+                            ->required(),
+                    ])
+                    ->modalButton('Download')
+                    ->color('gray')
+                    ->action(function (array $data) {
+                        $users = User::where('staff', $data['role'])->get();
+                        $pdf = Pdf::loadView('exports.faculty', compact('users'));
+            
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            "{$data['role']}_list.pdf"
+                        );
+                    }),
+                    
+                
+            ])
+            ->searchable()
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -163,4 +224,5 @@ class CreateUserResource extends Resource
             'view' => Pages\ViewCreateUser::route('/{record}'),
         ];
     }
+   
 }

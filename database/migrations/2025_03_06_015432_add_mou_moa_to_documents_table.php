@@ -15,13 +15,13 @@ return new class extends Migration {
             $table->string('partner_stakeholder');
             $table->date('start_date');
             $table->date('end_date');
-            $table->enum('training_courses', ['Yes', 'No'])->default('No');
-            $table->enum('technical_advisory_service', ['Yes', 'No'])->default('No');
-            $table->enum('information_dissemination', ['Yes', 'No'])->default('No');
-            $table->enum('consultancy', ['Yes', 'No'])->default('No');
-            $table->enum('community_outreach', ['Yes', 'No'])->default('No');
-            $table->enum('technology_transfer', ['Yes', 'No'])->default('No');
-            $table->enum('organizing_events', ['Yes', 'No'])->default('No');
+            $table->enum('training_courses', ['Yes', 'No'])->nullable(); // Removed ->change()
+            $table->enum('technical_advisory_service', ['Yes', 'No'])->nullable(); // Removed ->change()
+            $table->enum('information_dissemination', ['Yes', 'No'])->nullable(); // Removed ->change()
+            $table->enum('consultancy', ['Yes', 'No'])->nullable(); // Removed ->change()
+            $table->enum('community_outreach', ['Yes', 'No'])->nullable(); // Removed ->change()
+            $table->enum('technology_transfer', ['Yes', 'No'])->nullable(); // Removed ->change()
+            $table->enum('organizing_events', ['Yes', 'No'])->nullable(); // Removed ->change()
             $table->text('scope_of_work')->nullable();
             $table->string('pdf_file_url')->nullable();
             $table->timestamps();
