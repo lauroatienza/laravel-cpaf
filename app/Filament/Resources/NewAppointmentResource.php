@@ -81,7 +81,7 @@ class NewAppointmentResource extends Resource
                 //TextColumn::make('appointment_effectivity_date')->date(),
                 TextInput::make('photo_url')
                     ->url()
-                    ->label('Photo URL')
+                    ->label('Photo File URL')
                     ->helperText('Enter a valid URL') 
                     ->Required(),
             ]);
@@ -136,4 +136,6 @@ class NewAppointmentResource extends Resource
             'edit' => Pages\EditNewAppointment::route('/{record}/edit'),
         ];
     }
+
+
 }
