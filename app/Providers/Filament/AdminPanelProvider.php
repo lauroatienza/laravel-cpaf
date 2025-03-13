@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             //->registration(Register::class) 
             ->colors([
-               'primary' => [
+               'secondary' => [
     50 => '240, 255, 250',  // Lightest green
     100 => '204, 255, 229',
     200 => '153, 255, 204',
@@ -47,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
     950 => '3, 80, 50',  // Darkest green
 ],
 
-'secondary' => [
+'primary' => [
     50 => '235, 248, 255',  // Lightest blue
     100 => '200, 235, 255',
     200 => '170, 220, 255',
