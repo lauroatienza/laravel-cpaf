@@ -27,7 +27,10 @@ class InternationalPublicationAwardResource extends Resource
     protected static ?string $navigationGroup = 'Awards';
     protected static ?int $navigationSort = 3;
 
-
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'secondary'; 
+    }
     public static function form(Form $form): Form
     {
         return $form

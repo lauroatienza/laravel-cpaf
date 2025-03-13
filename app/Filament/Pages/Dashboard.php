@@ -6,7 +6,8 @@ use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
-
+use App\Filament\Widgets\CalendarWidget;
+use App\Filament\Widgets\StatsOverview;
  
 class Dashboard extends \Filament\Pages\Dashboard
 {
@@ -21,6 +22,9 @@ class Dashboard extends \Filament\Pages\Dashboard
             DatePicker::make('EndDate')->default(now()),
         ])->columns(2)
     ]);
+
+    
  } 
 
+ 
 }

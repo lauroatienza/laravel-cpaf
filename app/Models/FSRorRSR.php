@@ -10,10 +10,15 @@ class FSRorRSR extends Model
     use HasFactory;
 
     protected $fillable = [
-        "faculty_id",
+        "user_id",
         "year",
         "sem",
         "file_upload",
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 }
