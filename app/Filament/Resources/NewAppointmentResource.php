@@ -38,25 +38,42 @@ class NewAppointmentResource extends Resource
     protected static ?int $navigationSort = 3;
 
     public static function getNavigationBadge(): ?string
-    {
-        $user = Auth::user();
-    
-        // If the user is an admin, show the total count
-        if ($user->hasRole(['super-admin','admin'])) {
-            return static::$model::count();
-        }
-    
-        // Build possible name formats
-        $fullName = trim($user->name . ' ' . ($user->middle_name ?? '') . ' ' . $user->last_name);  // Standard
-        $fullNameReversed = trim($user->last_name . ', ' . $user->name . ' ' . ($user->middle_name ?? ''));  // Surname, First M.
-        $simpleName = trim($user->name . ' ' . $user->last_name);  // Without middle name
-    
-        return static::$model::where(function ($query) use ($fullName, $fullNameReversed, $simpleName) {
-            $query->where('full_name', 'LIKE', "%$fullName%")
-                  ->orWhere('full_name', 'LIKE', "%$fullNameReversed%")
-                  ->orWhere('full_name', 'LIKE', "%$simpleName%");
-        })->count();
+{
+    $user = Auth::user();
+
+    // If the user is an admin, show the total count
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return static::$model::count();
     }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and extra spaces
+    $normalizeName = function ($name) use ($titles) {
+        // Remove titles
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
+        // Replace multiple spaces with a single space
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+        $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+    })->count();
+}
+
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
@@ -184,15 +201,32 @@ class NewAppointmentResource extends Resource
         }
     
         // Build possible name formats
-        $fullName = trim($user->name . ' ' . ($user->middle_name ?? '') . ' ' . $user->last_name);  // Standard
-        $fullNameReversed = trim($user->last_name . ', ' . $user->name . ' ' . ($user->middle_name ?? ''));  // Surname, First M.
-        $simpleName = trim($user->name . ' ' . $user->last_name);  // Without middle name
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+    
+        // List of titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+        // Function to normalize names by removing titles and extra spaces
+        $normalizeName = function ($name) use ($titles) {
+            // Remove titles
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+            // Replace multiple spaces with a single space
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+    
+        // Normalize names
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
     
         return parent::getEloquentQuery()
-            ->where(function ($query) use ($fullName, $fullNameReversed, $simpleName) {
-                $query->where('full_name', 'LIKE', "%$fullName%")
-                      ->orWhere('full_name', 'LIKE', "%$fullNameReversed%")
-                      ->orWhere('full_name', 'LIKE', "%$simpleName%");
+            ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+                $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                      ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                      ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
             });
     }
+    
 }

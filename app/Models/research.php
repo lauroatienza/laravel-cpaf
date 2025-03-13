@@ -13,7 +13,7 @@ class research extends Model
         "contributing_unit",
         "faculty_id",
         "title",
-        "start_date", 
+        "start_date",
         "end_date",
         "extension_date",
         "event_highlight",
@@ -37,6 +37,5 @@ class research extends Model
         "pbms_upload_status",
     ];
 
-     
 
 }
