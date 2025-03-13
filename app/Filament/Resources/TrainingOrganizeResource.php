@@ -17,7 +17,7 @@ class TrainingOrganizeResource extends Resource
 {
     protected static ?string $model = TrainingOrganize::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-trophy';
+    protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
 
     protected static ?string $navigationLabel = 'Training Conducted';
 

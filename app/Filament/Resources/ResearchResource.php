@@ -50,7 +50,7 @@ class ResearchResource extends Resource
                 TextInput::make('title')->label('Title')->required(),
 
                 Select::make('faculty_id')
-                     ->relationship('faculty','first_name')->label('Project Lead'),
+                     ,
 
                 DatePicker::make('start_date')->label('Start Date')
                     ->format('Y/m/d')->required(),
@@ -67,7 +67,7 @@ class ResearchResource extends Resource
                     'yes' => 'Yes',
                     'no' => 'No',
                 ])->required()->default('no'),
-                
+
                 Select::make('status')->label('Status')
                 ->options([
                     'Completed' => 'Completed',
@@ -162,7 +162,7 @@ class ResearchResource extends Resource
 
 
               //  $table->foreignId('faculty_id');
-            //    $table->foreignId('reps_id');       
+            //    $table->foreignId('reps_id');
 
          //       $table->time('extension_date');
           //      $table->text('event_highlight');

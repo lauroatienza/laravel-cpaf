@@ -13,7 +13,7 @@ class research extends Model
         "contributing_unit",
         "faculty_id",
         "title",
-        "start_date", 
+        "start_date",
         "end_date",
         "extension_date",
         "event_highlight",
@@ -36,9 +36,5 @@ class research extends Model
         "flagship_theme",
         "pbms_upload_status",
     ];
-
-     public function faculty(){
-         return $this->belongsTo(Faculty::class);
-     }
 
 }
