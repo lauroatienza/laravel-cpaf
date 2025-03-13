@@ -36,8 +36,10 @@ class ExtensionResource extends Resource
 
     protected static ?string $navigationGroup = 'Programs';
 
-    protected static ?string $navigationLabel = 'Extension Involvements';    protected static ?int $navigationSort = 3;
-    protected static ?string $pluralLabel = 'Extension Involvements';
+    protected static ?string $navigationLabel = 'Extension Involvements';    
+    protected static ?int $navigationSort = 3;
+    protected static ?string $modelLabel = 'Extension Involvements';
+    protected static ?string $pluralModelLabel = 'Extension Involvements';
     public static function getNavigationBadge(): ?string
     {
         return static::$model::where('user_id', Auth::id())->count();

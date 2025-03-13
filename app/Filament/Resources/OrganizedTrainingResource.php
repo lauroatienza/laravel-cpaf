@@ -9,6 +9,7 @@ use Filament\Forms\Components\{TextInput, Select, DatePicker, Textarea, FileUplo
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\{TextColumn, BadgeColumn};
+use Filament\Tables\Actions;
 use Illuminate\Database\Eloquent\Builder;
 
 class OrganizedTrainingResource extends Resource
@@ -23,6 +24,7 @@ class OrganizedTrainingResource extends Resource
     {
         return static::$model::count(); 
     }
+
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
@@ -53,7 +55,8 @@ class OrganizedTrainingResource extends Resource
                             DatePicker::make('end_date')->label('End Date')->required(),
                         ]),
                         Textarea::make('special_notes')->label('Special Notes'),
-                        Textarea::make('resource_persons')->label('Resource Person(s)'),
+                        Textarea::make('resource_persons')->label('Resource Person(s)')
+                            ->nullable(),
                         Select::make('activity_category')->label('Activity Category')
                             ->options([
                                 'Training/Workshop' => 'Training/Workshop',
@@ -66,7 +69,7 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Trainee Details')
                     ->schema([
                         TextInput::make('total_trainees')->label('Total Trainees')->numeric()->required(),
-                        TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric()->required(),
+                        TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(), // No longer required
                         TextInput::make('training_hours')->label('Training Hours')->numeric()->required(),
                         Select::make('funding_source')->label('Funding Source')
                             ->options([
@@ -88,14 +91,21 @@ class OrganizedTrainingResource extends Resource
                         TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
                     ]),
 
-                Section::make('Supporting Documents')
+                    Section::make('Supporting Documents')
                     ->schema([
                         TextInput::make('related_extension_program')->label('Related Extension Program, if applicable'),
-                        FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
-                        FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
+                        TextInput::make('pdf_file_1')
+                            ->label('PDF File 1 (Link)')
+                            ->placeholder('Enter PDF link')
+                            ->url(),
+                        TextInput::make('pdf_file_2')
+                            ->label('PDF File 2 (Link)')
+                            ->placeholder('Enter PDF link')
+                            ->url(),
                         TextInput::make('documents_link')->label('Documents Link'),
                         TextInput::make('project_title')->label('Project Title'),
                     ]),
+                
             ]);
     }
 
@@ -105,19 +115,24 @@ class OrganizedTrainingResource extends Resource
             ->columns([
                 TextColumn::make('first_name')->label('First Name')->searchable(),
                 TextColumn::make('last_name')->label('Last Name')->searchable(),
-                TextColumn::make('title')->label('Title')->searchable(),
+                TextColumn::make('title')
+                    ->label('Title')
+                    ->searchable()
+                    ->limit(15)
+                    ->tooltip(fn ($record) => $record->title),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
             ])
             ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Actions\DeleteBulkAction::make(),
             ]);
-    }
+    }    
 
     public static function getRelations(): array
     {
