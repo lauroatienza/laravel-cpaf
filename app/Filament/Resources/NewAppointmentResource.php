@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\NewAppointmentResource\Pages;
 use App\Filament\Resources\NewAppointmentResource\RelationManagers;
 use App\Models\NewAppointment;
+use Date;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,6 +22,7 @@ use PhpParser\Node\Stmt\Label;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Text;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Contracts\Service\Attribute\Required;
 
 
@@ -37,7 +39,23 @@ class NewAppointmentResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        $user = Auth::user();
+    
+        // If the user is an admin, show the total count
+        if ($user->hasRole(['super-admin','admin'])) {
+            return static::$model::count();
+        }
+    
+        // Build possible name formats
+        $fullName = trim($user->name . ' ' . ($user->middle_name ?? '') . ' ' . $user->last_name);  // Standard
+        $fullNameReversed = trim($user->last_name . ', ' . $user->name . ' ' . ($user->middle_name ?? ''));  // Surname, First M.
+        $simpleName = trim($user->name . ' ' . $user->last_name);  // Without middle name
+    
+        return static::$model::where(function ($query) use ($fullName, $fullNameReversed, $simpleName) {
+            $query->where('full_name', 'LIKE', "%$fullName%")
+                  ->orWhere('full_name', 'LIKE', "%$fullNameReversed%")
+                  ->orWhere('full_name', 'LIKE', "%$simpleName%");
+        })->count();
     }
     public static function getNavigationBadgeColor(): string
     {
@@ -48,6 +66,12 @@ class NewAppointmentResource extends Resource
     {
         return $form
             ->schema([
+                DateTimePicker::make('time_stamp')
+                ->label('Timestamp')
+                ->required(),
+                TextInput::make('full_name')
+                ->label('Name')
+                ->required(),
                 Select::make('type_of_appointments')
                 ->label('Type of Appointment')
                 ->required()
@@ -95,6 +119,15 @@ class NewAppointmentResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('time_stamp')
+                ->label('Timestamp')
+                ->sortable()
+                ->searchable()
+                ->date('F d, Y'),
+                TextColumn::make('full_name')
+                ->label('Full name')
+                ->sortable()
+                ->searchable(),
                 TextColumn::make('type_of_appointments')
                 ->label('Type of Appointment')
                 ->sortable()
@@ -141,5 +174,25 @@ class NewAppointmentResource extends Resource
         ];
     }
 
-
+    public static function getEloquentQuery(): Builder
+    {
+        $user = Auth::user();
+    
+        // If the user is an admin, return all records
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
+    
+        // Build possible name formats
+        $fullName = trim($user->name . ' ' . ($user->middle_name ?? '') . ' ' . $user->last_name);  // Standard
+        $fullNameReversed = trim($user->last_name . ', ' . $user->name . ' ' . ($user->middle_name ?? ''));  // Surname, First M.
+        $simpleName = trim($user->name . ' ' . $user->last_name);  // Without middle name
+    
+        return parent::getEloquentQuery()
+            ->where(function ($query) use ($fullName, $fullNameReversed, $simpleName) {
+                $query->where('full_name', 'LIKE', "%$fullName%")
+                      ->orWhere('full_name', 'LIKE', "%$fullNameReversed%")
+                      ->orWhere('full_name', 'LIKE', "%$simpleName%");
+            });
+    }
 }

@@ -18,8 +18,9 @@ class NewAppointment extends Model
         'position',
         'appointment',
         'appointment_effectivity_date',
-        'name',
+        'full_name',
         'photo_url',
+        'time_stamp',
         'created_at',
         'updated_at',
     ];
