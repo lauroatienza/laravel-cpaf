@@ -53,9 +53,9 @@ class ExtensionResource extends Resource
     $simpleName = trim($user->name . ' ' . $user->last_name);  // Without middle name
 
     return static::$model::where(function ($query) use ($fullName, $fullNameReversed, $simpleName) {
-        $query->where('full_name', 'LIKE', "%$fullName%")
-              ->orWhere('full_name', 'LIKE', "%$fullNameReversed%")
-              ->orWhere('full_name', 'LIKE', "%$simpleName%");
+        $query->where('name', 'LIKE', "%$fullName%")
+              ->orWhere('name', 'LIKE', "%$fullNameReversed%")
+              ->orWhere('name', 'LIKE', "%$simpleName%");
     })->count();
 }
 
@@ -140,7 +140,7 @@ class ExtensionResource extends Resource
                   //  })
                 TextColumn::make('activity_date')->label('Timestamp')
                 ->sortable()->searchable() ->date('F d, Y'),
-                TextColumn::make('full_name')->label('Full Names')
+                TextColumn::make('name')->label('Full Names')
                 ->sortable()->searchable()
                 ->limit(20) // Only show first 20 characters
                 ->tooltip(fn ($state) => $state),
@@ -208,9 +208,9 @@ class ExtensionResource extends Resource
     
         return parent::getEloquentQuery()
             ->where(function ($query) use ($fullName, $fullNameReversed, $simpleName) {
-                $query->where('full_name', 'LIKE', "%$fullName%")
-                      ->orWhere('full_name', 'LIKE', "%$fullNameReversed%")
-                      ->orWhere('full_name', 'LIKE', "%$simpleName%");
+                $query->where('name', 'LIKE', "%$fullName%")
+                      ->orWhere('name', 'LIKE', "%$fullNameReversed%")
+                      ->orWhere('name', 'LIKE', "%$simpleName%");
             });
     }
     
