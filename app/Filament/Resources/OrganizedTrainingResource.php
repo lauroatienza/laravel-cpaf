@@ -8,6 +8,7 @@ use Filament\Forms;
 use Filament\Forms\Components\{TextInput, Select, DatePicker, Textarea, FileUpload, Section, Grid};
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Columns\{TextColumn, BadgeColumn};
 use Illuminate\Database\Eloquent\Builder;
 
@@ -132,4 +133,5 @@ class OrganizedTrainingResource extends Resource
             'edit' => Pages\EditOrganizedTraining::route('/{record}/edit'),
         ];
     }
+    
 }
