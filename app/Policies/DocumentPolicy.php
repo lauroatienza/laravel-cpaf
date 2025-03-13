@@ -13,7 +13,7 @@ class DocumentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyPermission(['Secretary_View',  'SuperAdmin_View']);
+        return $user->hasAnyPermission(['Secretary_View',  'SuperAdmin_View','Admin_View']);
     }
 
     /**
@@ -21,7 +21,7 @@ class DocumentPolicy
      */
     public function view(User $user, Document $document): bool
     {
-        return $user->hasAnyPermission(['Secretary_View',  'SuperAdmin_View']);
+        return $user->hasAnyPermission(['Secretary_View',  'SuperAdmin_View','Admin_View']);
     }
 
     /**
