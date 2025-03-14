@@ -18,20 +18,32 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
+        
             ->brandLogo(asset('logo5.svg'))
             ->brandLogoHeight('100%')
             ->default()
+
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
             ->path('admin')
             ->login()
             //->registration(Register::class) 
+            ->plugins([
+                FilamentEditProfilePlugin::make()
+                    ->setIcon('heroicon-o-user')
+                    ->shouldShowAvatarForm(
+                        value: true,
+                        directory: "public/avatars" // Corrected path
+                    )
+            ])
+            
             ->colors([
                'secondary' => [
     50 => '240, 255, 250',  // Lightest green
@@ -68,6 +80,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 // Pages\Dashboard::class,
             ])
+            
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 //Widgets\AccountWidget::class,

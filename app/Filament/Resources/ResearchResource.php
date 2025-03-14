@@ -150,9 +150,12 @@ class ResearchResource extends Resource
                 TextColumn::make('contributing_unit')->label('Contributing Unit')
                     ->sortable()->searchable(),
                 TextColumn::make('title')->label('Title')
-                    ->sortable()->searchable(),
-                TextColumn::make('faculty.fullname')->label("Project Leader")
-                    ->sortable()->searchable(),
+                    ->sortable()->searchable()->limit(15) // Only show first 20 characters
+                    ->tooltip(fn ($state) => $state),
+                TextColumn::make('name_of_researchers')->label("Name of Researchers")
+                    ->sortable()->searchable()
+                    ->limit(10) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state),
                 TextColumn::make('start_date')
                     ->sortable()->searchable(),
                 TextColumn::make('end_date')
