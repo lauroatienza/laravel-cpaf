@@ -4,13 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Document;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
     public function index()
     {
+        // ✅ Get all database documents
         $documents = Document::all();
-        return view('documents.index', compact('documents'));
+
+        // ✅ Fetch files from the "fsr_rsr_files" directory in storage
+        $directory = 'fsr_rsr_files';
+        $files = Storage::files("public/{$directory}"); // Get files
+
+        // ✅ Pass documents & files to the view
+        return view('documents.index', compact('documents', 'files', 'directory'));
     }
 
     public function store(Request $request)

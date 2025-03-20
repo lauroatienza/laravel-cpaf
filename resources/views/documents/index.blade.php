@@ -62,9 +62,19 @@
 <h3>Existing Documents</h3>
 <ul>
     @foreach($documents as $document)
-        <li>{{ $document->extension_title }} - <a href="{{ $document->pdf_file_url }}">View PDF</a></li>
+        <li>{{ $document->extension_title }} - <a href="{{ $document->pdf_file_url }}" target="_blank">View PDF</a></li>
     @endforeach
 </ul>
+
+<h3>Stored Files</h3>
+<ul>
+    @foreach($files as $file)
+        <?php $filename = basename($file); ?>
+        <li><a href="{{ route('files.view', ['directory' => $directory, 'filename' => $filename]) }}" target="_blank">{{ $filename }}</a></li>
+    @endforeach
+</ul>
+
+@endsection
 
 </body>
 </html>
