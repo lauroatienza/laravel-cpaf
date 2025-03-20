@@ -17,9 +17,9 @@ class OrganizedTrainingResource extends Resource
 {
     protected static ?string $model = OrganizedTraining::class;
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-    protected static ?string $navigationGroup = 'Programs';
-    protected static ?string $navigationLabel = 'Organized Training';
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationGroup = 'Training Programs';
+    protected static ?string $navigationLabel = 'Training Organized';
+    protected static ?int $navigationSort = 3;
 
     public static function getNavigationBadge(): ?string
 {
@@ -145,11 +145,9 @@ class OrganizedTrainingResource extends Resource
             ->columns([
                 TextColumn::make('first_name')->label('First Name')->searchable(),
                 TextColumn::make('last_name')->label('Last Name')->searchable(),
-                TextColumn::make('title')
-                    ->label('Title')
-                    ->searchable()
-                    ->limit(15)
-                    ->tooltip(fn ($record) => $record->title),
+                TextColumn::make('title')->label('Title')->searchable()
+                ->limit(20) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state), // Show full name on hover,,
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit'),

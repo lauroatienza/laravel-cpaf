@@ -23,7 +23,7 @@ class TrainingAttendedResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $navigationGroup = 'Programs';
+    protected static ?string $navigationGroup = 'Training Programs';
 
     public static function getNavigationBadge(): ?string
 {

@@ -10,8 +10,10 @@ class AwardsRecognitions extends Model
     use HasFactory;
 
     protected $fillable = [
+        "name",
         "award_title",
         "award_desc",
+        "award_type",
         "faculty_id",
         "date_awarded",
     ];

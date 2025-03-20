@@ -33,6 +33,7 @@ class ResearchSeeder extends Seeder
                 'expected_output' => $row[8] ?? null,
                 'no_months_orig_timeframe' => !empty($row[9]) ? intval($row[9]) : null,
                 'name_of_researchers' => $row[10] ?? null,
+                'poject_leader' => $row[11] ?? null,
                 'source_funding' => $row[12] ?? null,
                 'category_source_funding' => $row[13] ?? null,
                 'budget' => !empty($row[14]) ? floatval($row[14]) : null,

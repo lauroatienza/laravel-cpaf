@@ -34,7 +34,7 @@ class ExtensionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Programs';
+    protected static ?string $navigationGroup = 'Extension Programs';
 
     protected static ?string $navigationLabel = 'Extension Involvements';    
     protected static ?int $navigationSort = 3;
