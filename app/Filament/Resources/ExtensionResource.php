@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExtensionResource\Pages;
 use App\Filament\Resources\ExtensionResource\RelationManagers;
-use App\Models\Extensionnew;
+use App\Models\Extension;
 use App\Models\Users;
 use Doctrine\DBAL\Schema\Column;
 use Filament\Forms;
@@ -30,7 +30,7 @@ use Filament\Forms\Components\TimePicker;
 
 class ExtensionResource extends Resource
 {
-    protected static ?string $model = Extensionnew::class;
+    protected static ?string $model = Extension::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -41,13 +41,48 @@ class ExtensionResource extends Resource
     protected static ?string $modelLabel = 'Extension Involvements';
     protected static ?string $pluralModelLabel = 'Extension Involvements';
     public static function getNavigationBadge(): ?string
-    {
-        return static::$model::where('user_id', Auth::id())->count();
+{
+    $user = Auth::user();
+
+    // If the user is an admin, show the total count
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return static::$model::count();
     }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and extra spaces
+    $normalizeName = function ($name) use ($titles) {
+        // Remove titles
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
+        // Replace multiple spaces with a single space
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+        $query->whereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+              ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+              ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+    })->count();
+}
+
+
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
     }
+    
     public static function form(Form $form): Form
     {
         return $form
@@ -122,20 +157,36 @@ class ExtensionResource extends Resource
                    //  'pending' => 'heroicon-o-clock',
                 
                   //  })
+                TextColumn::make('activity_date')->label('Timestamp')
+                ->sortable()->searchable() ->date('F d, Y'),
+                TextColumn::make('name')->label('Full Names')
+                ->sortable()->searchable()
+                ->limit(20) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state),
                 TextColumn::make('extension_involvement')->label('Type of Extension Involvement')
                 ->sortable()->searchable(),
-                TextColumn::make('location')->label('Type of Extension')
-                ->sortable()->searchable(),
                 TextColumn::make('event_title')->label('Event Title')
+                ->sortable()->searchable()
+                ->limit(20) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state), // Show full name on hover,
+                TextColumn::make('created_at')->label('Start Date')
                 ->sortable()->searchable(),
+                TextColumn::make('extensiontype')->label('Type of Extension')
+                ->sortable()->searchable(),
+                TextColumn::make('venue')->label('Event Venue')
+                ->sortable()->searchable()
+                ->limit(10) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state),
+                TextColumn::make('date_end')->label('End Date')
+                ->sortable()->searchable(),
+                
                 
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -162,7 +213,44 @@ class ExtensionResource extends Resource
     }
     public static function getEloquentQuery(): Builder
 {
-    return parent::getEloquentQuery()->where('user_id', Auth::user()->id);
+    $user = Auth::user();
+
+    // If the user is an admin, return all records
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return parent::getEloquentQuery();
+    }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and extra spaces
+    $normalizeName = function ($name) use ($titles) {
+        // Remove titles
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
+        // Replace multiple spaces with a single space
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return parent::getEloquentQuery()
+        ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+            $query->whereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                  ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                  ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        });
 }
+
+
+
+
 
 }

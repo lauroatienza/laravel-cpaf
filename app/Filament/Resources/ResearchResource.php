@@ -54,7 +54,7 @@ class ResearchResource extends Resource
                 TextInput::make('title')->label('Title')->required(),
 
                 Select::make('faculty_id')
-                     ->relationship('faculty','first_name')->label('Project Lead'),
+                     ,
 
                 DatePicker::make('start_date')->label('Start Date')
                     ->format('Y/m/d')->required(),
@@ -71,7 +71,7 @@ class ResearchResource extends Resource
                     'yes' => 'Yes',
                     'no' => 'No',
                 ])->required()->default('no'),
-                
+
                 Select::make('status')->label('Status')
                 ->options([
                     'Completed' => 'Completed',
@@ -150,9 +150,12 @@ class ResearchResource extends Resource
                 TextColumn::make('contributing_unit')->label('Contributing Unit')
                     ->sortable()->searchable(),
                 TextColumn::make('title')->label('Title')
-                    ->sortable()->searchable(),
-                TextColumn::make('faculty.fullname')->label("Project Leader")
-                    ->sortable()->searchable(),
+                    ->sortable()->searchable()->limit(15) // Only show first 20 characters
+                    ->tooltip(fn ($state) => $state),
+                TextColumn::make('name_of_researchers')->label("Name of Researchers")
+                    ->sortable()->searchable()
+                    ->limit(10) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state),
                 TextColumn::make('start_date')
                     ->sortable()->searchable(),
                 TextColumn::make('end_date')
@@ -166,7 +169,7 @@ class ResearchResource extends Resource
 
 
               //  $table->foreignId('faculty_id');
-            //    $table->foreignId('reps_id');       
+            //    $table->foreignId('reps_id');
 
          //       $table->time('extension_date');
           //      $table->text('event_highlight');

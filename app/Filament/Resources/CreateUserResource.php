@@ -67,16 +67,8 @@ class CreateUserResource extends Resource
                     'Full Time' => 'Full Time',
                 ])
                 ->required(),
-            Select::make('designation')
-                ->label('Designation')
-                ->options([
-                    'INTERN' => 'intern',
-                    'SA KANTO' => 'Dyan sa Kanto',
-                    'CPAF' => 'CPAF',
-                    'CUBAO' => 'CUBAO',
-                    'MALACOCO' => 'MALACOCO',
-                ])
-                ->required(),
+            TextInput::make('designation')->label('Designation')
+            ->required(),
             Select::make('unit')
                 ->label('Unit')
                 ->options([
@@ -160,6 +152,11 @@ class CreateUserResource extends Resource
                 ->sortable()
                 ->color('secondary')
                 ->searchable(),
+                BadgeColumn::make('systemrole')
+                ->label('User Role')
+                ->sortable()
+                ->color('secondary')
+                ->searchable(),
                 TextColumn::make('email')
                 ->label('Contact')
                 ->sortable()
@@ -172,7 +169,7 @@ class CreateUserResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                 ->color('secondary'),
-                Tables\Actions\CreateAction::make(), 
+                
                 
             ])
             ->headerActions([
@@ -222,8 +219,7 @@ class CreateUserResource extends Resource
     {
         return [
             'index' => Pages\ListCreateUsers::route('/'),
-            'create' => Pages\CreateCreateUser::route('/create')
-            ,
+            'create' => Pages\CreateCreateUser::route('/create'),
             'edit' => Pages\EditCreateUser::route('/{record}/edit'),
             'view' => Pages\ViewCreateUser::route('/{record}'),
         ];

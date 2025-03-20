@@ -27,7 +27,7 @@ class FSRorRSRResource extends Resource
     protected static ?string $navigationLabel = 'FSR/RSR Attachments';
     protected static ?string $modelLabel = 'FSR/RSR Attachments';
     protected static ?string $pluralModelLabel = 'FSR/RSR Attachments';
-    protected static ?string $slug = 'fsr-or-rsr'; 
+    protected static ?string $slug = 'fsr-or-rsr';
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
