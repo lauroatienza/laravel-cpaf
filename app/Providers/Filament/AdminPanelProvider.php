@@ -18,20 +18,32 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
+        
             ->brandLogo(asset('logo5.svg'))
             ->brandLogoHeight('100%')
             ->default()
+
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
             ->path('admin')
             ->login()
             //->registration(Register::class) 
+            ->plugins([
+                FilamentEditProfilePlugin::make()
+                    ->setIcon('heroicon-o-user')
+                    ->shouldShowAvatarForm(
+                        value: true,
+                        directory: "public/avatars" // Corrected path
+                    )
+            ])
+            
             ->colors([
                'secondary' => [
     50 => '240, 255, 250',  // Lightest green
@@ -61,12 +73,14 @@ class AdminPanelProvider extends PanelProvider
     950 => '20, 100, 180',  // Darkest blue
 ],
             ])
+            ->favicon(asset('public\cpaflogo.png'))// add favicon
             ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 // Pages\Dashboard::class,
             ])
+            
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 //Widgets\AccountWidget::class,
@@ -85,7 +99,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
-    }
+            ])
+            ->brandName('CPAf Intranet');  
+            //->brandLogo(asset('public\cpaflogo.png'))
+            //->favicon(asset('public/favicon.ico'))
+        }
     
 }

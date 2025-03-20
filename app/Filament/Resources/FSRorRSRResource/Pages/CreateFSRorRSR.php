@@ -15,6 +15,7 @@ class CreateFSRorRSR extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
+    
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = Auth::id(); // Assign logged-in user's ID

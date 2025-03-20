@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\NewAppointmentResource\Pages;
 use App\Filament\Resources\NewAppointmentResource\RelationManagers;
 use App\Models\NewAppointment;
+use Date;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,6 +22,7 @@ use PhpParser\Node\Stmt\Label;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Text;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Contracts\Service\Attribute\Required;
 
 
@@ -36,9 +38,42 @@ class NewAppointmentResource extends Resource
     protected static ?int $navigationSort = 3;
 
     public static function getNavigationBadge(): ?string
-    {
+{
+    $user = Auth::user();
+
+    // If the user is an admin, show the total count
+    if ($user->hasRole(['super-admin', 'admin'])) {
         return static::$model::count();
     }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and extra spaces
+    $normalizeName = function ($name) use ($titles) {
+        // Remove titles
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
+        // Replace multiple spaces with a single space
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+        $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+    })->count();
+}
+
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
@@ -48,6 +83,12 @@ class NewAppointmentResource extends Resource
     {
         return $form
             ->schema([
+                DateTimePicker::make('time_stamp')
+                ->label('Timestamp')
+                ->required(),
+                TextInput::make('full_name')
+                ->label('Name')
+                ->required(),
                 Select::make('type_of_appointments')
                 ->label('Type of Appointment')
                 ->required()
@@ -85,7 +126,7 @@ class NewAppointmentResource extends Resource
                 //TextColumn::make('appointment_effectivity_date')->date(),
                 TextInput::make('photo_url')
                     ->url()
-                    ->label('Photo URL')
+                    ->label('Photo File URL')
                     ->helperText('Enter a valid URL') 
                     ->Required(),
             ]);
@@ -95,6 +136,15 @@ class NewAppointmentResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('time_stamp')
+                ->label('Timestamp')
+                ->sortable()
+                ->searchable()
+                ->date('F d, Y'),
+                TextColumn::make('full_name')
+                ->label('Full name')
+                ->sortable()
+                ->searchable(),
                 TextColumn::make('type_of_appointments')
                 ->label('Type of Appointment')
                 ->sortable()
@@ -140,4 +190,43 @@ class NewAppointmentResource extends Resource
             'edit' => Pages\EditNewAppointment::route('/{record}/edit'),
         ];
     }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $user = Auth::user();
+    
+        // If the user is an admin, return all records
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
+    
+        // Build possible name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+    
+        // List of titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+        // Function to normalize names by removing titles and extra spaces
+        $normalizeName = function ($name) use ($titles) {
+            // Remove titles
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+            // Replace multiple spaces with a single space
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+    
+        // Normalize names
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+    
+        return parent::getEloquentQuery()
+            ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+                $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                      ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                      ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+            });
+    }
+    
 }

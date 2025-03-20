@@ -23,6 +23,12 @@ class AwardsRecognitionsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
     protected static ?int $navigationSort = 3;
 
+    
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'secondary'; 
+    }
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
@@ -42,7 +48,7 @@ class AwardsRecognitionsResource extends Resource
             ->required()
             ->maxLength(255),
 
-        TextInput::make('awardee_name')
+        TextInput::make('name')
             ->label('Name(s) of Awardee/Recipient')
             ->required()
             ->maxLength(255),
@@ -70,7 +76,9 @@ class AwardsRecognitionsResource extends Resource
                 TextColumn::make('award_title')
                     ->label('Title of Paper or Award')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(15) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state),
 
                 TextColumn::make('awardee_name')
                     ->label('Name(s) of Awardee/Recipient')

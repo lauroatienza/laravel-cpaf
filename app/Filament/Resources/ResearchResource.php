@@ -15,8 +15,10 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
+use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\IconColumn;
@@ -32,9 +34,41 @@ class ResearchResource extends Resource
     protected static ?string $navigationGroup = 'Programs';
 
     public static function getNavigationBadge(): ?string
-    {
+{
+    $user = Auth::user();
+
+    // If the user is an admin, show the total count
+    if ($user->hasRole(['super-admin', 'admin'])) {
         return static::$model::count();
     }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and extra spaces
+    $normalizeName = function ($name) use ($titles) {
+        // Remove titles
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
+        // Replace multiple spaces with a single space
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+        $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+    })->count();
+}
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
@@ -51,15 +85,26 @@ class ResearchResource extends Resource
                     'CPAf' => 'CPAf',
                     'IGRD' => 'IGRD',
                 ])->required()->default('CPAf'),
+
+                DatePicker::make('start_date')->label('Start Date')
+                    ->format('Y/m/d')->required(),
+                
+                DatePicker::make('end_date')->label('End Date')
+                ->format('Y/m/d')->required(),
+
+                Select::make('status')->label('Status')
+                ->options([
+                    'Completed' => 'Completed',
+                    'On-going' => 'On-going',
+                ])->required()->default('On-going'),
+
                 TextInput::make('title')->label('Title')->required(),
 
                 Select::make('faculty_id')
                      ,
 
-                DatePicker::make('start_date')->label('Start Date')
-                    ->format('Y/m/d')->required(),
-                DatePicker::make('end_date')->label('End Date')
-                    ->format('Y/m/d')->required(),
+                
+                
 
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
@@ -72,11 +117,7 @@ class ResearchResource extends Resource
                     'no' => 'No',
                 ])->required()->default('no'),
 
-                Select::make('status')->label('Status')
-                ->options([
-                    'Completed' => 'Completed',
-                    'On-going' => 'On-going',
-                ])->required()->default('On-going'),
+                
 
                 RichEditor::make('objectives')->columnSpan('full'),
                 RichEditor::make('expected_output')->columnSpan('full'),
@@ -147,17 +188,48 @@ class ResearchResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('contributing_unit')->label('Contributing Unit')
-                    ->sortable()->searchable(),
-                TextColumn::make('title')->label('Title')
-                    ->sortable()->searchable(),
-                TextColumn::make('faculty.fullname')->label("Project Leader")
+                BadgeColumn::make('contributing_unit')->label('Contributing Unit')
                     ->sortable()->searchable(),
                 TextColumn::make('start_date')
                     ->sortable()->searchable(),
                 TextColumn::make('end_date')
                     ->sortable()->searchable(),
-
+                    BadgeColumn::make('status')
+                    ->sortable()
+                    ->searchable()
+                    ->color(fn ($state) => match ($state) {
+                        'Completed' => 'success',  // Green
+                        'On-going' => 'warning',   // Orange
+                        default => 'secondary',    // Gray
+                    }),
+                
+                TextColumn::make('title')->label('Title')
+                    ->sortable()->searchable()->limit(18) 
+                    ->tooltip(fn ($state) => $state),
+                TextColumn::make('objectives')->label('Objectives')
+                ->sortable()->searchable()->limit(18) 
+                ->tooltip(fn ($state) => $state),
+                TextColumn::make('expected_output')->label('Expected Output')
+                    ->sortable()->searchable()->limit(18) // Only show first 20 characters
+                    ->tooltip(fn ($state) => $state),
+                TextColumn::make('name_of_researchers')->label("Name of Researchers")
+                    ->sortable()->searchable()
+                    ->limit(10) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state),
+                TextColumn::make('poject_leader')->label("Project Leader")
+                    ->sortable()->searchable()
+                    ->limit(10) // Only show first 20 characters
+                ->tooltip(fn ($state) => $state),
+                TextColumn::make('source_funding')->label('Source of Funding')
+                    ->sortable()->searchable(),
+                BadgeColumn::make('category_source_funding')->label('Category of Source of Funding')
+                    ->sortable()->searchable()->color('gray'),
+                TextColumn::make('budget')->label('Budget')
+                ->sortable()->searchable(),
+                TextColumn::make('type_funding')->label('Type of Funding')
+                    ->sortable()->searchable(),
+                TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
+                    ->sortable()->searchable(),
                 IconColumn::make('pbms_upload_status')
                      ->icon(fn (string $state): string => match ($state) {
                             'uploaded' => 'heroicon-o-check-badge',
@@ -220,5 +292,43 @@ class ResearchResource extends Resource
             'view' => Pages\ViewResearch::route('/{record}'),
             'edit' => Pages\EditResearch::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $user = Auth::user();
+    
+        // If the user is an admin, return all records
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
+    
+        // Build possible name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+    
+        // List of titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+        // Function to normalize names by removing titles and extra spaces
+        $normalizeName = function ($name) use ($titles) {
+            // Remove titles
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+            // Replace multiple spaces with a single space
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+    
+        // Normalize names
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+    
+        return parent::getEloquentQuery()
+            ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+                $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                      ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                      ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+            });
     }
 }

@@ -28,7 +28,10 @@ class DocumentResource extends Resource
     {
         return Document::count();
     }
-
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'secondary'; 
+    }
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
