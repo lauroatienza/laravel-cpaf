@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class AwardsRecognitions extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        "award_title",
-        "award_desc",
-        "faculty_id",
-        "date_awarded",
+        'award_type',
+        'award_title',
+        'awardee_name',
+        'granting_organization',
+        'date_awarded',
     ];
 }
+

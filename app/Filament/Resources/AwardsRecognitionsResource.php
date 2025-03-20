@@ -64,7 +64,7 @@ class AwardsRecognitionsResource extends Resource
             ->columns([
                 TextColumn::make('award_type')
                     ->label('Type of Award')
-                    ->sortable()
+                    //->sortable()
                     ->searchable(),
 
                 TextColumn::make('award_title')
