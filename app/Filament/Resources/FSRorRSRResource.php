@@ -21,7 +21,6 @@ use Filament\Forms\Components\Hidden;
 class FSRorRSRResource extends Resource
 {
     protected static ?string $model = FSRorRSR::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Programs'; 
     protected static ?string $navigationLabel = 'FSR/RSR Attachments';
@@ -38,9 +37,10 @@ class FSRorRSRResource extends Resource
     {
         return static::$model::where('user_id', Auth::id())->count();
     }
+
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'secondary';
     }
 
     public static function resolveQueryUsing($query)
@@ -76,7 +76,18 @@ class FSRorRSRResource extends Resource
                 FileUpload::make('file_upload')
                     ->label('Upload File')
                     ->directory('fsr_rsr_files')
-                    ->required(),
+                    ->acceptedFileTypes([
+                        'application/vnd.ms-excel', // XLS
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
+                        'application/pdf', // PDF
+                        'image/jpeg', // JPG
+                        'image/png', // PNG
+                        'text/csv', // CSV (Common MIME type)
+                        'application/csv' // Another CSV MIME type
+                    ])
+                    ->maxSize(102400) // 100MB
+                    ->required()
+                    ->visibility('public'), // Ensure CSV is accessible
             ]);
     }
 
@@ -85,7 +96,7 @@ class FSRorRSRResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('user.name')
-                    ->label('Full Name')
+                    ->label('Name')
                     ->sortable()
                     ->searchable()
                     ->getStateUsing(fn ($record) => $record->user->name . ' ' . $record->user->last_name),
@@ -100,7 +111,13 @@ class FSRorRSRResource extends Resource
 
                 TextColumn::make('file_upload')
                     ->label('Uploaded File')
+                    ->formatStateUsing(fn ($state) => 
+                        '<a href="' . asset('storage/' . $state) . '" target="_blank">' . basename($state) . '</a>'
+                    )
+                    ->html()
                     ->sortable(),
+                
+                
             ])
             ->filters([
                 Filter::make('Recent')
