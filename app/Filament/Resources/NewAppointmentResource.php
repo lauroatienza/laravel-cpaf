@@ -115,9 +115,10 @@ class NewAppointmentResource extends Resource
                     'Dean' => 'Dean',
                     'Director' => 'Director',
                     'Head' => 'Head',
-                    'Other' => 'Other (Specify)', // Adds "Other" as an option
+                    'Other' => 'Other (Specify)',
                 ])
                 ->reactive(),
+      
 
                 DatePicker::make('appointment_effectivity_date')
                 ->label('Appointment Effectivity Date')
