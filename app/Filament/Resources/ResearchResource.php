@@ -33,6 +33,8 @@ class ResearchResource extends Resource
 
     protected static ?string $navigationGroup = 'Programs';
 
+    protected static ?int $navigationSort = 2;
+
     public static function getNavigationBadge(): ?string
 {
     $user = Auth::user();

@@ -22,7 +22,7 @@ class AwardsRecognitionsResource extends Resource
 
     protected static ?string $navigationGroup = 'Accomplishments';
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
 
     public static function getNavigationBadgeColor(): string

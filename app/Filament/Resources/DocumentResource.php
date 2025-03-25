@@ -23,6 +23,7 @@ class DocumentResource extends Resource
     protected static ?string $model = Document::class;
     protected static ?string $navigationGroup = 'Other Documents';
     protected static ?string $navigationLabel = 'MOU and MOA';
+    protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'heroicon-o-document';
     public static function getNavigationBadge(): ?string
     {
