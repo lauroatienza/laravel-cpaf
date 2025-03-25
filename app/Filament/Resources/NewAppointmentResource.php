@@ -69,8 +69,7 @@ class NewAppointmentResource extends Resource
 
     return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
         $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        ->orWhereRaw("LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(full_name, 'Dr.', ''), 'Prof.', ''), 'Engr.', ''), 'Sir', ''), 'Ms.', ''), 'Mr.', ''), 'Mrs.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"]); // Modified line
     })->count();
 }
 
@@ -97,8 +96,15 @@ class NewAppointmentResource extends Resource
                     'Adjunct Faculty' => 'Adjunct Faculty',
                     'Lecturer' => 'Lecturer',
                     'Administrator' => 'Administrator',
+                    'Other' => 'Other (Specify)',
                 ])
-                ->reactive(),
+                ->reactive()
+                ->afterStateUpdated(fn ($state, callable $set) => $set('appointment_other', $state === 'Other' ? null : '')), // Clears when not "Other"
+
+                TextInput::make('appointment_other')
+                    ->label('Please specify your appointment')
+                    ->visible(fn ($get) => $get('appointment') === 'Other') // Proper conditional visibility
+                    ->required(fn ($get) => $get('appointment') === 'Other'), 
 
                 TextInput::make('position')
                 ->label('Position')
@@ -117,7 +123,13 @@ class NewAppointmentResource extends Resource
                     'Head' => 'Head',
                     'Other' => 'Other (Specify)', // Adds "Other" as an option
                 ])
-                ->reactive(),
+                ->reactive()
+                ->afterStateUpdated(fn ($state, callable $set) => $set('appointment_other', $state === 'Other' ? null : '')), // Clears when not "Other"
+
+                TextInput::make('appointment_other')
+                    ->label('Please specify your appointment')
+                    ->visible(fn ($get) => $get('appointment') === 'Other') // Proper conditional visibility
+                    ->required(fn ($get) => $get('appointment') === 'Other'), 
 
                 DatePicker::make('appointment_effectivity_date')
                 ->label('Appointment Effectivity Date')
