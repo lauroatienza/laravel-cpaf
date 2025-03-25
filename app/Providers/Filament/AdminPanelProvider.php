@@ -40,7 +40,8 @@ class AdminPanelProvider extends PanelProvider
                     ->setIcon('heroicon-o-user')
                     ->shouldShowAvatarForm(
                         value: true,
-                        directory: "public/avatars" // Corrected path
+                         
+                        directory: 'public/avatars' // Corrected path
                     )
             ])
             
@@ -73,7 +74,7 @@ class AdminPanelProvider extends PanelProvider
     950 => '20, 100, 180',  // Darkest blue
 ],
             ])
-            ->favicon(asset('public\cpaflogo.png'))// add favicon
+            ->favicon(asset('cpaflogo.png'))// add favicon
             ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

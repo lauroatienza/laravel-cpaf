@@ -123,7 +123,7 @@ class AwardsRecognitionsResource extends Resource
                     ->searchable()
                     ->limit(20) // Only show first 20 characters
                 ->tooltip(fn ($state) => $state),
-
+                
                 TextColumn::make('date_awarded')
                     ->label('Date Awarded')
                     ->date()
