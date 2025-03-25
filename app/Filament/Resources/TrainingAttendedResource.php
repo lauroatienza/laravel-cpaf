@@ -23,7 +23,7 @@ class TrainingAttendedResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $navigationGroup = 'Training Programs';
+    protected static ?string $navigationGroup = 'Accomplishments';
 
     public static function getNavigationBadge(): ?string
 {
@@ -57,8 +57,7 @@ class TrainingAttendedResource extends Resource
 
     return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
         $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-              ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        ->orWhereRaw("LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(full_name, 'Dr.', ''), 'Prof.', ''), 'Engr.', ''), 'Sir', ''), 'Ms.', ''), 'Mr.', ''), 'Mrs.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"]); // Modified line
     })->count();
 }
 

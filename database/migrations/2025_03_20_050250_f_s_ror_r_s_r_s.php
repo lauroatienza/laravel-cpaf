@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('publications', function (Blueprint $table) {
+        Schema::create('f_s_ror_r_s_r_s', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable();
+            $table->string('year');
+            $table->string('sem');
+            $table->string('file_upload');
             $table->timestamps();
         });
     }
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('publications');
+        Schema::dropIfExists('f_s_ror_r_s_r_s');
     }
 };

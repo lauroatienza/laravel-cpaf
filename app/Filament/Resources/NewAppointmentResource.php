@@ -32,7 +32,7 @@ class NewAppointmentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
 
-    protected static ?string $navigationGroup = 'Programs';
+    protected static ?string $navigationGroup = 'Other Documents';
 
     protected static ?string $navigationLabel = 'New Appointment';    
     protected static ?int $navigationSort = 3;
@@ -148,11 +148,6 @@ class NewAppointmentResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('time_stamp')
-                ->label('Timestamp')
-                ->sortable()
-                ->searchable()
-                ->date('F d, Y'),
                 TextColumn::make('full_name')
                 ->label('Full name')
                 ->sortable()

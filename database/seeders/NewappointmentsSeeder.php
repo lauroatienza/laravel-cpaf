@@ -15,7 +15,7 @@ class NewappointmentsSeeder extends Seeder
      */
     public function run(): void
     {
-        $csv = Reader::createFromPath(storage_path('app/New Appointments.csv'), 'r');
+        $csv = Reader::createFromPath(storage_path('app/New Appointment.csv'), 'r');
         $csv->setHeaderOffset(0);
 
         foreach ($csv as $row) {

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('f_s_ror_r_s_r_s', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('faculty_id')->nullable();
+            $table->foreignId('user_id')->nullable();
             $table->string('year');
             $table->string('sem');
             $table->string('file_upload');

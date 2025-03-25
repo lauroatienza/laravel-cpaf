@@ -16,7 +16,7 @@ class OrganizedTrainingResource extends Resource
 {
     protected static ?string $model = OrganizedTraining::class;
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-    protected static ?string $navigationGroup = 'Training Programs';
+    protected static ?string $navigationGroup = 'Accomplishments';
     protected static ?string $navigationLabel = 'Training Organized';
     protected static ?int $navigationSort = 3;
 
