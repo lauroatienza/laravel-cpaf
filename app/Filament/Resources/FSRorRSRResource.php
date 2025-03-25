@@ -111,11 +111,10 @@ class FSRorRSRResource extends Resource
 
                 TextColumn::make('file_upload')
                     ->label('Uploaded File')
-                    ->formatStateUsing(fn ($state) => 
-                        '<a href="' . asset('storage/' . $state) . '" target="_blank">' . basename($state) . '</a>'
-                    )
-                    ->html()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable()
+                    ->url(fn ($record) => asset('storage/' . $record->file_upload), true)
+                    ->color('primary'),
                 
                 
             ])
