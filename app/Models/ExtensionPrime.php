@@ -20,6 +20,7 @@ class ExtensionPrime extends Model
     public $timestamps = false;
     protected $fillable = [
         'id_no',
+        'name',
         'contributing_unit',
         'start_date',
         'end_date',
