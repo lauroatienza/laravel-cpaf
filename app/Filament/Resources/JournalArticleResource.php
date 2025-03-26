@@ -26,6 +26,8 @@ class JournalArticleResource extends Resource
     protected static ?string $navigationLabel = 'Journal Articles';
     protected static ?string $slug = 'journal-articles';
 
+    protected static ?int $navigationSort = 3;
+
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()->where('user_id', Auth::id());

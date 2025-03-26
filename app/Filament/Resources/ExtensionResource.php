@@ -34,9 +34,10 @@ class ExtensionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Extension Programs';
+    protected static ?string $navigationGroup = 'Accomplishments';
 
-    protected static ?string $navigationLabel = 'Extension Involvements';    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationLabel = 'Extension Involvements';    
+    protected static ?int $navigationSort = 4;
     protected static ?string $pluralLabel = 'Extension Involvements';
     public static function getNavigationBadge(): ?string
 {

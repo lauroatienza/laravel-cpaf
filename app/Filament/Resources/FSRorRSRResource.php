@@ -25,6 +25,7 @@ class FSRorRSRResource extends Resource
     protected static ?string $navigationGroup = 'Programs'; 
     protected static ?string $navigationLabel = 'FSR/RSR Attachments';
     protected static ?string $modelLabel = 'FSR/RSR Attachments';
+    protected static ?int $navigationSort = 1;
     protected static ?string $pluralModelLabel = 'FSR/RSR Attachments';
     protected static ?string $slug = 'fsr-or-rsr';
 
