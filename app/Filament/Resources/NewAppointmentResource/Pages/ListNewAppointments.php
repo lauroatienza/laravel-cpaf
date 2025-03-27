@@ -13,7 +13,7 @@ class ListNewAppointments extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label('Create Appointment'),
+            //Actions\CreateAction::make()->label('Create Appointment'),
         ];
     }
 }
