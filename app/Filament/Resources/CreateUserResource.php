@@ -70,7 +70,7 @@ class CreateUserResource extends Resource
                     'Full Time' => 'Full Time',
                 ])
                 ->required(),
-            TextInput::make('designation')->label('Designation')
+            TextInput::make('designation')->label('Designation/Position')
             ->required(),
             Select::make('unit')
                 ->label('Unit')
