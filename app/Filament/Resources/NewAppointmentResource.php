@@ -185,7 +185,7 @@ class NewAppointmentResource extends Resource
                 /*Action::make('Export')
                     ->modalButton('Download')
                     ->color('gray'),*/
-                Tables\Actions\CreateAction::make()->label('Create Appointment'),
+                Tables\Actions\CreateAction::make()->label('Create Appointment')->icon('heroicon-o-pencil-square')->color('secondary'),
                 Tables\Actions\Action::make('export')
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
