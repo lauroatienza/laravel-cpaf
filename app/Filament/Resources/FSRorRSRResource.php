@@ -117,7 +117,6 @@ class FSRorRSRResource extends Resource
                     ->html()
                     ->sortable(),
                 
-                
             ])
             ->filters([
                 Filter::make('Recent')
