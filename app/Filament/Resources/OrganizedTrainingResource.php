@@ -143,59 +143,63 @@ class OrganizedTrainingResource extends Resource
             ]);
     }
     
-    public static function table(Tables\Table $table): Tables\Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('first_name')->label('First Name')->searchable(),
-                TextColumn::make('last_name')->label('Last Name')->searchable(),
-                TextColumn::make('title')->label('Title')->searchable()
-                    ->limit(20)
-                    ->tooltip(fn ($state) => $state),
-                TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
-                TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
-                BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
-            ])
-            ->filters([])
-            ->actions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-document')
-                    ->color('gray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])), // Fix here
-            ])
-            ->bulkActions([
-                Actions\DeleteBulkAction::make(),
-                Tables\Actions\BulkAction::make('exportBulk')
-                    ->label('Export Selected')
-                    ->icon('heroicon-o-document')
-                    ->color('gray')
-                    ->outlined()
-                    ->requiresConfirmation()
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
-            ])
-            ->selectable(); // ✅ Ensure the table is selectable for bulk actions
-    }
+public static function table(Tables\Table $table): Tables\Table
+{
+    return $table
+        ->columns([
+            TextColumn::make('first_name')->label('First Name')->searchable(),
+            TextColumn::make('last_name')->label('Last Name')->searchable(),
+            TextColumn::make('title')->label('Title')->searchable()
+                ->limit(20)
+                ->tooltip(fn ($state) => $state),
+            TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
+            TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
+            BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
+        ])
+        ->filters([])
+        ->headerActions([ // ✅ Export button moved here
+            Tables\Actions\Action::make('exportAll')
+                ->label('Export')
+                ->icon('heroicon-o-document')
+                ->color('gray')
+                ->outlined() // Gives a button-like appearance
+                ->form([
+                    Forms\Components\Select::make('format')
+                        ->options([
+                            'csv' => 'CSV',
+                            'pdf' => 'PDF',
+                        ])
+                        ->label('Export Format')
+                        ->required(),
+                ])
+                ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
+        ])
+        ->actions([
+            Actions\EditAction::make(),
+            Actions\DeleteAction::make(),
+        ])
+        ->bulkActions([
+            Actions\DeleteBulkAction::make(),
+            Tables\Actions\BulkAction::make('exportBulk')
+                ->label('Export Selected')
+                ->icon('heroicon-o-document')
+                ->color('gray')
+                ->outlined()
+                ->requiresConfirmation()
+                ->form([
+                    Forms\Components\Select::make('format')
+                        ->options([
+                            'csv' => 'CSV',
+                            'pdf' => 'PDF',
+                        ])
+                        ->label('Export Format')
+                        ->required(),
+                ])
+                ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
+        ])
+        ->selectable(); // ✅ Ensure the table is selectable for bulk actions
+}
+
     
     
     public static function exportData($records, $format)
