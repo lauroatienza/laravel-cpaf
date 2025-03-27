@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Columns\{TextColumn, BadgeColumn};
 use Filament\Tables\Actions;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrganizedTrainingResource extends Resource
 {
@@ -138,7 +142,7 @@ class OrganizedTrainingResource extends Resource
                 
             ]);
     }
-
+    
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
@@ -146,8 +150,8 @@ class OrganizedTrainingResource extends Resource
                 TextColumn::make('first_name')->label('First Name')->searchable(),
                 TextColumn::make('last_name')->label('Last Name')->searchable(),
                 TextColumn::make('title')->label('Title')->searchable()
-                ->limit(20) // Only show first 20 characters
-                ->tooltip(fn ($state) => $state), // Show full name on hover,,
+                    ->limit(20)
+                    ->tooltip(fn ($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
@@ -156,11 +160,75 @@ class OrganizedTrainingResource extends Resource
             ->actions([
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('export')
+                    ->label('Export')
+                    ->icon('heroicon-o-document')
+                    ->color('gray')
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])), // Fix here
             ])
             ->bulkActions([
                 Actions\DeleteBulkAction::make(),
-            ]);
+                Tables\Actions\BulkAction::make('exportBulk')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-document')
+                    ->color('gray')
+                    ->outlined()
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
+            ])
+            ->selectable(); // ✅ Ensure the table is selectable for bulk actions
+    }
+    
+    
+    public static function exportData($records, $format)
+    {
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records selected for export.');
+        }
+    
+        if ($format === 'csv') {
+            return response()->streamDownload(function () use ($records) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['First Name', 'Last Name', 'Title', 'Start Date', 'End Date']);
+    
+                foreach ($records as $record) {
+                    fputcsv($handle, [
+                        $record->first_name,
+                        $record->last_name,
+                        $record->title,
+                        $record->start_date,
+                        $record->end_date,
+                    ]);
+                }
+    
+                fclose($handle);
+            }, 'organized_trainings.csv');
+        }
+    
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('exports.organized_trainings', ['records' => $records]);
+            return response()->streamDownload(fn () => print($pdf->output()), 'organized_trainings.pdf');
+        }
     }    
+
 
     public static function getRelations(): array
     {
