@@ -117,7 +117,6 @@ class FSRorRSRResource extends Resource
                     ->url(fn ($record) => asset('storage/' . $record->file_upload), true)
                     ->color('primary'),
                 
-                
             ])
             ->filters([
                 Filter::make('Recent')
