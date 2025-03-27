@@ -10,7 +10,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Columns\{TextColumn, BadgeColumn};
+use Filament\Tables\Actions;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrganizedTrainingResource extends Resource
 {
@@ -84,7 +89,8 @@ class OrganizedTrainingResource extends Resource
                             DatePicker::make('end_date')->label('End Date')->required(),
                         ]),
                         Textarea::make('special_notes')->label('Special Notes'),
-                        Textarea::make('resource_persons')->label('Resource Person(s)'),
+                        Textarea::make('resource_persons')->label('Resource Person(s)')
+                            ->nullable(),
                         Select::make('activity_category')->label('Activity Category')
                             ->options([
                                 'Training/Workshop' => 'Training/Workshop',
@@ -97,7 +103,7 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Trainee Details')
                     ->schema([
                         TextInput::make('total_trainees')->label('Total Trainees')->numeric()->required(),
-                        TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric()->required(),
+                        TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(), // No longer required
                         TextInput::make('training_hours')->label('Training Hours')->numeric()->required(),
                         Select::make('funding_source')->label('Funding Source')
                             ->options([
@@ -119,38 +125,114 @@ class OrganizedTrainingResource extends Resource
                         TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
                     ]),
 
-                Section::make('Supporting Documents')
+                    Section::make('Supporting Documents')
                     ->schema([
                         TextInput::make('related_extension_program')->label('Related Extension Program, if applicable'),
-                        FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
-                        FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
+                        TextInput::make('pdf_file_1')
+                            ->label('PDF File 1 (Link)')
+                            ->placeholder('Enter PDF link')
+                            ->url(),
+                        TextInput::make('pdf_file_2')
+                            ->label('PDF File 2 (Link)')
+                            ->placeholder('Enter PDF link')
+                            ->url(),
                         TextInput::make('documents_link')->label('Documents Link'),
                         TextInput::make('project_title')->label('Project Title'),
                     ]),
+                
             ]);
     }
+    
+public static function table(Tables\Table $table): Tables\Table
+{
+    return $table
+        ->columns([
+            TextColumn::make('first_name')->label('First Name')->searchable(),
+            TextColumn::make('last_name')->label('Last Name')->searchable(),
+            TextColumn::make('title')->label('Title')->searchable()
+                ->limit(20)
+                ->tooltip(fn ($state) => $state),
+            TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
+            TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
+            BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
+        ])
+        ->filters([])
+        ->headerActions([ // ✅ Export button moved here
+            Tables\Actions\Action::make('exportAll')
+                ->label('Export')
+                ->icon('heroicon-o-document')
+                ->color('gray')
+                ->outlined() // Gives a button-like appearance
+                ->form([
+                    Forms\Components\Select::make('format')
+                        ->options([
+                            'csv' => 'CSV',
+                            'pdf' => 'PDF',
+                        ])
+                        ->label('Export Format')
+                        ->required(),
+                ])
+                ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
+        ])
+        ->actions([
+            Actions\EditAction::make(),
+            Actions\DeleteAction::make(),
+        ])
+        ->bulkActions([
+            Actions\DeleteBulkAction::make(),
+            Tables\Actions\BulkAction::make('exportBulk')
+                ->label('Export Selected')
+                ->icon('heroicon-o-document')
+                ->color('gray')
+                ->outlined()
+                ->requiresConfirmation()
+                ->form([
+                    Forms\Components\Select::make('format')
+                        ->options([
+                            'csv' => 'CSV',
+                            'pdf' => 'PDF',
+                        ])
+                        ->label('Export Format')
+                        ->required(),
+                ])
+                ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
+        ])
+        ->selectable(); // ✅ Ensure the table is selectable for bulk actions
+}
 
-    public static function table(Tables\Table $table): Tables\Table
+    
+    
+    public static function exportData($records, $format)
     {
-        return $table
-            ->columns([
-                TextColumn::make('first_name')->label('First Name')->searchable(),
-                TextColumn::make('last_name')->label('Last Name')->searchable(),
-                TextColumn::make('title')->label('Title')->searchable()
-                ->limit(20) // Only show first 20 characters
-                ->tooltip(fn ($state) => $state), // Show full name on hover,,
-                TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
-                TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
-                BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
-            ])
-            ->filters([])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
-    }
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records selected for export.');
+        }
+    
+        if ($format === 'csv') {
+            return response()->streamDownload(function () use ($records) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['First Name', 'Last Name', 'Title', 'Start Date', 'End Date']);
+    
+                foreach ($records as $record) {
+                    fputcsv($handle, [
+                        $record->first_name,
+                        $record->last_name,
+                        $record->title,
+                        $record->start_date,
+                        $record->end_date,
+                    ]);
+                }
+    
+                fclose($handle);
+            }, 'organized_trainings.csv');
+        }
+    
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('exports.organized_trainings', ['records' => $records]);
+            return response()->streamDownload(fn () => print($pdf->output()), 'organized_trainings.pdf');
+        }
+    }    
+
 
     public static function getRelations(): array
     {

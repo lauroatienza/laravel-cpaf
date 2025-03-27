@@ -23,7 +23,13 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Text;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Actions\Action;
 use Symfony\Contracts\Service\Attribute\Required;
+use League\Csv\Writer;
+use Illuminate\Support\Facades\Response;
+use SplTempFileObject;
+
+
 
 
 class NewAppointmentResource extends Resource
@@ -82,9 +88,9 @@ class NewAppointmentResource extends Resource
     {
         return $form
             ->schema([
-                DateTimePicker::make('time_stamp')
+                /*DateTimePicker::make('time_stamp')
                 ->label('Timestamp')
-                ->required(),
+                ->required(),*/
                 TextInput::make('full_name')
                 ->label('Name')
                 ->required(),
@@ -102,9 +108,9 @@ class NewAppointmentResource extends Resource
                 ->afterStateUpdated(fn ($state, callable $set) => $set('appointment_other', $state === 'Other' ? null : '')), // Clears when not "Other"
 
                 TextInput::make('appointment_other')
-                    ->label('Please specify your appointment')
-                    ->visible(fn ($get) => $get('appointment') === 'Other') // Proper conditional visibility
-                    ->required(fn ($get) => $get('appointment') === 'Other'), 
+                    ->label('Please specify your type of appointment')
+                    ->visible(fn ($get) => $get('type_of_appointments') === 'Other') // Proper conditional visibility
+                    ->required(fn ($get) => $get('type_of_appointments') === 'Other'), 
 
                 TextInput::make('position')
                 ->label('Position')
@@ -123,7 +129,13 @@ class NewAppointmentResource extends Resource
                     'Head' => 'Head',
                     'Other' => 'Other (Specify)',
                 ])
-                ->reactive(),
+                ->reactive()
+                ->afterStateUpdated(fn ($state, callable $set) => $set('appointment_other', $state === 'Other' ? null : '')), // Clears when not "Other"
+
+                TextInput::make('appointment_other')
+                    ->label('Please specify your appointment')
+                    ->visible(fn ($get) => $get('appointment') === 'Other') // Proper conditional visibility
+                    ->required(fn ($get) => $get('appointment') === 'Other'), 
 
                 DatePicker::make('appointment_effectivity_date')
                 ->label('Appointment Effectivity Date')
@@ -169,9 +181,52 @@ class NewAppointmentResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+            ->headerActions([
+                /*Action::make('Export')
+                    ->modalButton('Download')
+                    ->color('gray'),*/
+                Tables\Actions\CreateAction::make()->label('Create Appointment')->icon('heroicon-o-pencil-square')->color('secondary'),
+                Tables\Actions\Action::make('export')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        // Fetch all appointments
+                        $appointments = NewAppointment::all([
+                            'full_name', 
+                            'type_of_appointments', 
+                            'position', 
+                            'appointment', 
+                            'appointment_effectivity_date'
+                        ]);
+            
+                        // Create CSV writer
+                        $csv = Writer::createFromFileObject(new SplTempFileObject());
+            
+                        // Add CSV headers
+                        $csv->insertOne(['Full Name', 'Type of Appointment', 'Position', 'Appointment', 'Effectivity Date']);
+            
+                        // Add data rows
+                        foreach ($appointments as $appointment) {
+                            $csv->insertOne([
+                                $appointment->full_name,
+                                $appointment->type_of_appointments,
+                                $appointment->position,
+                                $appointment->appointment,
+                                $appointment->appointment_effectivity_date
+                            ]);
+                        }
+            
+                        // Return CSV 
+                        return response()->streamDownload(function () use ($csv) {
+                            echo $csv->toString();
+                        }, 'appointments_export_' . now()->format('Ymd_His') . '.csv');
+                    }),
+            ])
+            
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+    
                 ]),
             ]);
     }

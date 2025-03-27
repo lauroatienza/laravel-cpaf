@@ -23,7 +23,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Radio;
 use Illuminate\Support\Facades\Auth;
-
+use League\Csv\Writer;
+use SplTempFileObject;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TimePicker;
 
@@ -156,8 +157,8 @@ class ExtensionResource extends Resource
                    //  'pending' => 'heroicon-o-clock',
                 
                   //  })
-                TextColumn::make('activity_date')->label('Timestamp')
-                ->sortable()->searchable() ->date('F d, Y'),
+                /*TextColumn::make('activity_date')->label('Timestamp')
+                ->sortable()->searchable() ->date('F d, Y'),*/
                 TextColumn::make('name')->label('Full Names')
                 ->sortable()->searchable()
                 ->limit(20) // Only show first 20 characters
@@ -186,6 +187,47 @@ class ExtensionResource extends Resource
             ])
             ->actions([
                 Tables\Actions\DeleteAction::make(),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()->label('Create Extension Involvement')
+                    ->color('secondary') ->icon('heroicon-o-pencil-square'),
+                Tables\Actions\Action::make('export')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        // Fetch all extensions
+                        $extensions = Extension::all([
+                            'name', 
+                            'extension_involvement', 
+                            'event_title', 
+                            'activity_date', 
+                            'venue',
+                            'date_end',
+                        ]);
+    
+                        // Create CSV writer
+                        $csv = Writer::createFromFileObject(new SplTempFileObject());
+    
+                        // Add CSV headers
+                        $csv->insertOne(['Full Name', 'Type of Extension Involvement', 'Event Title', 'Activity Date', 'Venue', 'End Date']);
+    
+                        // Add data rows
+                        foreach ($extensions as $extension) {
+                            $csv->insertOne([
+                                $extension->name,
+                                $extension->extension_involvement,
+                                $extension->event_title,
+                                $extension->activity_date,
+                                $extension->venue,
+                                $extension->date_end
+                            ]);
+                        }
+    
+                        // Return CSV 
+                        return response()->streamDownload(function () use ($csv) {
+                            echo $csv->toString();
+                        }, 'extensions_export_' . now()->format('Ymd_His') . '.csv');
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

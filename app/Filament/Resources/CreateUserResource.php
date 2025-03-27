@@ -66,10 +66,11 @@ class CreateUserResource extends Resource
             Select::make('employment_status')->label('Employment Status')
                 ->options([
                     'Part-Time' => 'Part-Time',
+                    'Temporary' => 'Temporary',
                     'Full Time' => 'Full Time',
                 ])
                 ->required(),
-            TextInput::make('designation')->label('Designation')
+            TextInput::make('designation')->label('Designation/Position')
             ->required(),
             Select::make('unit')
                 ->label('Unit')
@@ -79,13 +80,6 @@ class CreateUserResource extends Resource
                     'IGRD' => 'IGRD',
                     'CISC' => 'CISC',
                     'CSPPS' => 'CSPPS',
-                ])
-                ->required(),
-            Select::make('fulltime_partime')
-                ->label('Employment Type')
-                ->options([
-                    'Full Time' => 'Full Time',
-                    'Part Time' => 'Part Time',
                 ])
                 ->required(),
             Select::make('ms_phd')
