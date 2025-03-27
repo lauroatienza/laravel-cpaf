@@ -36,11 +36,11 @@ class CreateUserResource extends Resource
     }
     public static function getNavigationBadgeColor(): string
 {
-    return 'secondary'; 
+    return 'secondary';
 }
     public static function form(Form $form): Form
     {
-       
+
         return $form
         ->schema([
             Section::make('Primary Information')
@@ -94,7 +94,7 @@ class CreateUserResource extends Resource
                 ->options([
                     'admin' => 'Admin',
                     'faculty' => 'Faculty',
-                    'representative' => 'Representative',
+                    'reps' => 'REPS',
                 ])
                 ->default('faculty')
                 ->required(),
@@ -122,15 +122,15 @@ class CreateUserResource extends Resource
     {
         return $table
         ->columns([
-           
+
                 ImageColumn::make('avatar_url')
                     ->label('Profile Picture')
                     ->disk('public')
                     ->circular()
                     ->height(40)
                     ->width(40),
-            
-                  
+
+
 
                 TextColumn::make('name')
                 ->label('Name')
@@ -175,12 +175,12 @@ class CreateUserResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                 ->color('secondary'),
-                
-                
+
+
             ])
             ->headerActions([
-                
-                
+
+
                 Action::make('Export')
                     ->form([
                         Forms\Components\Select::make('role')
@@ -188,7 +188,7 @@ class CreateUserResource extends Resource
                             ->options([
                                 'admin' => 'Admin',
                                 'faculty' => 'Faculty',
-                                'representative' => 'Representative',
+                                'reps' => 'REPS',
                             ])
                             ->required(),
                     ])
@@ -197,14 +197,14 @@ class CreateUserResource extends Resource
                     ->action(function (array $data) {
                         $users = User::where('staff', $data['role'])->get();
                         $pdf = Pdf::loadView('exports.faculty', compact('users'));
-            
+
                         return response()->streamDownload(
                             fn () => print($pdf->output()),
                             "{$data['role']}_list.pdf"
                         );
                     }),
-                    
-                
+
+
             ])
             ->searchable()
             ->bulkActions([

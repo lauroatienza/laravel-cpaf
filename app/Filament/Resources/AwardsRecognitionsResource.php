@@ -13,6 +13,12 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Auth;
+use League\Csv\Writer;
+use SplTempFileObject;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AwardsRecognitionsExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class AwardsRecognitionsResource extends Resource
 {
@@ -130,7 +136,7 @@ class AwardsRecognitionsResource extends Resource
                     ->searchable()
                     ->limit(20)
                 ->tooltip(fn ($state) => $state),
-                
+
                 TextColumn::make('date_awarded')
                     ->label('Date Awarded')
                     ->date()
@@ -143,6 +149,47 @@ class AwardsRecognitionsResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+            ])
+            ->headerActions([
+                /*Action::make('Export')
+                    ->modalButton('Download')
+                    ->color('gray'),*/
+                Tables\Actions\CreateAction::make()->label('New Awards/Recognitions')->icon('heroicon-o-pencil-square')->color('secondary'),
+                Tables\Actions\Action::make('export')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        // Fetch all Awards/Recognitions
+                        $appointments = AwardsRecognitions::all([
+                            'award_type',
+                            'award_title',
+                            'name',
+                            'granting_organization',
+                            'date_awarded',
+                        ]);
+
+                        // Create CSV writer
+                        $csv = Writer::createFromFileObject(new SplTempFileObject());
+
+                        // Add CSV headers
+                        $csv->insertOne(['award_type', 'award_title', 'name', 'granting_organization', 'date_awarded']);
+
+                        // Add data rows
+                        foreach ($appointments as $appointment) {
+                            $csv->insertOne([
+                                $appointment->award_type,
+                                $appointment->award_title,
+                                $appointment->name,
+                                $appointment->granting_organization,
+                                $appointment->date_awarded
+                            ]);
+                        }
+
+                        // Return CSV
+                        return response()->streamDownload(function () use ($csv) {
+                            echo $csv->toString();
+                        }, 'awards_recognitions_export_' . now()->format('Ymd_His') . '.csv');
+                    }),
             ]);
     }
 
