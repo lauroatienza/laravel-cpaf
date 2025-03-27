@@ -17,6 +17,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\DateColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\UrlColumn;
+use League\Csv\Writer;
+use SplTempFileObject;
+use Illuminate\Support\Collection;
 
 class DocumentResource extends Resource
 {
@@ -25,14 +28,17 @@ class DocumentResource extends Resource
     protected static ?string $navigationLabel = 'MOU and MOA';
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'heroicon-o-document';
+    
     public static function getNavigationBadge(): ?string
     {
         return Document::count();
     }
+    
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
     }
+    
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
@@ -47,8 +53,8 @@ class DocumentResource extends Resource
 
             Select::make('partnership_type')
                 ->options([
-                    'MOU' => 'Memorandum of Understanding (MOU)',
-                    'MOA' => 'Memorandum of Agreement (MOA)',
+                    'Memorandum of Agreement (MOA)' => 'Memorandum of Agreement (MOA)',
+                    'Memorandum of Understanding (MOU)' => 'Memorandum of Understanding (MOU)',
                 ])
                 ->required(),
 
@@ -58,53 +64,53 @@ class DocumentResource extends Resource
             DatePicker::make('end_date')->required(),
 
             Select::make('training_courses')
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->label('Training Courses (non-degree and non-degree)'),
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->label('Training Courses (non-degree and non-degree)'),
 
-            Select::make('technical_advisory_service')
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->label('Technical/Advisory Service for external clients'),
+        Select::make('technical_advisory_service')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->label('Technical/Advisory Service for external clients'),
 
-            Select::make('information_dissemination')
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->label('Information Dissemination/Communication through mass media'),
+        Select::make('information_dissemination')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->label('Information Dissemination/Communication through mass media'),
 
-            Select::make('consultancy')
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->label('Consultancy for external clients'),
+        Select::make('consultancy')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->label('Consultancy for external clients'),
 
-            Select::make('community_outreach')
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->label('Community Outreach or Public Service'),
+        Select::make('community_outreach')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->label('Community Outreach or Public Service'),
 
-            Select::make('technology_transfer')
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->label('Technology or Knowledge Transfer to Target user/adopters in industry or the community'),
-            
-            Select::make('organizing_events')
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->label('Organizing such as symposium, forum, exhibit, performance, conference'),
+        Select::make('technology_transfer')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->label('Technology or Knowledge Transfer to Target user/adopters in industry or the community'),
+        
+        Select::make('organizing_events')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->label('Organizing such as symposium, forum, exhibit, performance, conference'),
 
             Textarea::make('scope_of_work')->nullable(),
             TextInput::make('pdf_file_url')->label('PDF File URL')->url(),
@@ -113,41 +119,196 @@ class DocumentResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
-        return $table->columns([
-            TextColumn::make('contributing_unit')->sortable(),
-            BadgeColumn::make('partnership_type')->sortable(),
-            TextColumn::make('extension_title')->searchable(),
-            TextColumn::make('partner_stakeholder')->searchable(),
-            TextColumn::make('start_date')->sortable()->date(), 
-            TextColumn::make('end_date')->sortable()->date(), 
-            BadgeColumn::make('training_courses')
-                ->colors(['success' => 'Yes', 'danger' => 'No']),
+        return $table
+            ->columns([
+                TextColumn::make('contributing_unit')
+                    ->sortable()
+                    ->searchable(),
+                    
+                BadgeColumn::make('partnership_type')
+                    ->sortable(),
+                    
+                TextColumn::make('extension_title')
+                    ->searchable(),
+                    
+                TextColumn::make('partner_stakeholder')
+                    ->searchable(),
+                    
+                TextColumn::make('start_date')
+                    ->date('Y-m-d')
+                    ->sortable(),
+                    
+                TextColumn::make('end_date')
+                    ->date('Y-m-d')
+                    ->sortable(),
+                    
+                BadgeColumn::make('training_courses')
+                    ->label('Training Courses')
+                    ->colors(['success' => 'Yes', 'danger' => 'No']),
+                    
                 BadgeColumn::make('technical_advisory_service')
-                ->colors(['success' => 'Yes', 'danger' => 'No'])
-                ->label('Technical/Advisory Service'),
-            BadgeColumn::make('information_dissemination')
-                ->colors(['success' => 'Yes', 'danger' => 'No'])
-                ->label('Information Dissemination'),
-            BadgeColumn::make('consultancy')
-                ->colors(['success' => 'Yes', 'danger' => 'No'])
-                ->label('Consultancy'),
-            BadgeColumn::make('community_outreach')
-                ->colors(['success' => 'Yes', 'danger' => 'No'])
-                ->label('Community Outreach'),
-            BadgeColumn::make('technology_transfer')
-                ->colors(['success' => 'Yes', 'danger' => 'No'])
-                ->label('Technology Transfer'),
-            BadgeColumn::make('organizing_events')
-                ->colors(['success' => 'Yes', 'danger' => 'No'])
-                ->label('Organizing Events'),
-            TextColumn::make('pdf_file_url')
-                ->label('PDF File')
-                ->formatStateUsing(fn ($state) => "<a href='{$state}' target='_blank' style='color: blue; text-decoration: underline;'>View PDF</a>")
-                ->html(),
-        ])
-        ->filters([])
-        ->actions([Tables\Actions\EditAction::make(), Tables\Actions\DeleteAction::make()])
-        ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+                    ->label('Technical/Advisory Service')
+                    ->colors(['success' => 'Yes', 'danger' => 'No']),
+                    
+                BadgeColumn::make('information_dissemination')
+                    ->label('Info Dissemination')
+                    ->colors(['success' => 'Yes', 'danger' => 'No']),
+                    
+                BadgeColumn::make('consultancy')
+                    ->label('Consultancy')
+                    ->colors(['success' => 'Yes', 'danger' => 'No']),
+                    
+                BadgeColumn::make('community_outreach')
+                    ->label('Community Outreach')
+                    ->colors(['success' => 'Yes', 'danger' => 'No']),
+                    
+                BadgeColumn::make('technology_transfer')
+                    ->label('Technology Transfer')
+                    ->colors(['success' => 'Yes', 'danger' => 'No']),
+                    
+                BadgeColumn::make('organizing_events')
+                    ->label('Orginizing Events')
+                    ->colors(['success' => 'Yes', 'danger' => 'No']),
+                    
+                TextColumn::make('pdf_file_url')
+                    ->label('PDF')
+                    ->formatStateUsing(fn ($state) => $state ? 
+                        "<a href='{$state}' target='_blank' class='text-primary-600 hover:underline'>View</a>" : '')
+                    ->html(),
+            ])
+            ->defaultSort('start_date', 'desc')
+            ->filters([
+                Tables\Filters\SelectFilter::make('partnership_type')
+                    ->options([
+                        'Memorandum of Agreement (MOA)' => 'MOA',
+                        'Memorandum of Understanding (MOU)' => 'MOU',
+                    ]),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+                Tables\Actions\Action::make('export')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (array $data) {
+                        $query = Document::query();
+                        
+                        if ($data['type'] === 'MOA') {
+                            $query->where('partnership_type', 'Memorandum of Agreement (MOA)');
+                        } elseif ($data['type'] === 'MOU') {
+                            $query->where('partnership_type', 'Memorandum of Understanding (MOU)');
+                        }
+                        
+                        $records = $query->get();
+                        
+                        return response()->streamDownload(function () use ($records) {
+                            $csv = Writer::createFromFileObject(new SplTempFileObject());
+                            
+                            $csv->insertOne([
+                                'Unit', 'Type', 'Title', 'Partner', 
+                                'Start Date', 'End Date', 'Training',
+                                'Tech Service', 'Info Dissemination',
+                                'Consultancy', 'Community Outreach',
+                                'Tech Transfer', 'Organizing Events',
+                                'Scope of Work', 'PDF URL'
+                            ]);
+                            
+                            foreach ($records as $record) {
+                                $csv->insertOne([
+                                    $record->contributing_unit,
+                                    str_contains($record->partnership_type, 'MOA') ? 'MOA' : 'MOU',
+                                    $record->extension_title,
+                                    $record->partner_stakeholder,
+                                    $record->start_date,
+                                    $record->end_date,
+                                    $record->training_courses,
+                                    $record->technical_advisory_service,
+                                    $record->information_dissemination,
+                                    $record->consultancy,
+                                    $record->community_outreach,
+                                    $record->technology_transfer,
+                                    $record->organizing_events,
+                                    $record->scope_of_work,
+                                    $record->pdf_file_url,
+                                ]);
+                            }
+                            
+                            echo $csv->toString();
+                        }, 'documents_export_' . now()->format('Ymd_His') . '.csv');
+                    })
+                    ->form([
+                        Select::make('type')
+                            ->options([
+                                'ALL' => 'All Documents',
+                                'MOA' => 'MOA',
+                                'MOU' => 'MOU',
+                            ])
+                            ->default('ALL'),
+                    ]),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('export')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (Collection $records, array $data) {
+                        $filteredRecords = $records;
+                        
+                        if ($data['type'] === 'MOA') {
+                            $filteredRecords = $records->where('partnership_type', 'Memorandum of Agreement (MOA)');
+                        } elseif ($data['type'] === 'MOU') {
+                            $filteredRecords = $records->where('partnership_type', 'Memorandum of Understanding (MOU)');
+                        }
+                        
+                        return response()->streamDownload(function () use ($filteredRecords) {
+                            $csv = Writer::createFromFileObject(new SplTempFileObject());
+                            
+                            $csv->insertOne([
+                                'Unit', 'Type', 'Title', 'Partner', 
+                                'Start Date', 'End Date', 'Training',
+                                'Tech Service', 'Info Dissemination',
+                                'Consultancy', 'Community Outreach',
+                                'Tech Transfer', 'Organizing Events',
+                                'Scope of Work', 'PDF URL'
+                            ]);
+                            
+                            foreach ($filteredRecords as $record) {
+                                $csv->insertOne([
+                                    $record->contributing_unit,
+                                    str_contains($record->partnership_type, 'MOA') ? 'MOA' : 'MOU',
+                                    $record->extension_title,
+                                    $record->partner_stakeholder,
+                                    $record->start_date,
+                                    $record->end_date,
+                                    $record->training_courses,
+                                    $record->technical_advisory_service,
+                                    $record->information_dissemination,
+                                    $record->consultancy,
+                                    $record->community_outreach,
+                                    $record->technology_transfer,
+                                    $record->organizing_events,
+                                    $record->scope_of_work,
+                                    $record->pdf_file_url,
+                                ]);
+                            }
+                            
+                            echo $csv->toString();
+                        }, 'selected_documents_' . now()->format('Ymd_His') . '.csv');
+                    })
+                    ->form([
+                        Select::make('type')
+                            ->options([
+                                'ALL' => 'All Selected',
+                                'MOA' => 'MOA',
+                                'MOU' => 'MOU',
+                            ])
+                            ->default('ALL'),
+                    ])
+                    ->deselectRecordsAfterCompletion(),
+            ]);
     }
 
     public static function getPages(): array
@@ -158,8 +319,4 @@ class DocumentResource extends Resource
             'edit' => Pages\EditDocument::route('/{record}/edit'),
         ];
     }
-
-    
-    
 }
-
