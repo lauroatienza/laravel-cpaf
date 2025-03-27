@@ -26,10 +26,10 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
         
-            ->brandLogo(asset('logo5.svg'))
+        
+            ->brandLogo(asset('final2.svg'))
             ->brandLogoHeight('100%')
             ->default()
-
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
             ->path('admin')
@@ -41,7 +41,7 @@ class AdminPanelProvider extends PanelProvider
                     ->shouldShowAvatarForm(
                         value: true,
                          
-                        directory: 'public/avatars' // Corrected path
+                        directory: 'avatars' // Corrected path
                     )
             ])
             

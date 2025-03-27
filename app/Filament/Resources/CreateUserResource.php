@@ -11,6 +11,8 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+
 use Filament\Tables\Table;
 use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
@@ -125,7 +127,17 @@ class CreateUserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
+        ->columns([
+           
+                ImageColumn::make('avatar_url')
+                    ->label('Profile Picture')
+                    ->disk('public')
+                    ->circular()
+                    ->height(40)
+                    ->width(40),
+            
+                  
+
                 TextColumn::make('name')
                 ->label('Name')
                 ->sortable()
@@ -224,5 +236,5 @@ class CreateUserResource extends Resource
             'view' => Pages\ViewCreateUser::route('/{record}'),
         ];
     }
-   
+   //CREATED BY JULIUS ASHER P. AUSTRIA HARD CODED NO GPT
 }
