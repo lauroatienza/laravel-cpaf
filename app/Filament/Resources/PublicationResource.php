@@ -26,9 +26,9 @@ class PublicationResource extends Resource
 {
     protected static ?string $model = Publication::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationGroup = 'Programs';
+    protected static ?string $navigationGroup = 'Accomplishments';
     protected static ?string $label = 'Publication';
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationBadge(): ?string
     {

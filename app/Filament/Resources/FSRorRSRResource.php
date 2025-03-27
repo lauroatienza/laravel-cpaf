@@ -25,6 +25,7 @@ class FSRorRSRResource extends Resource
     protected static ?string $navigationGroup = 'Programs'; 
     protected static ?string $navigationLabel = 'FSR/RSR Attachments';
     protected static ?string $modelLabel = 'FSR/RSR Attachments';
+    protected static ?int $navigationSort = 1;
     protected static ?string $pluralModelLabel = 'FSR/RSR Attachments';
     protected static ?string $slug = 'fsr-or-rsr';
 
@@ -111,11 +112,10 @@ class FSRorRSRResource extends Resource
 
                 TextColumn::make('file_upload')
                     ->label('Uploaded File')
-                    ->formatStateUsing(fn ($state) => 
-                        '<a href="' . asset('storage/' . $state) . '" target="_blank">' . basename($state) . '</a>'
-                    )
-                    ->html()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable()
+                    ->url(fn ($record) => asset('storage/' . $record->file_upload), true)
+                    ->color('primary'),
                 
             ])
             ->filters([

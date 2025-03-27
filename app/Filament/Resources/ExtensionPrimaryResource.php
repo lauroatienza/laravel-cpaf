@@ -13,6 +13,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Columns\BadgeColumn;
 
 class ExtensionPrimaryResource extends Resource
@@ -20,11 +21,53 @@ class ExtensionPrimaryResource extends Resource
     protected static ?string $model = ExtensionPrime::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-    protected static ?string $navigationGroup = 'Extension Programs';
+    protected static ?string $navigationGroup = 'Programs';
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationLabel = 'Extension';
     protected static ?string $modelLabel = 'Extension';
     protected static ?string $pluralModelLabel = 'Extensions';
-    public static function form(Forms\Form $form): Forms\Form
+
+    public static function getNavigationBadge(): ?string
+    {
+        $user = Auth::user();
+    
+        // If the user is an admin, show the total count
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
+        }
+    
+        // Define the correct column name for names in the extension table
+        $nameColumn = 'researcher_names'; // Adjust this column name if needed
+    
+        // Build possible name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+    
+        // List of titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+        // Function to normalize names by removing titles
+        $normalizeName = function ($name) use ($titles) {
+            return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
+        };
+    
+        // Normalize names
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+    
+        return static::$model::where(function ($query) use ($nameColumn, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+            $query->whereRaw("LOWER(REPLACE($nameColumn, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                  ->orWhereRaw("LOWER(REPLACE($nameColumn, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                  ->orWhereRaw("LOWER(REPLACE($nameColumn, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        })->count();
+    }
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'secondary'; 
+    }    
+        public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([

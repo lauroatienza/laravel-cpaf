@@ -19,15 +19,15 @@ class AwardsRecognitionsResource extends Resource
     protected static ?string $model = \App\Models\AwardsRecognitions::class;
 
     protected static ?string $navigationLabel = 'Awards/Recognitions';
-    
-    protected static ?string $navigationGroup = 'Awards';
-    protected static ?string $navigationIcon = 'heroicon-o-trophy';
-    protected static ?int $navigationSort = 3;
 
-    
+    protected static ?string $navigationGroup = 'Accomplishments';
+    protected static ?string $navigationIcon = 'heroicon-o-trophy';
+    protected static ?int $navigationSort = 5;
+
+
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'secondary';
     }
 
     public static function getNavigationBadge(): ?string
@@ -114,16 +114,23 @@ class AwardsRecognitionsResource extends Resource
                     ->label('Title of Paper or Award')
                     ->sortable()
                     ->searchable()
-                    ->limit(20) // Only show first 20 characters
+                    ->limit(20)
                 ->tooltip(fn ($state) => $state),
 
                 TextColumn::make('name')
                     ->label('Name(s) of Awardee/Recipient')
                     ->sortable()
                     ->searchable()
-                    ->limit(20) // Only show first 20 characters
+                    ->limit(20)
                 ->tooltip(fn ($state) => $state),
 
+                TextColumn::make('granting_organization')
+                    ->label('Granting Organization')
+                    ->sortable()
+                    ->searchable()
+                    ->limit(20)
+                ->tooltip(fn ($state) => $state),
+                
                 TextColumn::make('date_awarded')
                     ->label('Date Awarded')
                     ->date()

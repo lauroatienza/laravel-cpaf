@@ -38,6 +38,8 @@ class User extends Authenticatable implements HasAvatar
         $avatarColumn = config('filament-edit-profile.avatar_column', 'avatar_url');
         return $this->$avatarColumn ? Storage::url($this->$avatarColumn) : null;
     }
+    
+
 
     protected function casts(): array
     {
@@ -55,11 +57,11 @@ class User extends Authenticatable implements HasAvatar
             $user->syncRoleFromSystemRole();
         });
     }
-    
+
     private function syncRoleFromSystemRole()
     {
         $validRoles = ['super-admin', 'admin', 'user', 'secretary'];
-    
+
         // Ensure the systemrole is valid before proceeding
         if (in_array($this->systemrole, $validRoles)) {
             $this->syncRoles([$this->systemrole]); // Spatie syncRoles for single role
@@ -67,7 +69,7 @@ class User extends Authenticatable implements HasAvatar
             \Log::error('Invalid systemrole', ['systemrole' => $this->systemrole]);
         }
     }
-    
-    
-    
+
+
+
 }
