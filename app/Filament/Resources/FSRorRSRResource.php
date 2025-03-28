@@ -22,10 +22,10 @@ class FSRorRSRResource extends Resource
 {
     protected static ?string $model = FSRorRSR::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationGroup = 'Programs'; 
+    protected static ?string $navigationGroup = 'Other Documents'; 
     protected static ?string $navigationLabel = 'FSR/RSR Attachments';
     protected static ?string $modelLabel = 'FSR/RSR Attachments';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 4;
     protected static ?string $pluralModelLabel = 'FSR/RSR Attachments';
     protected static ?string $slug = 'fsr-or-rsr';
 
@@ -116,7 +116,6 @@ class FSRorRSRResource extends Resource
                     ->searchable()
                     ->url(fn ($record) => asset('storage/' . $record->file_upload), true)
                     ->color('primary'),
-                
                 
             ])
             ->filters([

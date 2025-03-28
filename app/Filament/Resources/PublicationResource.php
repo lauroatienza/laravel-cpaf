@@ -20,6 +20,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Placeholder;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 
 class PublicationResource extends Resource
 {
@@ -228,6 +229,7 @@ class PublicationResource extends Resource
                 Section::make('Section 4 of 5')
                     ->schema([
                         Placeholder::make('proofs_instruction')
+                            ->label('Proofs Instruction')
                             ->helperText('Kindly input the link to the proofs below.
                                        Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')
                             ->columnSpan('full'),
@@ -245,6 +247,7 @@ class PublicationResource extends Resource
                 Section::make('Section 5 of 5')
                     ->schema([
                         Placeholder::make('awards_instruction')
+                            ->label('Awards Instruction')
                             ->helperText('Do not leave the box blank.
                                        Please put "NA" if you have no answers. Thank you!')
                             ->columnSpan('full'),
@@ -289,6 +292,7 @@ class PublicationResource extends Resource
             ->filters([])
             ->actions([
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 DeleteBulkAction::make(),

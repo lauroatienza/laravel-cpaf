@@ -25,7 +25,7 @@ use Illuminate\Validation\Rules\Password;
 class CreateUserResource extends Resource
 {
     protected static ?string $model = User::class;
-    protected static ?string $navigationLabel = 'Add Users';
+    protected static ?string $navigationLabel = 'Users';
 
     protected static ?string $navigationIcon = 'heroicon-o-user-plus';
     protected static ?string $navigationGroup = 'User Management';
@@ -66,6 +66,7 @@ class CreateUserResource extends Resource
             Select::make('employment_status')->label('Employment Status')
                 ->options([
                     'Part-Time' => 'Part-Time',
+                    'Temporary' => 'Temporary',
                     'Full Time' => 'Full Time',
                 ])
                 ->required(),
@@ -79,13 +80,6 @@ class CreateUserResource extends Resource
                     'IGRD' => 'IGRD',
                     'CISC' => 'CISC',
                     'CSPPS' => 'CSPPS',
-                ])
-                ->required(),
-            Select::make('fulltime_partime')
-                ->label('Employment Type')
-                ->options([
-                    'Full Time' => 'Full Time',
-                    'Part Time' => 'Part Time',
                 ])
                 ->required(),
             Select::make('ms_phd')
