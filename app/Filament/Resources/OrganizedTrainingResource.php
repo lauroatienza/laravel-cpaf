@@ -157,12 +157,12 @@ public static function table(Tables\Table $table): Tables\Table
             BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
         ])
         ->filters([])
-        ->headerActions([ // ✅ Export button moved here
+        ->headerActions([ 
             Tables\Actions\Action::make('exportAll')
                 ->label('Export')
                 ->icon('heroicon-o-document')
                 ->color('gray')
-                ->outlined() // Gives a button-like appearance
+                ->outlined()
                 ->form([
                     Forms\Components\Select::make('format')
                         ->options([
@@ -197,7 +197,7 @@ public static function table(Tables\Table $table): Tables\Table
                 ])
                 ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
         ])
-        ->selectable(); // ✅ Ensure the table is selectable for bulk actions
+        ->selectable(); 
 }
 
     
