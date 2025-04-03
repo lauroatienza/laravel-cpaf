@@ -22,7 +22,7 @@ class ExtensionPrimaryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationGroup = 'Programs';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationLabel = 'Extension';
     protected static ?string $modelLabel = 'Extension';
     protected static ?string $pluralModelLabel = 'Extensions';
