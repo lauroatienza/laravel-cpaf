@@ -158,6 +158,8 @@ public static function table(Tables\Table $table): Tables\Table
         ])
         ->filters([])
         ->headerActions([ // ✅ Export button moved here
+            Tables\Actions\CreateAction::make()->label('New Organized Training')
+                    ->color('secondary') ->icon('heroicon-o-pencil-square'),
             Tables\Actions\Action::make('exportAll')
                 ->label('Export')
                 ->icon('heroicon-o-document')
@@ -175,6 +177,7 @@ public static function table(Tables\Table $table): Tables\Table
                 ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
         ])
         ->actions([
+            
             Actions\EditAction::make(),
             Actions\DeleteAction::make(),
         ])

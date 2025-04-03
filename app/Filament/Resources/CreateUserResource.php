@@ -123,12 +123,7 @@ class CreateUserResource extends Resource
         return $table
         ->columns([
            
-                ImageColumn::make('avatar_url')
-                    ->label('Profile Picture')
-                    ->disk('public')
-                    ->circular()
-                    ->height(40)
-                    ->width(40),
+                
             
                   
 
@@ -180,7 +175,8 @@ class CreateUserResource extends Resource
             ])
             ->headerActions([
                 
-                
+                Tables\Actions\CreateAction::make()->label('Create New User')
+                    ->color('secondary') ->icon('heroicon-o-pencil-square'),
                 Action::make('Export')
                     ->form([
                         Forms\Components\Select::make('role')

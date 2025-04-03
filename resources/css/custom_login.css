@@ -1,0 +1,10 @@
+body {
+    background: url('/public/img/wallpaper.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+main{
+   
+    position: absolute; right: 100px;
+
+}

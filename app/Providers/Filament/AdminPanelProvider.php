@@ -9,6 +9,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use app\Filament\Resources\UserResource\Pages\Auth\Register;
+use app\Filament\Pages\Auth\Logincustom;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -29,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
         
         
-            ->brandLogo(asset('final2.svg'))
+            ->brandLogo(asset('final21.svg'))
             ->brandLogoHeight('100%')
             ->default()
             ->id('admin')
