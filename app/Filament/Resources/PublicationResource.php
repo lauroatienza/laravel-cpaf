@@ -21,6 +21,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
+use Illuminate\Support\Facades\Auth;
 
 class PublicationResource extends Resource
 {
@@ -30,14 +31,25 @@ class PublicationResource extends Resource
     protected static ?string $label = 'Publication';
     protected static ?int $navigationSort = 1;
 
-    public static function getNavigationBadge(): ?string
-    {
-        return \Illuminate\Support\Facades\Auth::check() ? static::$model::where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->count() : 0;
+public static function getNavigationBadge(): ?string
+{
+    $user = Auth::user();
+
+    // Check if the user is a super-admin or admin
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return (string) \App\Models\Publication::count();
+    }
+
+    if ($user) {
+        return (string) \App\Models\Publication::where('user_id', $user->id)->count();
+    }
+
+    return null;  
     }
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'secondary';  
     }
 
     public static function form(Form $form): Form
