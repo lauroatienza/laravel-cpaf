@@ -98,7 +98,7 @@ class CreateUserResource extends Resource
                 ])
                 ->default('faculty')
                 ->required(),
-
+            
             Select::make('systemrole')
                 ->label('User Role')
                 ->options([
@@ -144,10 +144,7 @@ class CreateUserResource extends Resource
                 ->sortable()
                 ->searchable()
                 ->formatStateUsing(fn (string $state): string => ucfirst(strtolower($state))),
-                TextColumn::make('fulltime_partime')
-                ->label('Employment Type')
-                ->sortable()
-                ->searchable(),
+                
                 BadgeColumn::make('ms_phd')
                 ->label('Highest Degree Attained')
                 ->sortable()
