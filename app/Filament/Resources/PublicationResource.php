@@ -32,8 +32,9 @@ class PublicationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return \Illuminate\Support\Facades\Auth::check() ? static::$model::where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->count() : 0;
     }
+
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 

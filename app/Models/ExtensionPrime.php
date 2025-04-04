@@ -71,4 +71,10 @@ class ExtensionPrime extends Model
             }
         });
     }
+
+    public function trainings()
+    {
+        return $this->hasMany(OrganizedTraining::class, 'extension_id');
+    }
+
 }

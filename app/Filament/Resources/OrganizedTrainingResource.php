@@ -125,20 +125,24 @@ class OrganizedTrainingResource extends Resource
                         TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
                     ]),
 
-                    Section::make('Supporting Documents')
+                Section::make('Supporting Documents')
                     ->schema([
-                        TextInput::make('related_extension_program')->label('Related Extension Program, if applicable'),
-                        TextInput::make('pdf_file_1')
-                            ->label('PDF File 1 (Link)')
-                            ->placeholder('Enter PDF link')
-                            ->url(),
-                        TextInput::make('pdf_file_2')
-                            ->label('PDF File 2 (Link)')
-                            ->placeholder('Enter PDF link')
-                            ->url(),
+                        TextInput::make('related_extension_program')
+                            ->label('Related Extension Program, if applicable')
+                            ->default(fn() => Auth::user()->extension ? Auth::user()->extension->title_of_extension_program : null)
+                            ->disabled(),
+        
+                        FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
+                        FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
+        
                         TextInput::make('documents_link')->label('Documents Link'),
-                        TextInput::make('project_title')->label('Project Title'),
+
+                        TextInput::make('project_title')
+                            ->label('Project Title')
+                            ->default(fn() => Auth::user()->extension ? Auth::user()->extension->project_article : null)
+                            ->disabled(),
                     ]),
+
                 
             ]);
     }

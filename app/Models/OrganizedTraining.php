@@ -25,4 +25,10 @@ class OrganizedTraining extends Model
         'start_date' => 'date',
         'end_date' => 'date'
     ];
+
+    public function extension()
+    {
+        return $this->belongsTo(ExtensionPrime::class, 'extension_id'); // Ensure 'extension_id' exists in the training table
+    }
+
 }
