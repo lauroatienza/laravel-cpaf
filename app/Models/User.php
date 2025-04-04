@@ -25,7 +25,6 @@ class User extends Authenticatable implements HasAvatar
         'unit',
         'ms_phd',
         'systemrole', // ✅ Ensure systemrole is handled properly
-        'fulltime_partime',
         'avatar_url',
     ];
 
