@@ -157,12 +157,16 @@ public static function table(Tables\Table $table): Tables\Table
             BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
         ])
         ->filters([])
-        ->headerActions([ 
+        ->headerActions([
+            // Custom create button
+            Tables\Actions\CreateAction::make()
+                ->label('Create Organized Training')
+                ->color('secondary')
+                ->icon('heroicon-o-pencil-square'),
+        
             Tables\Actions\Action::make('exportAll')
                 ->label('Export')
-                ->icon('heroicon-o-document')
-                ->color('gray')
-                ->outlined()
+                ->icon('heroicon-o-arrow-down-tray')
                 ->form([
                     Forms\Components\Select::make('format')
                         ->options([
@@ -174,6 +178,7 @@ public static function table(Tables\Table $table): Tables\Table
                 ])
                 ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
         ])
+        
         ->actions([
             
             Actions\EditAction::make(),
@@ -183,9 +188,7 @@ public static function table(Tables\Table $table): Tables\Table
             Actions\DeleteBulkAction::make(),
             Tables\Actions\BulkAction::make('exportBulk')
                 ->label('Export Selected')
-                ->icon('heroicon-o-document')
-                ->color('gray')
-                ->outlined()
+                ->icon('heroicon-o-arrow-down-tray')
                 ->requiresConfirmation()
                 ->form([
                     Forms\Components\Select::make('format')
