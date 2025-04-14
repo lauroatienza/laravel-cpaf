@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\OrganizedTrainingResource\Pages;
 
-use Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\OrganizedTrainingResource;
+use Filament\Resources\Pages\CreateRecord;
 use App\Models\ExtensionPrime;
 
-class EditOrganizedTraining extends EditRecord
+class CreateOrganizedTrainingWithExtension extends CreateRecord
 {
     protected static string $resource = OrganizedTrainingResource::class;
 
@@ -15,18 +15,15 @@ class EditOrganizedTraining extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Combine first + last name
         $fullName = "{$data['first_name']} {$data['last_name']}";
 
-        // Search for matching ExtensionPrime record
         $match = ExtensionPrime::where(function ($query) use ($fullName) {
             $query->where('researcher_names', 'LIKE', "%$fullName%")
                   ->orWhere('project_leader', 'LIKE', "%$fullName%");
         })->first();
 
-        // If found, assign it to related_extension_program
         if ($match) {
             $data['related_extension_program'] = $match->id_no;
         }
