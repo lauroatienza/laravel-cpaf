@@ -251,6 +251,7 @@ public static function table(Tables\Table $table): Tables\Table
         ])
         
         ->actions([
+            
             Actions\EditAction::make(),
             Actions\DeleteAction::make(),
         ])

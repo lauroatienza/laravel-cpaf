@@ -12,7 +12,6 @@ use App\Filament\Widgets\StatsOverview;
 class Dashboard extends \Filament\Pages\Dashboard
 {
  use HasFiltersForm;
-
  public function filtersForm(Form $form): Form
  {
 
@@ -25,6 +24,6 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     
  } 
-
+ 
  
 }
