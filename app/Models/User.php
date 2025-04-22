@@ -35,6 +35,7 @@ class User extends Authenticatable implements HasAvatar
         'yr_grad',
         'date_hired',
         'contact_no',
+        'research_interests', 'fields_of_specialization'
     ];
 
     protected $hidden = [

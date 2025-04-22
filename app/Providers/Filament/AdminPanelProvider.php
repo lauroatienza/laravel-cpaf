@@ -46,13 +46,12 @@ class AdminPanelProvider extends PanelProvider
                     ->setIcon('heroicon-o-user')
                     ->shouldShowAvatarForm(
                         value: true,
-                         
                         directory: 'avatars' // Corrected path
                     )
             ])
             
             ->colors([
-               'secondary' => [
+    'secondary' => [
     50 => '240, 255, 250',  // Lightest green
     100 => '204, 255, 229',
     200 => '153, 255, 204',
