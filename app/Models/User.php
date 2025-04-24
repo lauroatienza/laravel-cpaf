@@ -9,6 +9,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Support\Facades\Storage;
 
+
 class User extends Authenticatable implements HasAvatar
 {
     use HasRoles, HasFactory, Notifiable;
@@ -26,6 +27,15 @@ class User extends Authenticatable implements HasAvatar
         'ms_phd',
         'systemrole', // ✅ Ensure systemrole is handled properly
         'avatar_url',
+        'rank_',
+        'sg',
+        's',
+        'item_no',
+        'birthday',
+        'yr_grad',
+        'date_hired',
+        'contact_no',
+        'research_interests', 'fields_of_specialization'
     ];
 
     protected $hidden = [
@@ -38,7 +48,7 @@ class User extends Authenticatable implements HasAvatar
         return $this->$avatarColumn ? Storage::url($this->$avatarColumn) : null;
     }
     
-
+    
 
     protected function casts(): array
     {
@@ -69,6 +79,8 @@ class User extends Authenticatable implements HasAvatar
         }
     }
 
+    
 
 
 }
+

@@ -71,8 +71,7 @@ class ExtensionPrimaryResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('id_no')->label('ID No.')->disabled(),
-
+        
                 TextInput::make('contributing_unit')->label('Contributing Unit'),
 
                 DatePicker::make('start_date')->label('Start Date (mm/dd/yyyy)'),

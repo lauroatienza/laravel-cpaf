@@ -24,7 +24,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\IconColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use Illuminate\Database\Eloquent\Model;
 class ResearchResource extends Resource
 {
     protected static ?string $model = Research::class;
@@ -34,6 +34,11 @@ class ResearchResource extends Resource
     protected static ?string $navigationGroup = 'Programs';
 
     protected static ?int $navigationSort = 1;
+    protected static ?string $recordTitleAttribute = 'title';
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title', 'name_of_researchers', 'poject_leader'];
+    }
 
     public static function getNavigationBadge(): ?string
 {
@@ -53,9 +58,16 @@ class ResearchResource extends Resource
     $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
 
     // Function to normalize names by removing titles and extra spaces
-    $normalizeName = function ($name) use ($titles) {
+    $normalizeName = function ($name) use ($titles, $user) {
         // Remove titles
         $nameWithoutTitles = str_ireplace($titles, '', $name);
+        
+        // If the middle name exists and is not already an initial, replace it with the initial
+        if ($user->middle_name) {
+            $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+            $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+        }
+        
         // Replace multiple spaces with a single space
         return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
     };
@@ -71,6 +83,7 @@ class ResearchResource extends Resource
               ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
     })->count();
 }
+
     public static function getNavigationBadgeColor(): string
     {
         return 'secondary'; 
@@ -297,40 +310,48 @@ class ResearchResource extends Resource
     }
 
     public static function getEloquentQuery(): Builder
-    {
-        $user = Auth::user();
-    
-        // If the user is an admin, return all records
-        if ($user->hasRole(['super-admin', 'admin'])) {
-            return parent::getEloquentQuery();
-        }
-    
-        // Build possible name formats
-        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-        $simpleName = trim("{$user->name} {$user->last_name}");
-    
-        // List of titles to remove
-        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-    
-        // Function to normalize names by removing titles and extra spaces
-        $normalizeName = function ($name) use ($titles) {
-            // Remove titles
-            $nameWithoutTitles = str_ireplace($titles, '', $name);
-            // Replace multiple spaces with a single space
-            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-        };
-    
-        // Normalize names
-        $normalizedFullName = $normalizeName($fullName);
-        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-        $normalizedSimpleName = $normalizeName($simpleName);
-    
-        return parent::getEloquentQuery()
-            ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-                $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                      ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                      ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
-            });
+{
+    $user = Auth::user();
+
+    // If the user is an admin, return all records
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return parent::getEloquentQuery();
     }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // List of titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names by removing titles and converting middle name to initial
+    $normalizeName = function ($name) use ($titles, $user) {
+        // Remove titles
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
+        
+        // If the middle name exists and is not already an initial, replace it with the initial
+        if ($user->middle_name) {
+            $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+            $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+        }
+
+        // Replace multiple spaces with a single space
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+    };
+
+    // Normalize names
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+
+    return parent::getEloquentQuery()
+        ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+            $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        });
+}
+
 }
