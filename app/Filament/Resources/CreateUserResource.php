@@ -61,7 +61,7 @@ class CreateUserResource extends Resource
                     ->description('Fill up the following:')
                     ->schema([
                         TextInput::make('name')->label('First Name')->required(),
-                        TextInput::make('email')->label('Email')->email() ->required(),
+                        TextInput::make('email')->label('Email')->email()->required(),
                         TextInput::make('last_name')->label('Last Name')->required(),
                         TextInput::make('password')
                             ->password()
@@ -115,7 +115,7 @@ class CreateUserResource extends Resource
                         'reps' => 'REPS',
                     ])
                     ->default('faculty')
-                    ->required(),   
+                    ->required(),
 
                 Select::make('systemrole')
                     ->label('User Role')
@@ -135,7 +135,7 @@ class CreateUserResource extends Resource
                     }),
 
                 TextInput::make('research_interests')->label('Research Interests'),
-                TextInput::make('fields_of_specialization')->label('Fields of Specialization'), 
+                TextInput::make('fields_of_specialization')->label('Fields of Specialization'),
                 TextInput::make('rank_')->label('Rank'),
                 TextInput::make('sg')->label('SG'),
                 TextInput::make('s')->label('S'),
@@ -146,6 +146,8 @@ class CreateUserResource extends Resource
                 TextInput::make('date_hired')->label('Date Hired in CPAf'),
                 TextInput::make('contact_no')->label('Contact Number'),
             ]);
+            
+            
     }
 
     public static function table(Table $table): Table
@@ -155,11 +157,12 @@ class CreateUserResource extends Resource
 
 
                 TextColumn::make('full_name')
-                    ->searchable()
-                    ->sortable()
-                    ->getStateUsing(function ($record) {
-                        return $record->name . ' ' . $record->last_name;
-                    }),
+                    ->label('Full Name')
+                    ->getStateUsing(fn($record) => "{$record->name} {$record->last_name}")
+                    ->searchable(['name', 'last_name']) // ← Just pass array directly
+                    ->sortable(),
+
+
                 TextColumn::make('unit')
                     ->label('Unit')
                     ->sortable()
@@ -176,7 +179,7 @@ class CreateUserResource extends Resource
                     ->color('secondary')
                     ->searchable()
                     ->limit(10) // Only show first 20 characters
-                    ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
                 BadgeColumn::make('systemrole')
                     ->label('User Role')
                     ->sortable()

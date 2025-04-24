@@ -37,104 +37,115 @@ class ExtensionResource extends Resource
 
     protected static ?string $navigationGroup = 'Accomplishments';
 
-    protected static ?string $navigationLabel = 'Extension Involvements';    
+    protected static ?string $navigationLabel = 'Extension Involvements';
     protected static ?int $navigationSort = 4;
     protected static ?string $pluralLabel = 'Extension Involvements';
     public static function getNavigationBadge(): ?string
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // If the user is an admin, show the total count
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return static::$model::count();
+
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
+        }
+
+
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+
+
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+        $replacer = 'name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
+
+        $normalizeName = function ($name) use ($titles, $user) {
+
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+
+
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+
+        return static::$model::where(function ($query) use ($replacer, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+            $query->whereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        })->count();
     }
-
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-    // List of titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-    // Function to normalize names by removing titles and extra spaces
-    $normalizeName = function ($name) use ($titles) {
-        // Remove titles
-        $nameWithoutTitles = str_ireplace($titles, '', $name);
-        // Replace multiple spaces with a single space
-        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-    };
-
-    // Normalize names
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
-
-    return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-        $query->whereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-              ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-              ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
-    })->count();
-}
 
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'secondary';
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
                     ->label('Full Name')
-                    ->default(Auth::user()->name. ' ' . Auth::user()->last_name) // Gets logged-in user's name
+                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name) // Gets logged-in user's name
                     ->hidden()
                     ->required(),
 
                 Select::make('extension_involvement')
-                ->label('Type of Extension Involvement')
-                ->options([
-                    'Resource Person' => 'Resource Person',
-                    'Seminar Speaker' => 'Seminar Speaker',
-                    'Reviewer' => 'Reviewer',
-                    'Evaluator' => 'Evaluator',
-                    'Moderator' => 'Moderator',
-                    'Session Chair' => 'Session Chair',
-                    'Editor' => 'Editor',
-                    'Examiner' => 'Examiner',
-                    'Other' => 'Other (Specify)', // Adds "Other" as an option
-                ])
-                ->reactive(), // Allows dynamic updates based on selection
-                
-                Select::make('location')
-                ->label('Type of Extension')
-                ->options([
-                    'Training' => 'Training',
-                    'Conference' => 'Conference',
-                    'Editorial Team/Board' => 'Editorial Team/Board',
-                    'Workshop' => 'Workshop',
-                    'Other' => 'Other (Specify)', // Adds "Other" as an option
-                ])
-                ->reactive(), // Allows dynamic updates based on selection
+                    ->label('Type of Extension Involvement')
+                    ->options([
+                        'Resource Person' => 'Resource Person',
+                        'Seminar Speaker' => 'Seminar Speaker',
+                        'Reviewer' => 'Reviewer',
+                        'Evaluator' => 'Evaluator',
+                        'Moderator' => 'Moderator',
+                        'Session Chair' => 'Session Chair',
+                        'Editor' => 'Editor',
+                        'Examiner' => 'Examiner',
+                        'Other' => 'Other (Specify)', // Adds "Other" as an option
+                    ])
+                    ->reactive(), // Allows dynamic updates based on selection
 
-            TextInput::make('custom_involvement')
-                ->label('Specify Other')
-                ->hidden(fn ($get) => $get('type_of_involvement') !== 'Other') // Show only if "Other" is selected
-                ->maxLength(255),
+                Select::make('location')
+                    ->label('Type of Extension')
+                    ->options([
+                        'Training' => 'Training',
+                        'Conference' => 'Conference',
+                        'Editorial Team/Board' => 'Editorial Team/Board',
+                        'Workshop' => 'Workshop',
+                        'Other' => 'Other (Specify)', // Adds "Other" as an option
+                    ])
+                    ->reactive(), // Allows dynamic updates based on selection
+
+                TextInput::make('custom_involvement')
+                    ->label('Specify Other')
+                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other') // Show only if "Other" is selected
+                    ->maxLength(255),
 
                 TextInput::make('event_title')
-                ->label("Event Title"),
+                    ->label("Event Title"),
 
                 TextInput::make('venue')
-                ->label("Venue and Location"),
-                
+                    ->label("Venue and Location"),
+
                 DatePicker::make('activity_date')
-                ->label('Activity Date'),
+                    ->label('Activity Date'),
 
             ])->columns(1);
-    }  
+    }
 
     public static function table(Table $table): Table
     {
@@ -151,36 +162,36 @@ class ExtensionResource extends Resource
                 TextColumn::make('end_date')
                 ->sortable()->searchable(),
                 */
-               // IconColumn::make('pbms_upload_status')
-               // ->icon(fn (string $state): string => match ($state) {
-                   //   'uploaded' => 'heroicon-o-check-badge',
-                   //  'pending' => 'heroicon-o-clock',
-                
-                  //  })
+                // IconColumn::make('pbms_upload_status')
+                // ->icon(fn (string $state): string => match ($state) {
+                //   'uploaded' => 'heroicon-o-check-badge',
+                //  'pending' => 'heroicon-o-clock',
+
+                //  })
                 /*TextColumn::make('activity_date')->label('Timestamp')
                 ->sortable()->searchable() ->date('F d, Y'),*/
                 TextColumn::make('name')->label('Full Names')
-                ->sortable()->searchable()
-                ->limit(20) // Only show first 20 characters
-                ->tooltip(fn ($state) => $state),
+                    ->sortable()->searchable()
+                    ->limit(20) // Only show first 20 characters
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('extension_involvement')->label('Type of Extension Involvement')
-                ->sortable()->searchable(),
+                    ->sortable()->searchable(),
                 TextColumn::make('event_title')->label('Event Title')
-                ->sortable()->searchable()
-                ->limit(20) // Only show first 20 characters
-                ->tooltip(fn ($state) => $state), // Show full name on hover,
+                    ->sortable()->searchable()
+                    ->limit(20) // Only show first 20 characters
+                    ->tooltip(fn($state) => $state), // Show full name on hover,
                 TextColumn::make('created_at')->label('Start Date')
-                ->sortable()->searchable(),
+                    ->sortable()->searchable(),
                 TextColumn::make('extensiontype')->label('Type of Extension')
-                ->sortable()->searchable(),
+                    ->sortable()->searchable(),
                 TextColumn::make('venue')->label('Event Venue')
-                ->sortable()->searchable()
-                ->limit(10) // Only show first 20 characters
-                ->tooltip(fn ($state) => $state),
+                    ->sortable()->searchable()
+                    ->limit(10) // Only show first 20 characters
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('date_end')->label('End Date')
-                ->sortable()->searchable(),
-                
-                
+                    ->sortable()->searchable(),
+
+
             ])
             ->filters([
                 //
@@ -190,27 +201,27 @@ class ExtensionResource extends Resource
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()->label('Create Extension Involvement')
-                    ->color('secondary') ->icon('heroicon-o-pencil-square'),
+                    ->color('secondary')->icon('heroicon-o-pencil-square'),
                 Tables\Actions\Action::make('export')
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
                         // Fetch all extensions
                         $extensions = Extension::all([
-                            'name', 
-                            'extension_involvement', 
-                            'event_title', 
-                            'activity_date', 
+                            'name',
+                            'extension_involvement',
+                            'event_title',
+                            'activity_date',
                             'venue',
                             'date_end',
                         ]);
-    
+
                         // Create CSV writer
                         $csv = Writer::createFromFileObject(new SplTempFileObject());
-    
+
                         // Add CSV headers
                         $csv->insertOne(['Full Name', 'Type of Extension Involvement', 'Event Title', 'Activity Date', 'Venue', 'End Date']);
-    
+
                         // Add data rows
                         foreach ($extensions as $extension) {
                             $csv->insertOne([
@@ -222,7 +233,7 @@ class ExtensionResource extends Resource
                                 $extension->date_end
                             ]);
                         }
-    
+
                         // Return CSV 
                         return response()->streamDownload(function () use ($csv) {
                             echo $csv->toString();
@@ -234,7 +245,7 @@ class ExtensionResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-        }
+    }
 
     public static function getRelations(): array
     {
@@ -253,42 +264,62 @@ class ExtensionResource extends Resource
         ];
     }
     public static function getEloquentQuery(): Builder
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // If the user is an admin, return all records
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return parent::getEloquentQuery();
+        // If the user is an admin, return all records
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
+
+        // Build possible name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+
+        // New format: Lastname, F.M.
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
+
+        // Titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+        // Function to normalize names
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+        // Normalize each name variant
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+        // Create full REPLACE chain for SQL title-stripping
+        $replacer = 'name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
+
+        return parent::getEloquentQuery()
+            ->where(function ($query) use ($replacer, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $normalizedReversedInitials) {
+                $query->whereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+            });
+
     }
-
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-    // List of titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-    // Function to normalize names by removing titles and extra spaces
-    $normalizeName = function ($name) use ($titles) {
-        // Remove titles
-        $nameWithoutTitles = str_ireplace($titles, '', $name);
-        // Replace multiple spaces with a single space
-        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-    };
-
-    // Normalize names
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
-
-    return parent::getEloquentQuery()
-        ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-            $query->whereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                  ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                  ->orWhereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
-        });
-}
 
 
 
