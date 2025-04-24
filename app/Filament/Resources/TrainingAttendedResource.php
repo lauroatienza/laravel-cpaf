@@ -63,7 +63,7 @@ class TrainingAttendedResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'secondary';
     }
 
     public static function form(Form $form): Form
@@ -102,7 +102,8 @@ class TrainingAttendedResource extends Resource
                         'Symposium' => 'Symposium',
                         'Other' => 'Other',
                     ])
-                    ->live(),
+                    ->live()
+                    ->required(),
 
                 Forms\Components\TextInput::make('specific_title')
                     ->label('Specific Title')

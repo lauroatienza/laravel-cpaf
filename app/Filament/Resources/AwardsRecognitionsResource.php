@@ -174,13 +174,14 @@ class AwardsRecognitionsResource extends Resource
                         // Add data rows
                         foreach ($awardsrecognitions as $award) {
                             $csv->insertOne([
-                                $awardsrecognitions->award_type,
-                                $awardsrecognitions->award_title,
-                                $awardsrecognitions->name,
-                                $awardsrecognitions->granting_organization,
-                                $awardsrecognitions->date_awarded
+                                $award->award_type,
+                                $award->award_title,
+                                $award->name,
+                                $award->granting_organization,
+                                $award->date_awarded
                             ]);
                         }
+
 
                         // Return CSV
                         return response()->streamDownload(function () use ($csv) {
