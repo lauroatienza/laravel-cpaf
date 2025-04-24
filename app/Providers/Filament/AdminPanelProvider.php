@@ -30,13 +30,14 @@ class AdminPanelProvider extends PanelProvider
         return $panel
         
         
-            ->brandLogo(asset('final21.svg'))
+            ->brandLogo(asset('brand3 (1).svg'))
             ->brandLogoHeight('100%')
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
             ->path('admin')
-            
+            ->darkMode(false)
+
             ->login()
 
             
