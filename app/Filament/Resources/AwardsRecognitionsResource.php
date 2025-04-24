@@ -151,16 +151,13 @@ class AwardsRecognitionsResource extends Resource
                 Tables\Actions\DeleteAction::make(),
             ])
             ->headerActions([
-                /*Action::make('Export')
-                    ->modalButton('Download')
-                    ->color('gray'),*/
                 Tables\Actions\CreateAction::make()->label('New Awards/Recognitions')->icon('heroicon-o-pencil-square')->color('secondary'),
                 Tables\Actions\Action::make('export')
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
                         // Fetch all Awards/Recognitions
-                        $appointments = AwardsRecognitions::all([
+                        $awardsrecognitions = AwardsRecognitions::all([
                             'award_type',
                             'award_title',
                             'name',
@@ -175,13 +172,13 @@ class AwardsRecognitionsResource extends Resource
                         $csv->insertOne(['award_type', 'award_title', 'name', 'granting_organization', 'date_awarded']);
 
                         // Add data rows
-                        foreach ($appointments as $appointment) {
+                        foreach ($awardsrecognitions as $award) {
                             $csv->insertOne([
-                                $appointment->award_type,
-                                $appointment->award_title,
-                                $appointment->name,
-                                $appointment->granting_organization,
-                                $appointment->date_awarded
+                                $awardsrecognitions->award_type,
+                                $awardsrecognitions->award_title,
+                                $awardsrecognitions->name,
+                                $awardsrecognitions->granting_organization,
+                                $awardsrecognitions->date_awarded
                             ]);
                         }
 

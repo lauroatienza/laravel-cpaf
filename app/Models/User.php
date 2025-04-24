@@ -8,6 +8,8 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+
 
 class User extends Authenticatable implements HasAvatar
 {
@@ -38,7 +40,7 @@ class User extends Authenticatable implements HasAvatar
         $avatarColumn = config('filament-edit-profile.avatar_column', 'avatar_url');
         return $this->$avatarColumn ? Storage::url($this->$avatarColumn) : null;
     }
-    
+
 
 
     protected function casts(): array
@@ -66,7 +68,7 @@ class User extends Authenticatable implements HasAvatar
         if (in_array($this->systemrole, $validRoles)) {
             $this->syncRoles([$this->systemrole]); // Spatie syncRoles for single role
         } else {
-            \Log::error('Invalid systemrole', ['systemrole' => $this->systemrole]);
+            Log::error('Invalid systemrole', ['systemrole' => $this->systemrole]);
         }
     }
 
