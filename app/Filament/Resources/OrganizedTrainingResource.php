@@ -17,6 +17,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\ExtensionPrime;
+use Illuminate\Support\Str;
+use App\Models\Research;
 
 class OrganizedTrainingResource extends Resource
 {
@@ -160,56 +162,139 @@ class OrganizedTrainingResource extends Resource
                     TextInput::make('responses_very_satisfactory')->label('Number of Responses - Very Satisfactory')->numeric(),
                     TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
                 ]),
-
-            Section::make('Supporting Documents')
-                ->schema([
-                    TextInput::make('related_extension_program')
-                        ->label('Related Extension Program, if applicable')
-                        ->readOnly(),
+                
+                Section::make('Supporting Documents')
+                    ->schema([
+                        Select::make('related_extension_program')
+                            ->label('Related Extension Program, if applicable')
+                            ->options(function () {
+                                $user = Auth::user();
+                                if (!$user) {
+                                    return [];
+                                }
+                
+                                $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+                                $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+                                $simpleName = trim("{$user->name} {$user->last_name}");
+                
+                                $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                                $normalizeName = function ($name) use ($titles) {
+                                    return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
+                                };
+                
+                                $normalizedFullName = $normalizeName($fullName);
+                                $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+                                $normalizedSimpleName = $normalizeName($simpleName);
+                
+                                // Fetching related extension programs
+                                $relatedPrograms = \App\Models\ExtensionPrime::where(function ($query) use (
+                                    $normalizedFullName,
+                                    $normalizedFullNameReversed,
+                                    $normalizedSimpleName,
+                                    $user
+                                ) {
+                                    $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                                        ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
+                                })->get();
+                
+                                // Prepare options for the dropdown
+                                return $relatedPrograms->mapWithKeys(function ($program) {
+                                    return [$program->id => $program->project_article]; // You can adjust this based on the column name you want to display in the dropdown.
+                                });
+                            })
+                            ->searchable() // This makes the dropdown searchable
+                            ->placeholder('Select related extension program')
+                            ->required(),
+                
+                        FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
+                        FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
                         
+                        TextInput::make('documents_link')->label('Documents Link'),
+                
+                        TextInput::make('project_title')
+                            ->label('Project Title')
+                            ->default(function () {
+                                $user = Auth::user();
+                                if (!$user) {
+                                    return null;
+                                }
+                
+                                $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+                                $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+                                $simpleName = trim("{$user->name} {$user->last_name}");
+                
+                                $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                                $normalizeName = function ($name) use ($titles) {
+                                    return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
+                                };
+                
+                                $normalizedFullName = $normalizeName($fullName);
+                                $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+                                $normalizedSimpleName = $normalizeName($simpleName);
+                
+                                $match = \App\Models\ExtensionPrime::where(function ($query) use (
+                                    $normalizedFullName,
+                                    $normalizedFullNameReversed,
+                                    $normalizedSimpleName,
+                                    $user
+                                ) {
+                                    $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                                        ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
+                                })->first();
+                
+                                return $match?->project_article;
+                            })
+                            ->disabled(),
+                    ]),                
 
-                    FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
-                    FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
-
-                    TextInput::make('documents_link')->label('Documents Link'),
-
-                    TextInput::make('project_title')
-                        ->label('Project Title')
+            Section::make()
+                ->schema([
+                    TextInput::make('related_research_program')
+                        ->label('Related Research Program')
                         ->default(function () {
                             $user = Auth::user();
-                            if (!$user) {
-                                return null;
-                            }
 
-                            $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-                            $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-                            $simpleName = trim("{$user->name} {$user->last_name}");
+                            if (!$user) return null;
 
-                            $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-                            $normalizeName = function ($name) use ($titles) {
-                                return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
+                            // Normalize helper
+                            $normalize = function ($value) {
+                                $value = strtolower($value);
+                                $value = str_replace(
+                                    ['Dr.', 'Prof.', 'Project Leader', 'Program Leader', 'Study Leaders', 'Project Staff', 'Associate', 'Assistant', 'Program experts', 'Site Coordinator', 'Operations Manager', 'Specialist', 'Part-time URA', 'RAs', 'Enumerators', '(', ')', ':', ';', '-', '\n'],
+                                    '',
+                                    $value
+                                );
+                                $value = preg_replace('/[^a-zA-Z\s]/', '', $value); // remove any remaining symbols
+                                return trim(preg_replace('/\s+/', ' ', $value)); // collapse multiple spaces
                             };
 
-                            $normalizedFullName = $normalizeName($fullName);
-                            $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-                            $normalizedSimpleName = $normalizeName($simpleName);
+                            // Build variations of the user's name
+                            $fullName = $normalize("{$user->first_name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+                            $fullNameReversed = $normalize("{$user->last_name}, {$user->first_name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+                            $simpleName = $normalize("{$user->first_name} {$user->last_name}");
 
-                            $match = \App\Models\ExtensionPrime::where(function ($query) use (
-                                $normalizedFullName,
-                                $normalizedFullNameReversed,
-                                $normalizedSimpleName,
-                                $user
-                            ) {
-                                $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                                    ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                                    ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
-                                    ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
-                            })->first();
+                            // Match against all research name_of_researchers
+                            $match = Research::get()->first(function ($research) use ($normalize, $fullName, $fullNameReversed, $simpleName) {
+                            $field = $research->name_of_researchers ?? '';
 
-                            return $match?->project_article;
-                        })
-                        ->disabled(),
-                ])
+                            // Flatten and normalize the field
+                            $cleaned = $normalize($field);
+
+                            return Str::contains($cleaned, $fullName)
+                                || Str::contains($cleaned, $fullNameReversed)
+                                || Str::contains($cleaned, $simpleName);
+                        });
+
+                        return $match?->title ?? null;
+                    })
+                    ->disabled()
+                    ->columnSpan('full')
+            ])
+            
         ]);
 }
 
@@ -275,7 +360,6 @@ public static function table(Tables\Table $table): Tables\Table
         ->selectable(); 
 }
 
-    
     
     public static function exportData($records, $format)
     {
