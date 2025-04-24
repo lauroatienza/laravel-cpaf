@@ -30,13 +30,14 @@ class AdminPanelProvider extends PanelProvider
         return $panel
         
         
-            ->brandLogo(asset('final21.svg'))
+            ->brandLogo(asset('brand3 (1).svg'))
             ->brandLogoHeight('100%')
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
             ->path('admin')
-            
+            ->darkMode(false)
+
             ->login()
 
             
@@ -46,13 +47,12 @@ class AdminPanelProvider extends PanelProvider
                     ->setIcon('heroicon-o-user')
                     ->shouldShowAvatarForm(
                         value: true,
-                         
                         directory: 'avatars' // Corrected path
                     )
             ])
             
             ->colors([
-               'secondary' => [
+    'secondary' => [
     50 => '240, 255, 250',  // Lightest green
     100 => '204, 255, 229',
     200 => '153, 255, 204',

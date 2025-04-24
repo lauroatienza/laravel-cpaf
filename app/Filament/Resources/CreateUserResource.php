@@ -133,6 +133,9 @@ class CreateUserResource extends Resource
                             $record->syncRoles([$state]); // ✅ Sync Spatie role
                         }
                     }),
+
+                TextInput::make('research_interests')->label('Research Interests'),
+                TextInput::make('fields_of_specialization')->label('Fields of Specialization'), 
                 TextInput::make('rank_')->label('Rank'),
                 TextInput::make('sg')->label('SG'),
                 TextInput::make('s')->label('S'),
@@ -185,6 +188,14 @@ class CreateUserResource extends Resource
                     ->searchable(),
                 BadgeColumn::make('rank_')
                     ->label('Rank')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('research_interests')
+                    ->label('Research Interests')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('fields_of_specialization')
+                    ->label('Fields of Specialization')
                     ->sortable()
                     ->searchable(),
 

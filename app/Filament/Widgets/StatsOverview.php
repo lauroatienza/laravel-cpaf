@@ -60,7 +60,7 @@ class StatsOverview extends BaseWidget
                     ->chart([1, 3, 5])
                     ->color('success'),
 
-                Stat::make('Total: Chapter in Book', ChapterInBook::count())
+                Stat::make('Total: Publications', ChapterInBook::count())
                     ->chart([1, 3, 5])
                     ->color('success'),
 
