@@ -78,26 +78,8 @@ class OrganizedTrainingResource extends Resource
                             ->required()
                             ->reactive(), // 👈 Make reactive
 
-<<<<<<< HEAD
-                Section::make('Trainee Details')
-                    ->schema([
-                        TextInput::make('total_trainees')->label('Total Trainees')->numeric()->required(),
-                        TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric()->helperText('Formula: Total Number of Trainees X Weight Value,
-                                    Weight Value: (<8 hours = 0.5; 8 hours (1 day) = 1, 3-4 days = 1.5; 5 days or (discontinued)'),
-                        TextInput::make('training_hours')->label('Training Hours')->numeric()->required(),
-                        Select::make('funding_source')->label('Funding Source')
-                            ->options([
-                                'UP Entity' => 'UP Entity',
-                                'RP Government Entity or Public Sector Entity' => 'RP Government Entity or Public Sector Entity',
-                                'RP Private Sector Entity' => 'RP Private Sector Entity',
-                                'Foreign or Non-Domestic Entity' => 'Foreign or Non-Domestic Entity',
-                            ])
-                            ->required(),
-                    ]),
-=======
                         TextInput::make('middle_name')
                             ->label('Middle Name'),
->>>>>>> 5a422a2af9763ea87ade2a3ee2caa073108a3185
 
                         TextInput::make('last_name')
                             ->label('Last Name')

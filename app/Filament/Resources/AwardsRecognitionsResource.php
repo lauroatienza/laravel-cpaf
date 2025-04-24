@@ -7,6 +7,8 @@ use App\Models\AwardsRecognitions;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
@@ -143,13 +145,87 @@ class AwardsRecognitionsResource extends Resource
                     ->placeholder('N/A'),
             ])
             ->filters([
-                // Add filters if needed
+
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Create Awards/Recognitions')
+                    ->color('secondary')
+                    ->icon('heroicon-o-pencil-square'),
+            
+                Action::make('exportAll')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn (array $data) => static::exportData(\App\Models\AwardsRecognitions::all(), $data['format'])),
+            ])
+            ->bulkActions([
+                BulkAction::make('Delete Selected')
+                    ->label('Delete Selected')
+                    ->icon('heroicon-o-trash') 
+                    ->color('danger')
+                    ->action(fn ($records) => $records->each->delete()),
+            
+                BulkAction::make('exportBulk')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
+            ])            
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ]);
     }
+
+    public static function exportData($records, $format)
+    {
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records selected for export.');
+        }
+    
+        if ($format === 'csv') {
+            return response()->streamDownload(function () use ($records) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['Type of Award', 'Title of Paper or Award', 'Name(s) of Awardee/Recipient', 'Granting Organization', 'Date Awarded']);
+    
+                foreach ($records as $record) {
+                    fputcsv($handle, [
+                        $record->award_type,
+                        $record->award_title,
+                        $record->name,
+                        $record->granting_organization,
+                        $record->date_awarded,
+                    ]);
+                }
+    
+                fclose($handle);
+            }, 'awards_and_recognitions.csv');
+        }
+    
+        if ($format === 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.awards_recognitions', ['records' => $records]);
+            return response()->streamDownload(fn () => print($pdf->output()), 'awards_and_recognitions.pdf');
+        }
+    }
+    
 
     public static function getRelations(): array
     {
