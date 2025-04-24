@@ -13,6 +13,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -201,10 +202,25 @@ class CreateUserResource extends Resource
                     ->label('Fields of Specialization')
                     ->sortable()
                     ->searchable(),
-
             ])
             ->filters([
-                //
+                SelectFilter::make('staff')
+                    ->label('User Classification')
+                    ->options([
+                        'admin' => 'Admin',
+                        'faculty' => 'Faculty',
+                        'representative' => 'REPS',
+                    ])
+                    ->query(function ($query, $data) {
+                        if ($data['value'] === 'admin') {
+                            return $query->where('staff', 'admin');
+                        } elseif ($data['value'] === 'faculty') {
+                            return $query->where('staff', 'faculty');
+                        } elseif ($data['value'] === 'representative') {
+                            return $query->where('staff', 'representative');
+                        }
+                        return $query;
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->color('secondary'),

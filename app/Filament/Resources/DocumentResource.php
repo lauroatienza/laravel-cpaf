@@ -129,7 +129,15 @@ class DocumentResource extends Resource
                     ->sortable(),
                     
                 TextColumn::make('extension_title')
-                    ->searchable(),
+                    ->searchable()
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 30) {
+                            return null;
+                        }
+                        return $state;
+                    })
+                    ->formatStateUsing(fn ($state) => strlen($state) > 30 ? substr($state, 0, 30).'...' : $state),
                     
                 TextColumn::make('partner_stakeholder')
                     ->searchable(),
@@ -189,7 +197,6 @@ class DocumentResource extends Resource
                 Tables\Actions\DeleteAction::make(),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
                 Tables\Actions\Action::make('export')
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -317,6 +324,7 @@ class DocumentResource extends Resource
             'index' => Pages\ListDocuments::route('/'),
             'create' => Pages\CreateDocument::route('/create'),
             'edit' => Pages\EditDocument::route('/{record}/edit'),
+            'view' => Pages\ViewDocument::route('/{record}'),
         ];
     }
 }

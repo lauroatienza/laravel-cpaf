@@ -61,16 +61,6 @@ class ExtensionPrime extends Model
         'created_at',
         'updated_at',
     ];
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (Auth::check()) {
-                $model->id_no = auth()->id();
-            }
-        });
-    }
 
     public function extension()
     {

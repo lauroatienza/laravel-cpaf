@@ -13,6 +13,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Columns\BadgeColumn;
@@ -173,7 +175,7 @@ class ExtensionPrimaryResource extends Resource
                 TextColumn::make('start_date')->label('Start Date')->sortable(),
                 TextColumn::make('end_date')->label('End Date')->sortable(),
                 TextColumn::make('extension_date')->label('Extension Date')->sortable(),
-
+    
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->color(fn ($state) => match ($state) {
@@ -181,33 +183,133 @@ class ExtensionPrimaryResource extends Resource
                         'On-going' => 'warning',
                         default => 'secondary',
                     }),
-
+    
                 TextColumn::make('title_of_extension_program')->label('Title of Extension Program')->sortable()->searchable(),
                 TextColumn::make('objectives')->label('Objectives')->limit(50)->searchable(),
                 TextColumn::make('expected_output')->label('Expected Output/Scope of Work')->limit(50)->searchable(),
-
+    
                 TextColumn::make('original_timeframe_months')->label('Number of Months')->sortable(),
-
+    
                 TextColumn::make('researcher_names')->label('Name of Researcher/s')->sortable()->searchable(),
                 TextColumn::make('project_leader')->label('Project Leader')->sortable()->searchable(),
-
+    
                 TextColumn::make('source_of_funding')->label('Source of Funding')->sortable(),
                 TextColumn::make('budget')->label('Budget')->sortable(),
                 TextColumn::make('type_of_funding')->label('Type of Funding')->sortable(),
                 TextColumn::make('fund_code')->label('Fund Code')->sortable(),
-
+    
                 TextColumn::make('pbms_upload_status')->label('PBMS Uploading Status')->sortable(),
             ])
             ->filters([])
+    
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Create Extension Program')
+                    ->color('secondary')
+                    ->icon('heroicon-o-pencil-square'),
+    
+                Action::make('exportAll')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn (array $data) => static::exportData(ExtensionPrime::all(), $data['format'])),
+            ])
+    
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
+    
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
+    
+                BulkAction::make('exportBulk')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
             ]);
     }
+    
+    public static function exportData($records, $format)
+    {
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records selected for export.');
+        }
+    
+        if ($format === 'csv') {
+            return response()->streamDownload(function () use ($records) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, [
+                    'ID No.',
+                    'Contributing Unit',
+                    'Start Date',
+                    'End Date',
+                    'Extension Date',
+                    'Status',
+                    'Title of Extension Program',
+                    'Objectives',
+                    'Expected Output/Scope of Work',
+                    'Number of Months',
+                    'Name of Researchers',
+                    'Project Leader',
+                    'Source of Funding',
+                    'Budget',
+                    'Type of Funding',
+                    'Fund Code',
+                    'PBMS Upload Status',
+                ]);
+    
+                foreach ($records as $record) {
+                    fputcsv($handle, [
+                        $record->id_no,
+                        $record->contributing_unit,
+                        $record->start_date,
+                        $record->end_date,
+                        $record->extension_date,
+                        $record->status,
+                        $record->title_of_extension_program,
+                        $record->objectives,
+                        $record->expected_output,
+                        $record->original_timeframe_months,
+                        $record->researcher_names,
+                        $record->project_leader,
+                        $record->source_of_funding,
+                        $record->budget,
+                        $record->type_of_funding,
+                        $record->fund_code,
+                        $record->pbms_upload_status,
+                    ]);
+                }
+    
+                fclose($handle);
+            }, 'extension_programs.csv');
+        }
+    
+        if ($format === 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.extensionprimary', ['records' => $records]);
+            return response()->streamDownload(fn () => print($pdf->output()), 'extensionprimary.pdf');
+        }
+    }
+    
 
     public static function getRelations(): array
     {
