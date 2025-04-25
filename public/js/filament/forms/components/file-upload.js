@@ -42,20 +42,20 @@ ${p.outerHTML}${_}
 
 filepond/dist/filepond.esm.js:
   (*!
-   * FilePond 4.32.7
+   * FilePond 4.30.6
    * Licensed under MIT, https://opensource.org/licenses/MIT/
    * Please visit https://pqina.nl/filepond/ for details.
    *)
 
 cropperjs/dist/cropper.esm.js:
   (*!
-   * Cropper.js v1.6.2
+   * Cropper.js v1.6.1
    * https://fengyuanchen.github.io/cropperjs
    *
    * Copyright 2015-present Chen Fengyuan
    * Released under the MIT license
    *
-   * Date: 2024-04-21T07:43:05.335Z
+   * Date: 2023-09-17T03:44:19.860Z
    *)
 
 filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.esm.js:

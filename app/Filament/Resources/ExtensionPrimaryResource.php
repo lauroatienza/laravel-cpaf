@@ -11,6 +11,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
@@ -32,38 +33,70 @@ class ExtensionPrimaryResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $user = Auth::user();
-    
-        // If the user is an admin, show the total count
+
         if ($user->hasRole(['super-admin', 'admin'])) {
             return static::$model::count();
         }
-    
-        // Define the correct column name for names in the extension table
-        $nameColumn = 'researcher_names'; // Adjust this column name if needed
-    
-        // Build possible name formats
+        
         $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
         $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
         $simpleName = trim("{$user->name} {$user->last_name}");
-    
-        // List of titles to remove
+        
+        // Format: Lapitan, A.V.
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
+        
         $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-    
-        // Function to normalize names by removing titles
-        $normalizeName = function ($name) use ($titles) {
-            return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
+        
+        // Normalize function
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+        
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+        
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
         };
-    
-        // Normalize names
+        
+        // Normalized name variations
         $normalizedFullName = $normalizeName($fullName);
         $normalizedFullNameReversed = $normalizeName($fullNameReversed);
         $normalizedSimpleName = $normalizeName($simpleName);
-    
-        return static::$model::where(function ($query) use ($nameColumn, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-            $query->whereRaw("LOWER(REPLACE($nameColumn, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                  ->orWhereRaw("LOWER(REPLACE($nameColumn, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                  ->orWhereRaw("LOWER(REPLACE($nameColumn, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+        
+        // SQL-friendly column name replacements
+        $columns = ['researcher_names', 'project_leader'];
+        $replacers = [];
+        
+        foreach ($columns as $column) {
+            $colReplacer = $column;
+            foreach ($titles as $title) {
+                $colReplacer = "REPLACE($colReplacer, '$title', '')";
+            }
+            $replacers[$column] = $colReplacer;
+        }
+        
+        // Main query with all normalized formats and both columns
+        return static::$model::where(function ($query) use (
+            $replacers,
+            $normalizedFullName,
+            $normalizedFullNameReversed,
+            $normalizedSimpleName,
+            $normalizedReversedInitials
+        ) {
+            foreach ($replacers as $column => $replacer) {
+                $query->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                      ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                      ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                      ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+            }
         })->count();
+        
     }
     public static function getNavigationBadgeColor(): string
     {
@@ -290,5 +323,69 @@ class ExtensionPrimaryResource extends Resource
             'create' => Pages\CreateExtensionPrimary::route('/create'),
             'edit' => Pages\EditExtensionPrimary::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $user = Auth::user();
+
+// If the user is an admin, return all records
+if ($user->hasRole(['super-admin', 'admin'])) {
+    return parent::getEloquentQuery();
+}
+
+// Build name variations
+$fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+$fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+$simpleName = trim("{$user->name} {$user->last_name}");
+$initials = strtoupper(substr($user->name, 0, 1)) . '.';
+if ($user->middle_name) {
+    $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+}
+$reversedInitialsName = "{$user->last_name}, {$initials}";
+
+// Titles to strip from name columns
+$titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+// Function to normalize names
+$normalizeName = function ($name) use ($titles, $user) {
+    $nameWithoutTitles = str_ireplace($titles, '', $name);
+    if ($user->middle_name) {
+        $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+    }
+    return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+};
+
+// Normalize name formats
+$normalizedFullName = $normalizeName($fullName);
+$normalizedFullNameReversed = $normalizeName($fullNameReversed);
+$normalizedSimpleName = $normalizeName($simpleName);
+$normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+// Columns to check
+$columns = ['researcher_names', 'project_leader'];
+
+// Build dynamic title-free column expressions
+$replacers = [];
+foreach ($columns as $column) {
+    $cleanedColumn = $column;
+    foreach ($titles as $title) {
+        $cleanedColumn = "REPLACE($cleanedColumn, '$title', '')";
+    }
+    $replacers[$column] = $cleanedColumn;
+}
+
+// Apply filters to both columns with all name formats
+return parent::getEloquentQuery()
+    ->where(function ($query) use ($replacers, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $normalizedReversedInitials) {
+        foreach ($replacers as $columnExpr) {
+            $query->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                  ->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                  ->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                  ->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+        }
+    });
+
     }
 }

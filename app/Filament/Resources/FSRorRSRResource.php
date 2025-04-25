@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FSRorRSRResource\Pages;
 use App\Models\FSRorRSR;
 use Filament\Forms;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Resource;
@@ -24,7 +25,7 @@ class FSRorRSRResource extends Resource
 {
     protected static ?string $model = FSRorRSR::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationGroup = 'Other Documents'; 
+    protected static ?string $navigationGroup = 'Other Documents';
     protected static ?string $navigationLabel = 'FSR/RSR Attachments';
     protected static ?string $modelLabel = 'FSR/RSR Attachments';
     protected static ?int $navigationSort = 4;
@@ -34,11 +35,25 @@ class FSRorRSRResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()->where('user_id', Auth::id());
+        
+
+        // Admins see everything
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
     }
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::where('user_id', Auth::id())->count();
+        $user = Auth::user();
+
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
+        }
+
+        // Only return records belonging to the logged-in user
+        return static::$model::where('user_id', $user->id)->count();
+
     }
 
     public static function getNavigationBadgeColor(): string
@@ -102,7 +117,7 @@ class FSRorRSRResource extends Resource
                     ->label('Name')
                     ->sortable()
                     ->searchable()
-                    ->getStateUsing(fn ($record) => $record->user->name . ' ' . $record->user->last_name),
+                    ->getStateUsing(fn($record) => $record->user->name . ' ' . $record->user->last_name),
 
                 TextColumn::make('year')
                     ->sortable()
@@ -116,7 +131,7 @@ class FSRorRSRResource extends Resource
                     ->label('Uploaded File')
                     ->sortable()
                     ->searchable()
-                    ->url(fn ($record) => asset('storage/' . $record->file_upload), true)
+                    ->url(fn($record) => asset('storage/' . $record->file_upload), true)
                     ->color('primary'),
             ])
             ->filters([])
@@ -207,4 +222,7 @@ class FSRorRSRResource extends Resource
             'edit' => Pages\EditFSRorRSR::route('/{record}/edit'),
         ];
     }
+
 }
+
+
