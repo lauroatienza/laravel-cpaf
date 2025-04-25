@@ -25,6 +25,13 @@ class TrainingAttendedResource extends Resource
 
     protected static ?string $navigationGroup = 'Accomplishments';
 
+    public static function getPluralLabel(): string
+{
+    return 'Training Attended';
+}
+
+
+
     public static function getNavigationBadge(): ?string
 {
     $user = Auth::user();
@@ -70,10 +77,6 @@ class TrainingAttendedResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('training_title')
-                    ->label('Attended Training/Seminar/Workshop/Conference Title')
-                    ->required(),
-
                 Forms\Components\TextInput::make('full_name')
                     ->label('Full Name')
                     ->required(),
@@ -107,12 +110,15 @@ class TrainingAttendedResource extends Resource
 
                 Forms\Components\TextInput::make('specific_title')
                     ->label('Specific Title')
-                    ->visible(fn ($get) => $get('category') === 'Other'),
+                    ->placeholder('Specify title')
+                    ->required(),
 
                 Forms\Components\Textarea::make('highlights')
                     ->label('Highlights of Event')
                     ->rows(4)
-                    ->nullable(),
+                    ->nullable()
+                    ->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you')
+                    ->required(),
 
                 Forms\Components\Radio::make('has_gender_component')
                     ->label('Has Gender Component?')
@@ -133,24 +139,14 @@ class TrainingAttendedResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('training_title')
-                    ->label('Training Title')
-                    ->sortable()
-                    ->searchable()
-                    ->limit(20) // Only show first 20 characters
-                    ->tooltip(fn ($state) => $state),
-
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Full Name')
                     ->searchable()
-                    ->limit(20) // Only show first 20 characters
+                    ->limit(20)
                     ->tooltip(fn ($state) => $state),
 
                 Tables\Columns\TextColumn::make('unit_center')
                     ->label('Unit/Center')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('category')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('start_date')
@@ -160,6 +156,22 @@ class TrainingAttendedResource extends Resource
                 Tables\Columns\TextColumn::make('end_date')
                     ->date()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('category')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('training_title')
+                    ->label('Specific Title')
+                    ->sortable()
+                    ->searchable()
+                    ->limit(20)
+                    ->tooltip(fn ($state) => $state),
+
+                Tables\Columns\TextColumn::make('highlights')
+                    ->label('Highlights of Event')
+                    ->sortable()
+                    ->limit(20)
+                    ->tooltip(fn ($state) => $state),
 
                 Tables\Columns\BooleanColumn::make('has_gender_component')
                     ->label('Gender Component'),
