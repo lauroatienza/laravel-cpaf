@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Models\Publication;
 use App\Filament\Resources\PublicationResource\Pages;
+use Illuminate\Support\Str;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables;
@@ -23,7 +24,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use League\Csv\Writer;
 use SplTempFileObject;
-
+use Illuminate\Support\Facades\Auth;
 
 class PublicationResource extends Resource
 {
@@ -32,6 +33,35 @@ class PublicationResource extends Resource
     protected static ?string $navigationGroup = 'Accomplishments';
     protected static ?string $label = 'Publication';
     protected static ?int $navigationSort = 1;
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->where('user_id', Auth::id());
+
+
+        // Admins see everything
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $user = Auth::user();
+
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
+        }
+
+        // Only return records belonging to the logged-in user
+        return static::$model::where('user_id', $user->id)->count();
+
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'secondary';
+    }
 
     public static function form(Form $form): Form
     {
@@ -78,11 +108,15 @@ class PublicationResource extends Resource
                         ])->required(),
                         Textarea::make('editors')->label('Name of Editor(s)')->placeholder("Separate editors' names with semi-colons.")->helperText('Example: John Doe; Jane Smith; Alex Johnson')->rows(3),
                         TextInput::make('volume_issue')->label('Volume No. and Issue No.')->placeholder('Enter volume and issue number')->maxLength(255),
-                        DatePicker::make('date_published')->label('Date Published or Accepted for Publication')->placeholder('Select date')->required(),
-                        DatePicker::make('conference_start_date')->label('Conference START Date')->placeholder('Select start date'),
-                        DatePicker::make('conference_end_date')->label('Conference END Date')->placeholder('Select end date'),
+                        Grid::make(3)->schema([
+                            DatePicker::make('date_published')->label('Date Published or Accepted for Publication')->placeholder('Select date')->required(),
+                            DatePicker::make('conference_start_date')->label('Conference START Date')->placeholder('Select start date'),
+                            DatePicker::make('conference_end_date')->label('Conference END Date')->placeholder('Select end date'),
+                        ]),
                         Textarea::make('conference_venue')->label('Conference Venue, City, and Country')->placeholder('Enter location details')->rows(3),
-                        TextInput::make('doi_or_link')->label('DOI if any or Link')->placeholder('Specify DOI or URL')->maxLength(255),
+                        //TextInput::make('doi_or_link')->label('DOI if any or Link')->placeholder('Specify DOI or URL')->limit(20),
+                        TextInput::make('doi_or_link')->label('DOI or Link')->placeholder('Specify DOI or URL')->url()->required(),
+
                         Select::make('isbn_issn')->label('ISBN or ISSN')->options([
                             'ISBN' => 'ISBN',
                             'ISSN' => 'ISSN']),
@@ -110,10 +144,11 @@ class PublicationResource extends Resource
 
                 Section::make('Section 5 of 5')
                     ->schema([
-                        Placeholder::make('awards_instruction')->label('Awards Instruction')->helperText('Do not leave the box blank.\nPlease put "NA" if you have no answers. Thank you!')->columnSpan('full'),
+                        Placeholder::make('awards_instruction')->label('Awards Instruction')->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')->columnSpan('full'),
                         Radio::make('received_award')->label('Received Award')->options(['YES' => 'YES', 'NO' => 'NO'])->required(),
                         Textarea::make('award_title')->label('Award Title')->placeholder('Enter the award title')->nullable(),
-                        DatePicker::make('date_awarded')->label('Date Awarded')->nullable(),
+                        Grid::make(6)->schema([DatePicker::make('date_awarded')->label('Date Awarded')->nullable()
+                    ]),
                     ]),
             ]);
     }
@@ -143,7 +178,20 @@ class PublicationResource extends Resource
             TextColumn::make('conference_start_date')->label('Conference Start')->date()->limit(20),
             TextColumn::make('conference_end_date')->label('Conference End')->date(),
             TextColumn::make('conference_venue')->label('Conference Venue')->searchable()->limit(20)->tooltip(fn ($record) => $record->conference_venue),
-            TextColumn::make('doi_or_link')->label('DOI/Link')->url('doi_or_link')->openUrlInNewTab()->limit(20),
+
+            //COPY DOI OR LINK TO OTHER LINKS FROM SECTION 4
+            TextColumn::make('doi_or_link')
+                ->label('DOI / Link')
+                ->url(fn ($record) =>
+                    str_starts_with($record->doi_or_link, 'http')
+                        ? $record->doi_or_link
+                        : 'https://doi.org/' . ltrim($record->doi_or_link, '/')
+                )
+                ->openUrlInNewTab()
+                ->limit(30)
+                ->searchable(),
+            //
+
             TextColumn::make('isbn_issn')->label('ISBN/ISSN')->searchable(),
 
             // SECTION 3 of 5: Indexing and Citations
@@ -157,8 +205,27 @@ class PublicationResource extends Resource
             TextColumn::make('citations')->label('Citations')->sortable()->limit(20)->tooltip(fn ($record) => $record->citations),
 
             // SECTION 4 of 5: Proofs
-            TextColumn::make('pdf_proof_1')->label('PDF Proof 1')->url('pdf_proof_1')->openUrlInNewTab()->sortable()->limit(20),
-            TextColumn::make('pdf_proof_2')->label('PDF Proof 2')->url('pdf_proof_2')->openUrlInNewTab()->sortable()->limit(20),
+            TextColumn::make('pdf_proof_1')
+                ->label('PDF Proof 1')
+                ->url(fn ($record) =>
+                    str_starts_with($record->pdf_proof_1, 'http')
+                        ? $record->pdf_proof_1
+                        : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/')
+                )
+                ->openUrlInNewTab()
+                ->limit(30)
+                ->searchable(),
+
+                TextColumn::make('pdf_proof_2')
+                ->label('PDF Proof 2')
+                ->url(fn ($record) =>
+                    str_starts_with($record->pdf_proof_2, 'http')
+                        ? $record->pdf_proof_2
+                        : 'https://drive.google.com/' . ltrim($record->pdf_proof_2, '/')
+                )
+                ->openUrlInNewTab()
+                ->limit(30)
+                ->searchable(),
 
             // SECTION 5 of 5: Awards
             TextColumn::make('received_award')->label('Received Award')->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),

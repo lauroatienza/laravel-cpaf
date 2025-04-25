@@ -159,8 +159,6 @@ class AwardsRecognitionsResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->limit(20)
-                ->tooltip(fn ($state) => $state),
-
                     ->tooltip(fn($state) => $state),
 
                 TextColumn::make('date_awarded')
