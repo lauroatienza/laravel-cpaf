@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\PublicationResource\Pages;
 
 use App\Filament\Resources\PublicationResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Filament\Actions;
 
 class ListPublications extends ListRecords
 {
@@ -15,5 +17,10 @@ class ListPublications extends ListRecords
         return [
            // Actions\CreateAction::make(),
         ];
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()->where('user_id', Auth::id());
     }
 }

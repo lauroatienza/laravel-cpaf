@@ -4,18 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ExtensionPrime extends Model
 {
     use HasFactory;
 
-    protected $table = 'extension'; // Ensures it uses the correct table name
+    protected $table = 'extension'; 
     protected $primaryKey = 'id_no';
 
     
-    public $incrementing = false; // If id_no is not auto-incrementing, disable it
+    public $incrementing = true; 
 
-    protected $keyType = 'string'; // Change to 'int' if id_no is an integer
+    protected $keyType = 'int'; 
 
     public $timestamps = false;
     protected $fillable = [
@@ -60,15 +61,11 @@ class ExtensionPrime extends Model
         'created_at',
         'updated_at',
     ];
-    protected static function boot()
+
+    public function extension()
     {
-        parent::boot();
-    
-        static::creating(function ($model) {
-            if (auth()->check()) {
-                $model->id_no = auth()->id();
-                
-            }
-        });
+        return $this->belongsTo(ExtensionPrime::class, 'extension_id');
     }
+
+
 }

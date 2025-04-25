@@ -9,6 +9,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use app\Filament\Resources\UserResource\Pages\Auth\Register;
+use app\Filament\Pages\Auth\Logincustom;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -29,13 +30,14 @@ class AdminPanelProvider extends PanelProvider
         return $panel
         
         
-            ->brandLogo(asset('final2.svg'))
+            ->brandLogo(asset('brand3 (1).svg'))
             ->brandLogoHeight('100%')
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
             ->path('admin')
-            
+            ->darkMode(false)
+            ->databaseNotifications()
             ->login()
 
             
@@ -45,13 +47,12 @@ class AdminPanelProvider extends PanelProvider
                     ->setIcon('heroicon-o-user')
                     ->shouldShowAvatarForm(
                         value: true,
-                         
                         directory: 'avatars' // Corrected path
                     )
             ])
             
             ->colors([
-               'secondary' => [
+    'secondary' => [
     50 => '240, 255, 250',  // Lightest green
     100 => '204, 255, 229',
     200 => '153, 255, 204',
