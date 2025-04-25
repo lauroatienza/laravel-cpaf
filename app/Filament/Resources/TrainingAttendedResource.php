@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -169,14 +170,61 @@ class TrainingAttendedResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Create Training Attended')
+                    ->color('secondary')
+                    ->icon('heroicon-o-pencil-square'),
+    
+                Action::make('exportAll') // This should work now
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn () => static::exportData(TrainingAttended::all())),
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('exportBulk')
+                        ->label('Export Selected')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => static::exportData($records)),
+                ]),
             ]);
+    }
+    
+    public static function exportData($records)
+    {
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records selected for export.');
+        }
+    
+        return response()->streamDownload(function () use ($records) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'Training Title', 'Full Name', 'Unit/Center', 'Category', 'Start Date', 'End Date', 'Gender Component', 'Total Hours'
+            ]);
+    
+            foreach ($records as $record) {
+                fputcsv($handle, [
+                    $record->training_title,
+                    $record->full_name,
+                    $record->unit_center,
+                    $record->category,
+                    $record->start_date,
+                    $record->end_date,
+                    $record->has_gender_component ? 'Yes' : 'No',
+                    $record->total_hours,
+                ]);
+            }
+    
+            fclose($handle);
+        }, 'training_attended_data.csv');
     }
 
     public static function getRelations(): array
