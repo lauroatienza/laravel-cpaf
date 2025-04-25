@@ -165,7 +165,7 @@ class CreateUserResource extends Resource
                     ->sortable()
                     ->searchable(),
                 BadgeColumn::make('staff')
-                    ->label('Position')
+                    ->label('Classification')
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(fn(string $state): string => ucfirst(strtolower($state))),
