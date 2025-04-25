@@ -8,4 +8,9 @@ use Filament\Resources\Pages\ViewRecord;
 class CreateUser extends ViewRecord
 {
     protected static string $resource = CreateUserResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
