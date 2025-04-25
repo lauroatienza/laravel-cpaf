@@ -15,7 +15,11 @@ return [
     */ 'themes' => [
         'filament.admin' => resource_path('css/filament/admin/theme.css'),
     ],
-
+    'notifications' => [
+    'driver' => 'database',
+    'enabled' => true, // Laravel's default notification channel
+    // 'driver' => 'filament' // This is for frontend UI notifications
+],
     'broadcasting' => [
 
         // 'echo' => [

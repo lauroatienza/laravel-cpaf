@@ -10,11 +10,6 @@ class EditPublication extends EditRecord
 {
     protected static string $resource = PublicationResource::class;
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
-
     protected function getHeaderActions(): array
     {
         return [
