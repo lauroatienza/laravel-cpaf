@@ -13,12 +13,11 @@ class FSRorRSR extends Model
         "user_id",
         "year",
         "sem",
-        "file_upload",
+        "drive_link",
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
 }
