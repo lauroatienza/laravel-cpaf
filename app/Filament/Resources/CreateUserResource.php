@@ -56,6 +56,7 @@ class CreateUserResource extends Resource
     public static function form(Form $form): Form
     {
 
+
         return $form
             ->schema([
                 Section::make('Primary Information')
@@ -117,6 +118,41 @@ class CreateUserResource extends Resource
                     ])
                     ->default('faculty')
                     ->required(),
+            Select::make('employment_status')->label('Employment Status')
+                ->options([
+                    'Part-Time' => 'Part-Time',
+                    'Temporary' => 'Temporary',
+                    'Full Time' => 'Full Time',
+                ])
+                ->required(),
+            TextInput::make('designation')->label('Designation/Position')
+            ->required(),
+            Select::make('unit')
+                ->label('Unit')
+                ->options([
+                    'DO' => 'DO',
+                    'KMO' => 'KMO',
+                    'IGRD' => 'IGRD',
+                    'CISC' => 'CISC',
+                    'CSPPS' => 'CSPPS',
+                ])
+                ->required(),
+            Select::make('ms_phd')
+                ->label('Highest Degree Attained')
+                ->options([
+                    'BS' => 'BS',
+                    'MS' => 'MS',
+                    'PhD' => 'PhD',
+                ])
+                ->required(),
+            Select::make('staff')
+                ->options([
+                    'admin' => 'Admin',
+                    'faculty' => 'Faculty',
+                    'reps' => 'REPS',
+                ])
+                ->default('faculty')
+                ->required(),
 
                 Select::make('systemrole')
                     ->label('User Role')
@@ -147,8 +183,8 @@ class CreateUserResource extends Resource
                 TextInput::make('date_hired')->label('Date Hired in CPAf'),
                 TextInput::make('contact_no')->label('Contact Number'),
             ]);
-            
-            
+
+
     }
 
     public static function table(Table $table): Table
@@ -162,8 +198,6 @@ class CreateUserResource extends Resource
                     ->getStateUsing(fn($record) => "{$record->name} {$record->last_name}")
                     ->searchable(['name', 'last_name']) // ← Just pass array directly
                     ->sortable(),
-
-
                 TextColumn::make('unit')
                     ->label('Unit')
                     ->sortable()
@@ -233,11 +267,17 @@ class CreateUserResource extends Resource
                     ->color('danger')
                     ->label('Delete Permanently'),
 
+                Tables\Actions\EditAction::make()
+                ->color('secondary'),
+
+
             ])
             ->headerActions([
 
                 Tables\Actions\CreateAction::make()->label('Create New User')
                     ->color('secondary')->icon('heroicon-o-pencil-square'),
+
+
                 Action::make('Export')
                     ->form([
                         Forms\Components\Select::make('role')
@@ -246,6 +286,7 @@ class CreateUserResource extends Resource
                                 'admin' => 'Admin',
                                 'faculty' => 'Faculty',
                                 'representative' => 'REPS',
+                                'reps' => 'REPS',
                             ])
                             ->required(),
                     ])
@@ -255,11 +296,14 @@ class CreateUserResource extends Resource
                         $users = User::where('staff', $data['role'])->get();
                         $pdf = Pdf::loadView('exports.faculty', compact('users'));
 
+
                         return response()->streamDownload(
                             fn() => print ($pdf->output()),
                             "{$data['role']}_list.pdf"
                         );
                     }),
+
+
 
 
             ])
