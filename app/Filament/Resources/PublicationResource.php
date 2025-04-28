@@ -101,8 +101,9 @@ class PublicationResource extends Resource
                                 $set('other_type', null);
                             }
                         }),
+
                     TextInput::make('other_type')
-                        ->label('Please specify')
+                        ->label('Other (please specify)')
                         ->maxLength(255)
                         ->visible(fn (Get $get) => $get('type_of_publication') === 'Other')
                         ->afterStateUpdated(function (Set $set, $state, Get $get) {
@@ -110,8 +111,6 @@ class PublicationResource extends Resource
                                 $set('type_of_publication', $state);
                             }
                         }),
-
-
 
 
 
