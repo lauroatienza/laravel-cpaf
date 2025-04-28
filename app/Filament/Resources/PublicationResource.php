@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Auth;
 class PublicationResource extends Resource
 {
     protected static ?string $model = Publication::class;
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
     protected static ?string $navigationGroup = 'Accomplishments';
     protected static ?string $label = 'Publication';
     protected static ?int $navigationSort = 1;
@@ -64,7 +64,7 @@ class PublicationResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary';
+        return 'primary';
     }
 
     public static function form(Form $form): Form

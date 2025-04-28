@@ -52,13 +52,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             
             ->colors([
-    'secondary' => [
-        500 => '23, 91, 64',   // #175b40
-],
+        'primary' => '#2b3189',
+            'secondary' => '#175b40',
 
-'primary' => [
-    500 => '48, 53, 139',  // #30358b
-],
             ])
             ->favicon(asset('cpaflogo.png'))// add favicon
             ->databaseNotifications()

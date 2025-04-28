@@ -91,16 +91,16 @@ class ExtensionPrimaryResource extends Resource
         ) {
             foreach ($replacers as $column => $replacer) {
                 $query->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                      ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                      ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
-                      ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
             }
         })->count();
         
     }
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'primary';
     }    
         public static function form(Forms\Form $form): Forms\Form
     {
