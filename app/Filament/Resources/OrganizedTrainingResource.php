@@ -77,7 +77,7 @@ class OrganizedTrainingResource extends Resource
                     Grid::make(3)->schema([
                         TextInput::make('first_name')
                             ->label('First Name')
-                            ->required()
+                            //->required()
                             ->reactive(), // 👈 Make reactive
 
                         TextInput::make('middle_name')
@@ -85,7 +85,7 @@ class OrganizedTrainingResource extends Resource
 
                         TextInput::make('last_name')
                             ->label('Last Name')
-                            ->required()
+                            //->required()
                             ->reactive() // 👈 Make reactive
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 $firstName = $get('first_name');
@@ -140,9 +140,9 @@ class OrganizedTrainingResource extends Resource
 
             Section::make('Trainee Details')
                 ->schema([
-                    TextInput::make('total_trainees')->label('Total Trainees')->numeric()->required(),
+                    TextInput::make('total_trainees')->label('Total Trainees')->numeric(),//->required(),
                     TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(),
-                    TextInput::make('training_hours')->label('Training Hours')->numeric()->required(),
+                    TextInput::make('training_hours')->label('Training Hours')->numeric(),//->required(),
                     Select::make('funding_source')->label('Funding Source')
                         ->options([
                             'UP Entity' => 'UP Entity',
@@ -150,7 +150,7 @@ class OrganizedTrainingResource extends Resource
                             'RP Private Sector Entity' => 'RP Private Sector Entity',
                             'Foreign or Non-Domestic Entity' => 'Foreign or Non-Domestic Entity',
                         ])
-                        ->required(),
+                        //->required(),
                 ]),
 
             Section::make('Survey Responses')
@@ -205,8 +205,8 @@ class OrganizedTrainingResource extends Resource
                                 });
                             })
                             ->searchable() // This makes the dropdown searchable
-                            ->placeholder('Select related extension program')
-                            ->required(),
+                            ->placeholder('Select related extension program'),
+                            //->required(),
                 
                         FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
                         FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
