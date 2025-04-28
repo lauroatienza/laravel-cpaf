@@ -11,6 +11,12 @@ class CreateExtensionPrimary extends CreateRecord
     protected static string $resource = ExtensionPrimaryResource::class;
     public function getTitle(): string
     {
-        return 'Add Extension'; // Change this to your desired title
+        return 'Add Extension';
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
 }
