@@ -5,10 +5,13 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Blade;
 use App\Models\User;
+use Filament\Facades\Filament;
 use App\Models\Research;
 use App\Observers\UserObserver;
 use App\Observers\ResearchObserver;
 use Illuminate\View\View; // Make sure this is imported
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,5 +34,7 @@ class AppServiceProvider extends ServiceProvider
         );
         User::observe(UserObserver::class);
         Research::observe(ResearchObserver::class);
+        
+
     }
 }

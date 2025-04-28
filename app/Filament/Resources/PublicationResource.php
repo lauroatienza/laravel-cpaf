@@ -22,6 +22,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ViewAction;
 use League\Csv\Writer;
 use SplTempFileObject;
 use Illuminate\Support\Facades\Auth;
@@ -29,21 +30,24 @@ use Illuminate\Support\Facades\Auth;
 class PublicationResource extends Resource
 {
     protected static ?string $model = Publication::class;
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
     protected static ?string $navigationGroup = 'Accomplishments';
     protected static ?string $label = 'Publication';
     protected static ?int $navigationSort = 1;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
-    {
-        return parent::getEloquentQuery()->where('user_id', Auth::id());
+{
+    $user = Auth::user();
 
-
-        // Admins see everything
-        if ($user->hasRole(['super-admin', 'admin'])) {
-            return parent::getEloquentQuery();
-        }
+    // Admins see everything
+    if ($user && $user->hasRole(['super-admin', 'admin'])) {
+        return parent::getEloquentQuery();
     }
+
+    // Non-admins see only their own
+    return parent::getEloquentQuery()->where('user_id', $user?->id);
+}
+
 
     public static function getNavigationBadge(): ?string
     {
@@ -60,7 +64,7 @@ class PublicationResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary';
+        return 'primary';
     }
 
     public static function form(Form $form): Form
@@ -147,7 +151,7 @@ class PublicationResource extends Resource
                         Placeholder::make('awards_instruction')->label('Awards Instruction')->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')->columnSpan('full'),
                         Radio::make('received_award')->label('Received Award')->options(['YES' => 'YES', 'NO' => 'NO'])->required(),
                         Textarea::make('award_title')->label('Award Title')->placeholder('Enter the award title')->nullable(),
-                        Grid::make(6)->schema([DatePicker::make('date_awarded')->label('Date Awarded')->nullable()
+                        Grid::make(5)->schema([DatePicker::make('date_awarded')->label('Date Awarded')->nullable()
                     ]),
                     ]),
             ]);
@@ -234,6 +238,7 @@ class PublicationResource extends Resource
         ])
         ->filters([])
         ->actions([
+            ViewAction::make(),
             EditAction::make(),
             DeleteAction::make(),
         ])
