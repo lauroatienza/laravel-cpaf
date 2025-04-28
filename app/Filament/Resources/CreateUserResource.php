@@ -147,8 +147,8 @@ class CreateUserResource extends Resource
                 TextInput::make('date_hired')->label('Date Hired in CPAf'),
                 TextInput::make('contact_no')->label('Contact Number'),
             ]);
-            
-            
+
+
     }
 
     public static function table(Table $table): Table
@@ -163,7 +163,7 @@ class CreateUserResource extends Resource
                     ->searchable(['name', 'last_name']) // ← Just pass array directly
                     ->sortable(),
 
-
+                    
                 TextColumn::make('unit')
                     ->label('Unit')
                     ->sortable()
@@ -202,6 +202,7 @@ class CreateUserResource extends Resource
                     ->label('Fields of Specialization')
                     ->sortable()
                     ->searchable(),
+                
             ])
             ->filters([
                 SelectFilter::make('staff')

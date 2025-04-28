@@ -31,7 +31,8 @@ class AdminPanelProvider extends PanelProvider
         
         
             ->brandLogo(asset('brand3 (1).svg'))
-            ->brandLogoHeight('100%')
+            ->brandLogoHeight('100px')
+            
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
