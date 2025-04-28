@@ -1,20 +1,13 @@
-/* Change sidebar title and text color */
-.filament-sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+.fi-topbar > nav {
+    background-color: inherit !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
-.filament-sidebar-header img {
-    height: 40px; /* Adjust the size of your logo */
-}
-
-/* Change button color */
-.filament-button {
-    background-color: #3b82f6 !important; /* Blue color */
-    color: white !important;
-}
-
-.filament-button:hover {
-    background-color: #2563eb !important; /* Darker blue on hover */
+.fi-sidebar-header {
+    background-color: inherit !important;
+    box-shadow: none !important;
+    outline: none !important;
 }

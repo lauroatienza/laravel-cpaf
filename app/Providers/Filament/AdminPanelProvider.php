@@ -31,7 +31,8 @@ class AdminPanelProvider extends PanelProvider
         
         
             ->brandLogo(asset('brand3 (1).svg'))
-            ->brandLogoHeight('100%')
+            ->brandLogoHeight('100px')
+            
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
@@ -52,33 +53,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             
             ->colors([
-    'secondary' => [
-    50 => '240, 255, 250',  // Lightest green
-    100 => '204, 255, 229',
-    200 => '153, 255, 204',
-    300 => '102, 255, 178',
-    400 => '51, 255, 153',
-    500 => '26, 230, 128',  // **Main Light Green**
-    600 => '20, 200, 110',
-    700 => '15, 170, 95',
-    800 => '10, 140, 80',
-    900 => '5, 110, 65',
-    950 => '3, 80, 50',  // Darkest green
-],
+        'primary' => '#2b3189',
+            'secondary' => '#175b40',
 
-'primary' => [
-    50 => '235, 248, 255',  // Lightest blue
-    100 => '200, 235, 255',
-    200 => '170, 220, 255',
-    300 => '140, 205, 255',
-    400 => '110, 190, 255',
-    500 => '80, 175, 255',  // **Main Light Blue**
-    600 => '60, 160, 240',
-    700 => '50, 145, 225',
-    800 => '40, 130, 210',
-    900 => '30, 115, 195',
-    950 => '20, 100, 180',  // Darkest blue
-],
             ])
             ->favicon(asset('cpaflogo.png'))// add favicon
             ->databaseNotifications()
@@ -108,8 +85,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->brandName('CPAf Intranet');  
-            //->brandLogo(asset('public\cpaflogo.png'))
-            //->favicon(asset('public/favicon.ico'))
+            
         }
     
 }

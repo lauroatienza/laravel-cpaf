@@ -51,7 +51,7 @@ class CreateUserResource extends Resource
     }
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary';
+        return 'primary';
     }
     public static function form(Form $form): Form
     {
@@ -236,6 +236,7 @@ class CreateUserResource extends Resource
                     ->label('Fields of Specialization')
                     ->sortable()
                     ->searchable(),
+                
             ])
             ->filters([
                 SelectFilter::make('staff')
