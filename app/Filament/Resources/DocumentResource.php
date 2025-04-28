@@ -56,7 +56,8 @@ class DocumentResource extends Resource
                     'Memorandum of Agreement (MOA)' => 'Memorandum of Agreement (MOA)',
                     'Memorandum of Understanding (MOU)' => 'Memorandum of Understanding (MOU)',
                 ])
-                ->required(),
+                ->required()
+                ->label('Type of Partnership Agreement'),
 
             TextInput::make('extension_title')->required(),
             TextInput::make('partner_stakeholder')->required(),
@@ -123,13 +124,16 @@ class DocumentResource extends Resource
             ->columns([
                 TextColumn::make('contributing_unit')
                     ->sortable()
+                    ->label('Contributing Unit')
                     ->searchable(),
                     
                 BadgeColumn::make('partnership_type')
+                    ->label('Partnership Type')
                     ->sortable(),
                     
                 TextColumn::make('extension_title')
                     ->searchable()
+                    ->label('Extension Title')
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
                         if (strlen($state) <= 30) {
@@ -140,6 +144,7 @@ class DocumentResource extends Resource
                     ->formatStateUsing(fn ($state) => strlen($state) > 30 ? substr($state, 0, 30).'...' : $state),
                     
                 TextColumn::make('partner_stakeholder')
+                    ->label('Partner Stakeholder')
                     ->searchable(),
                     
                 TextColumn::make('start_date')

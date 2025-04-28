@@ -13,6 +13,7 @@ use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class StatsOverview extends BaseWidget
@@ -23,20 +24,15 @@ class StatsOverview extends BaseWidget
     public $startDate;
     public $endDate;
 
-    public function mount($startDate = null, $endDate = null)
-    {
-        // Assign passed date range or default to start of year and current date
-        $this->startDate = $startDate ? Carbon::parse($startDate) : Carbon::now()->startOfYear();
-        $this->endDate = $endDate ? Carbon::parse($endDate) : Carbon::now();
-    }
 
     protected function getStats(): array
     {
         $user = Auth::user();
 
         // Convert the dates into Carbon instances
-        $startDate = $this->startDate;
-        $endDate = $this->endDate;
+        $startDate = Carbon::parse($this->filters['StartDate'] ?? now()->startOfYear());
+        $endDate = Carbon::parse($this->filters['EndDate'] ?? now());
+
 
         \Log::info('Start Date: ' . $startDate);
         \Log::info('End Date: ' . $endDate);
