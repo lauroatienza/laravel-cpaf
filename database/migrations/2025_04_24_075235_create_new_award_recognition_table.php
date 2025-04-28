@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('f_s_ror_r_s_r_s', function (Blueprint $table) {
+        Schema::create('new_award_recognition', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable();
-            $table->string('year');
-            $table->string('sem');
-            $table->string('file_upload');
             $table->timestamps();
+            $table->string('award_type')->nullable();
+            $table->string('award_title')->nullable();
+            $table->string('name')->nullable();
+            $table->string('granting_organization')->nullable();
+            $table->string('date_awarded')->nullable();
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('f_s_ror_r_s_r_s');
+        Schema::dropIfExists('new_award_recognition');
     }
 };

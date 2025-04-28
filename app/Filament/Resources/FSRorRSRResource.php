@@ -88,24 +88,17 @@ class FSRorRSRResource extends Resource
                     ->options([
                         '1st' => '1st Semester',
                         '2nd' => '2nd Semester',
+                        "Inter" => 'Inter Semester',
                     ])
                     ->required(),
 
-                FileUpload::make('file_upload')
-                    ->label('Upload File')
-                    ->directory('fsr_rsr_files')
-                    ->acceptedFileTypes([
-                        'application/vnd.ms-excel',
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                        'application/pdf', 
-                        'image/jpeg', 
-                        'image/png', 
-                        'text/csv', 
-                        'application/csv' 
-                    ])
-                    ->maxSize(102400) 
+
+                TextInput::make('drive_link')
+                    ->label('Google Drive Shared Link')
+                    ->placeholder('https://drive.google.com/...')
+                    ->url()
                     ->required()
-                    ->visibility('public'),
+                    ->maxLength(500),
             ]);
     }
 
@@ -127,12 +120,14 @@ class FSRorRSRResource extends Resource
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('file_upload')
-                    ->label('Uploaded File')
-                    ->sortable()
-                    ->searchable()
-                    ->url(fn($record) => asset('storage/' . $record->file_upload), true)
+                TextColumn::make('drive_link')
+                    ->label('File')
+                    ->formatStateUsing(fn ($record) => $record->drive_link ? '🔗 View File' : 'None')
+                    ->url(fn ($record) => $record->drive_link, true)
+                    ->openUrlInNewTab()
                     ->color('primary'),
+                
+                
             ])
             ->filters([])
             ->headerActions([
@@ -160,10 +155,14 @@ class FSRorRSRResource extends Resource
                 DeleteAction::make(),
             ])
             ->bulkActions([
-                BulkAction::make('Delete Selected')
+                Tables\Actions\BulkAction::make('delete')
+                    ->label('Delete Selected')
+                    ->icon('heroicon-o-trash')
+                    ->requiresConfirmation()
+                    ->color('danger')
                     ->action(fn ($records) => $records->each->delete()),
-
-                BulkAction::make('exportBulk')
+            
+                Tables\Actions\BulkAction::make('exportBulk')
                     ->label('Export Selected')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->requiresConfirmation()
@@ -178,6 +177,7 @@ class FSRorRSRResource extends Resource
                     ])
                     ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
             ])
+            
             ->selectable(); 
     }
 
@@ -222,7 +222,6 @@ class FSRorRSRResource extends Resource
             'edit' => Pages\EditFSRorRSR::route('/{record}/edit'),
         ];
     }
-
 }
 
 
