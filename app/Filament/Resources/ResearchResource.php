@@ -297,14 +297,7 @@ class ResearchResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('exportBulk')
-                        ->label('Export Selected')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->requiresConfirmation()
-                        ->action(fn ($records) => static::exportData($records)),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
