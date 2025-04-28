@@ -13,7 +13,7 @@ class ListResearch extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label("Add Research Project"),
+            // Actions\CreateAction::make()->label("Add Research Project"),
         ];
     }
 }

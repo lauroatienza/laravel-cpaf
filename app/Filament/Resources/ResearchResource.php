@@ -20,6 +20,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\IconColumn;
 use Illuminate\Database\Eloquent\Builder;
@@ -280,17 +281,68 @@ class ResearchResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Create Research Project')
+                    ->color('secondary')
+                    ->icon('heroicon-o-pencil-square'),
+                    
+                Action::make('exportAll')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn () => static::exportData(Research::all())),
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('exportBulk')
+                        ->label('Export Selected')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => static::exportData($records)),
                 ]),
             ]);
     }
 
+    public static function exportData($records)
+    {
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records selected for export.');
+        }
+    
+        return response()->streamDownload(function () use ($records) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'Contributing Unit', 'Start Date', 'End Date', 'Status', 'Title', 'Objectives', 'Expected Output', 'Name of Researchers', 'Project Leader', 'Source of Funding', 'Category of Source of Funding', 'Budget', 'Type of Funding', 'SDG Theme', 'Upload Status'
+            ]);
+    
+            foreach ($records as $record) {
+                fputcsv($handle, [
+                    $record->contributing_unit,
+                    $record->start_date,
+                    $record->end_date,
+                    $record->status,
+                    $record->title,
+                    $record->objectives,
+                    $record->expected_output,
+                    $record->name_of_researchers,
+                    $record->project_leader,
+                    $record->source_funding,
+                    $record->category_source_funding,
+                    $record->budget,
+                    $record->type_funding,
+                    $record->sdg_theme,
+                    $record->pbms_upload_status
+                ]);
+            }
+    
+            fclose($handle);
+        }, 'research_data.csv');
+    }
 
     public static function getRelations(): array
     {
