@@ -91,7 +91,7 @@ class ExtensionResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary';
+        return 'primary';
     }
 
     public static function form(Form $form): Form

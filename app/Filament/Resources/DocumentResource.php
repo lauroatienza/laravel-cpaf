@@ -36,7 +36,7 @@ class DocumentResource extends Resource
     
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'primary'; 
     }
     
     public static function form(Forms\Form $form): Forms\Form
