@@ -31,7 +31,7 @@ class OrganizedTrainingResource extends Resource
 
     public static function getNavigationBadge(): ?string
 {
-    
+
     $user = Auth::user();
 
     // If the user is an admin, show the total count
@@ -67,7 +67,7 @@ class OrganizedTrainingResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'primary'; 
+        return 'primary';
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -164,7 +164,7 @@ class OrganizedTrainingResource extends Resource
                     TextInput::make('responses_very_satisfactory')->label('Number of Responses - Very Satisfactory')->numeric(),
                     TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
                 ]),
-                
+
                 Section::make('Supporting Documents')
                     ->schema([
                         Select::make('related_extension_program')
@@ -174,20 +174,20 @@ class OrganizedTrainingResource extends Resource
                                 if (!$user) {
                                     return [];
                                 }
-                
+
                                 $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
                                 $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
                                 $simpleName = trim("{$user->name} {$user->last_name}");
-                
+
                                 $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
                                 $normalizeName = function ($name) use ($titles) {
                                     return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
                                 };
-                
+
                                 $normalizedFullName = $normalizeName($fullName);
                                 $normalizedFullNameReversed = $normalizeName($fullNameReversed);
                                 $normalizedSimpleName = $normalizeName($simpleName);
-                
+
                                 // Fetching related extension programs
                                 $relatedPrograms = \App\Models\ExtensionPrime::where(function ($query) use (
                                     $normalizedFullName,
@@ -200,7 +200,7 @@ class OrganizedTrainingResource extends Resource
                                         ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
                                         ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
                                 })->get();
-                
+
                                 // Prepare options for the dropdown
                                 return $relatedPrograms->mapWithKeys(function ($program) {
                                     return [$program->id => $program->project_article]; // You can adjust this based on the column name you want to display in the dropdown.
@@ -209,12 +209,12 @@ class OrganizedTrainingResource extends Resource
                             ->searchable() // This makes the dropdown searchable
                             ->placeholder('Select related extension program'),
                             //->required(),
-                
-                        FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
-                        FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
-                        
+
+                        TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
+                        TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)'),
+
                         TextInput::make('documents_link')->label('Documents Link'),
-                
+
                         TextInput::make('project_title')
                             ->label('Project Title')
                             ->default(function () {
@@ -222,20 +222,20 @@ class OrganizedTrainingResource extends Resource
                                 if (!$user) {
                                     return null;
                                 }
-                
+
                                 $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
                                 $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
                                 $simpleName = trim("{$user->name} {$user->last_name}");
-                
+
                                 $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
                                 $normalizeName = function ($name) use ($titles) {
                                     return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
                                 };
-                
+
                                 $normalizedFullName = $normalizeName($fullName);
                                 $normalizedFullNameReversed = $normalizeName($fullNameReversed);
                                 $normalizedSimpleName = $normalizeName($simpleName);
-                
+
                                 $match = \App\Models\ExtensionPrime::where(function ($query) use (
                                     $normalizedFullName,
                                     $normalizedFullNameReversed,
@@ -247,11 +247,11 @@ class OrganizedTrainingResource extends Resource
                                         ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
                                         ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
                                 })->first();
-                
+
                                 return $match?->project_article;
                             })
                             ->disabled(),
-                    ]),                
+                    ]),
 
             Section::make()
                 ->schema([
@@ -296,7 +296,7 @@ class OrganizedTrainingResource extends Resource
                     ->disabled()
                     ->columnSpan('full')
             ])
-            
+
         ]);
 }
 
@@ -321,7 +321,7 @@ public static function table(Tables\Table $table): Tables\Table
                 ->label('Create Organized Training')
                 ->color('secondary')
                 ->icon('heroicon-o-pencil-square'),
-        
+
             Tables\Actions\Action::make('exportAll')
                 ->label('Export')
                 ->icon('heroicon-o-arrow-down-tray')
@@ -336,9 +336,9 @@ public static function table(Tables\Table $table): Tables\Table
                 ])
                 ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
         ])
-        
+
         ->actions([
-            
+            Actions\ViewAction::make(),
             Actions\EditAction::make(),
             Actions\DeleteAction::make(),
         ])
@@ -359,21 +359,21 @@ public static function table(Tables\Table $table): Tables\Table
                 ])
                 ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
         ])
-        ->selectable(); 
+        ->selectable();
 }
 
-    
+
     public static function exportData($records, $format)
     {
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-    
+
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, ['First Name', 'Last Name', 'Title', 'Start Date', 'End Date']);
-    
+
                 foreach ($records as $record) {
                     fputcsv($handle, [
                         $record->first_name,
@@ -383,16 +383,16 @@ public static function table(Tables\Table $table): Tables\Table
                         $record->end_date,
                     ]);
                 }
-    
+
                 fclose($handle);
             }, 'organized_trainings.csv');
         }
-    
+
         if ($format === 'pdf') {
             $pdf = Pdf::loadView('exports.organized_trainings', ['records' => $records]);
             return response()->streamDownload(fn () => print($pdf->output()), 'organized_trainings.pdf');
         }
-    }    
+    }
 
 
     public static function getRelations(): array
@@ -443,6 +443,6 @@ public static function table(Tables\Table $table): Tables\Table
         });
 }
 
-    
-    
+
+
 }
