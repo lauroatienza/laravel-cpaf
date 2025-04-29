@@ -165,8 +165,8 @@ class PublicationResource extends Resource
                 Section::make('Section 4 of 5')
                     ->schema([
                         Placeholder::make('proofs_instruction')->label('Proofs Instruction')->helperText('Kindly input the link to the proofs below. Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')->columnSpan('full'),
-                        TextInput::make('pdf_proof_1')->label('PDF Image File 1 (Proof of Publication)')->placeholder('Input the link to the proof')->required(),
-                        TextInput::make('pdf_proof_2')->label('PDF Image File 2 (Proof of Utilization)')->placeholder('Input the link to the proof (if applicable)'),
+                        TextInput::make('pdf_proof_1')->label('Proof of Publication 1')->placeholder('Input the Google Drive link to the proof')->required(),
+                        TextInput::make('pdf_proof_2')->label('Proof of Publication 2')->placeholder('Input the Google Drive link to the proof (if applicable)'),
                     ]),
 
                 Section::make('Section 5 of 5')
