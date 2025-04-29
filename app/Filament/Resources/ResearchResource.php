@@ -87,11 +87,7 @@ class ResearchResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-<<<<<<< HEAD
-        return 'secondary'; 
-=======
         return 'primary';
->>>>>>> 92a50f948bc030917fafa486adce5c182a0c12dc
     }
 
     public static function form(Form $form): Form
@@ -135,12 +131,8 @@ class ResearchResource extends Resource
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
-<<<<<<< HEAD
-                ])->required(),
-=======
                 ])->default('no'),
 
->>>>>>> 92a50f948bc030917fafa486adce5c182a0c12dc
 
 
                 RichEditor::make('objectives')->columnSpan('full')->nullable(),
@@ -230,18 +222,12 @@ class ResearchResource extends Resource
                 TextColumn::make('title')->label('Title')
                     ->sortable()->searchable()->limit(18)
                     ->tooltip(fn ($state) => $state),
-<<<<<<< HEAD
-                    TextColumn::make('objectives')->label('Objectives')
+                TextColumn::make('objectives')->label('Objectives')
                     ->sortable()
                     ->searchable()
                     ->limit(18)
                     ->html()
                     ->tooltip(fn ($state) => strip_tags($state)),
-=======
-                TextColumn::make('objectives')->label('Objectives')
-                ->sortable()->searchable()->limit(18)
-                ->tooltip(fn ($state) => $state),
->>>>>>> 92a50f948bc030917fafa486adce5c182a0c12dc
                 TextColumn::make('expected_output')->label('Expected Output')
                     ->sortable()
                     ->searchable()
