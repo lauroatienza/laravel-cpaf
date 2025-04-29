@@ -213,7 +213,7 @@ class OrganizedTrainingResource extends Resource
                         TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
                         TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)'),
 
-                        TextInput::make('documents_link')->label('Documents Link'),
+                        TextInput::make('relevant_documents')->label('Documents Link'),
 
                         TextInput::make('project_title')
                             ->label('Project Title')
