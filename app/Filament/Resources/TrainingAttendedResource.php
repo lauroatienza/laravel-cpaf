@@ -12,7 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+
+
+
 
 class TrainingAttendedResource extends Resource
 {
@@ -25,6 +29,13 @@ class TrainingAttendedResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationGroup = 'Accomplishments';
+
+    public static function getPluralLabel(): string
+{
+    return 'Training Attended';
+}
+
+
 
     public static function getNavigationBadge(): ?string
 {
@@ -64,17 +75,13 @@ class TrainingAttendedResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary';
+        return 'primary';
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('training_title')
-                    ->label('Attended Training/Seminar/Workshop/Conference Title')
-                    ->required(),
-
                 Forms\Components\TextInput::make('full_name')
                     ->label('Full Name')
                     ->required(),
@@ -104,16 +111,36 @@ class TrainingAttendedResource extends Resource
                         'Other' => 'Other',
                     ])
                     ->live()
-                    ->required(),
+                    ->required()
+                    ->afterStateUpdated(function (Set $set, $state) {
+                        if ($state !== 'Other') {
+                            $set('other_category', null);
+                        }
+                    }),
 
-                Forms\Components\TextInput::make('specific_title')
+                Forms\Components\TextInput::make('other_category')
+                    ->label('Please specify')
+                    ->maxLength(255)
+                    ->visible(fn (Get $get) => $get('category') === 'Other')
+                    ->afterStateUpdated(function (Set $set, $state, Get $get) {
+                        if ($get('category') === 'Other') {
+                            $set('category', $state);
+                        }
+                    }),
+
+
+
+                Forms\Components\TextInput::make('training_title')
                     ->label('Specific Title')
-                    ->visible(fn ($get) => $get('category') === 'Other'),
+                    ->placeholder('Specify title')
+                    ->required(),
 
                 Forms\Components\Textarea::make('highlights')
                     ->label('Highlights of Event')
                     ->rows(4)
-                    ->nullable(),
+                    ->nullable()
+                    ->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you')
+                    ->required(),
 
                 Forms\Components\Radio::make('has_gender_component')
                     ->label('Has Gender Component?')
@@ -126,7 +153,8 @@ class TrainingAttendedResource extends Resource
                 Forms\Components\TextInput::make('total_hours')
                     ->label('Total Hrs. Spent')
                     ->numeric()
-                    ->required(),
+                    ->helperText('Please put "0" if you have no answer. Thank you')
+                    ->nullable(),
             ]);
     }
 
@@ -134,25 +162,16 @@ class TrainingAttendedResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('training_title')
-                    ->label('Training Title')
-                    ->sortable()
-                    ->searchable()
-                    ->limit(20) // Only show first 20 characters
-                    ->tooltip(fn ($state) => $state),
-
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Full Name')
                     ->searchable()
-                    ->limit(20) // Only show first 20 characters
+                    ->limit(20)
                     ->tooltip(fn ($state) => $state),
 
                 Tables\Columns\TextColumn::make('unit_center')
                     ->label('Unit/Center')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('category')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
 
                 Tables\Columns\TextColumn::make('start_date')
                     ->date()
@@ -162,11 +181,30 @@ class TrainingAttendedResource extends Resource
                     ->date()
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('category')
+                    ->label('Category')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('training_title')
+                    ->label('Specific Title')
+                    ->sortable()
+                    ->searchable()
+                    ->limit(20)
+                    ->tooltip(fn ($state) => $state),
+
+                Tables\Columns\TextColumn::make('highlights')
+                    ->label('Highlights of Event')
+                    ->sortable()
+                    ->limit(20)
+                    ->tooltip(fn ($state) => $state),
+
                 Tables\Columns\BooleanColumn::make('has_gender_component')
-                    ->label('Gender Component'),
+                    ->label('Gender Component')
+                    ->alignCenter(),
 
                 Tables\Columns\TextColumn::make('total_hours')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => rtrim(rtrim(number_format($state, 1, '.', ''), '0'), '.')),
             ])
             ->filters([
                 //
@@ -176,7 +214,7 @@ class TrainingAttendedResource extends Resource
                     ->label('Create Training Attended')
                     ->color('secondary')
                     ->icon('heroicon-o-pencil-square'),
-    
+
                 Action::make('exportAll') // This should work now
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -198,32 +236,32 @@ class TrainingAttendedResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function exportData($records)
     {
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-    
+
         return response()->streamDownload(function () use ($records) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
-                'Training Title', 'Full Name', 'Unit/Center', 'Category', 'Start Date', 'End Date', 'Gender Component', 'Total Hours'
+                'Full Name', 'Unit/Center', 'Start Date', 'End Date', 'Category', 'Training Title', 'Gender Component', 'Total Hours'
             ]);
-    
+
             foreach ($records as $record) {
                 fputcsv($handle, [
-                    $record->training_title,
                     $record->full_name,
                     $record->unit_center,
-                    $record->category,
                     $record->start_date,
                     $record->end_date,
+                    $record->category,
+                    $record->training_title,// "Specific title"
                     $record->has_gender_component ? 'Yes' : 'No',
                     $record->total_hours,
                 ]);
             }
-    
+
             fclose($handle);
         }, 'training_attended_data.csv');
     }
@@ -246,28 +284,27 @@ class TrainingAttendedResource extends Resource
 {
     $user = Auth::user();
 
-    // If the user is an admin, return all records
     if ($user->hasRole(['super-admin', 'admin'])) {
         return parent::getEloquentQuery();
     }
 
-    // Build possible name formats
+
     $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
     $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
     $simpleName = trim("{$user->name} {$user->last_name}");
 
-    // List of titles to remove
+
     $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
 
-    // Function to normalize names by removing titles and extra spaces
+
     $normalizeName = function ($name) use ($titles) {
-        // Remove titles
+
         $nameWithoutTitles = str_ireplace($titles, '', $name);
-        // Replace multiple spaces with a single space
+
         return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
     };
 
-    // Normalize names
+
     $normalizedFullName = $normalizeName($fullName);
     $normalizedFullNameReversed = $normalizeName($fullNameReversed);
     $normalizedSimpleName = $normalizeName($simpleName);

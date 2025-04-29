@@ -58,7 +58,7 @@ class FSRorRSRResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary';
+        return 'primary';
     }
 
     public static function resolveQueryUsing($query)
@@ -113,10 +113,14 @@ class FSRorRSRResource extends Resource
                     ->getStateUsing(fn($record) => $record->user->name . ' ' . $record->user->last_name),
 
                 TextColumn::make('year')
+                    ->badge()
+                    ->color('info')
                     ->sortable()
                     ->searchable(),
 
                 TextColumn::make('sem')
+                    ->badge()
+                    ->color('success')
                     ->sortable()
                     ->searchable(),
 

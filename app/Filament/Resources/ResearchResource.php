@@ -87,7 +87,7 @@ class ResearchResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'primary'; 
     }
 
     public static function form(Form $form): Form
@@ -133,7 +133,7 @@ class ResearchResource extends Resource
                     'no' => 'No',
                 ])->required()->default('no'),
 
-                
+    
 
                 RichEditor::make('objectives')->columnSpan('full'),
                 RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output'),
@@ -297,14 +297,7 @@ class ResearchResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('exportBulk')
-                        ->label('Export Selected')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->requiresConfirmation()
-                        ->action(fn ($records) => static::exportData($records)),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

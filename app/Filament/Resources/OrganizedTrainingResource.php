@@ -23,7 +23,7 @@ use App\Models\Research;
 class OrganizedTrainingResource extends Resource
 {
     protected static ?string $model = OrganizedTraining::class;
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
     protected static ?string $navigationGroup = 'Accomplishments';
     protected static ?string $navigationLabel = 'Training Organized';
     protected static ?int $navigationSort = 2;
@@ -31,6 +31,7 @@ class OrganizedTrainingResource extends Resource
 
     public static function getNavigationBadge(): ?string
 {
+    
     $user = Auth::user();
 
     // If the user is an admin, show the total count
@@ -58,14 +59,15 @@ class OrganizedTrainingResource extends Resource
 
     return static::$model::where(function ($query) use ($user, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
         $query->whereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(middle_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedFullName%"])
-              ->orWhereRaw("LOWER(CONCAT(TRIM(last_name), ', ', TRIM(first_name), ' ', TRIM(middle_name))) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-              ->orWhereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        ->orWhereRaw("LOWER(CONCAT(TRIM(last_name), ', ', TRIM(first_name), ' ', TRIM(middle_name))) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+        ->orWhereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
     })->count();
+
 }
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary'; 
+        return 'primary'; 
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -77,7 +79,7 @@ class OrganizedTrainingResource extends Resource
                     Grid::make(3)->schema([
                         TextInput::make('first_name')
                             ->label('First Name')
-                            ->required()
+                            //->required()
                             ->reactive(), // 👈 Make reactive
 
                         TextInput::make('middle_name')
@@ -85,7 +87,7 @@ class OrganizedTrainingResource extends Resource
 
                         TextInput::make('last_name')
                             ->label('Last Name')
-                            ->required()
+                            //->required()
                             ->reactive() // 👈 Make reactive
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 $firstName = $get('first_name');
@@ -140,9 +142,9 @@ class OrganizedTrainingResource extends Resource
 
             Section::make('Trainee Details')
                 ->schema([
-                    TextInput::make('total_trainees')->label('Total Trainees')->numeric()->required(),
-                    TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric()->helperText('Formula: Total Number of Trainees X Weight Value')->helperText('Weight Value: (<8 hours = 0.5; 8 hours (1 day) = 1, 3-4 days = 1.5; 5 days or (discontinued)'),
-                    TextInput::make('training_hours')->label('Training Hours')->numeric()->required(),
+                    TextInput::make('total_trainees')->label('Total Trainees')->helperText('Formula: Total Number of Trainees X Weight Value; Weight Value: (<8 hours = 0.5; 8 hours (1 day) = 1, 3-4 days = 1.5; 5 days or (discontinued)')->numeric(),//->required(),
+                    TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(),
+                    TextInput::make('training_hours')->label('Training Hours')->numeric(),//->required(),
                     Select::make('funding_source')->label('Funding Source')
                         ->options([
                             'UP Entity' => 'UP Entity',
@@ -150,7 +152,7 @@ class OrganizedTrainingResource extends Resource
                             'RP Private Sector Entity' => 'RP Private Sector Entity',
                             'Foreign or Non-Domestic Entity' => 'Foreign or Non-Domestic Entity',
                         ])
-                        ->required(),
+                        //->required(),
                 ]),
 
             Section::make('Survey Responses')
@@ -205,8 +207,8 @@ class OrganizedTrainingResource extends Resource
                                 });
                             })
                             ->searchable() // This makes the dropdown searchable
-                            ->placeholder('Select related extension program')
-                            ->required(),
+                            ->placeholder('Select related extension program'),
+                            //->required(),
                 
                         FileUpload::make('pdf_file_1')->label('PDF File 1')->directory('organized_trainings'),
                         FileUpload::make('pdf_file_2')->label('PDF File 2')->directory('organized_trainings'),
