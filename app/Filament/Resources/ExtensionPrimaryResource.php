@@ -109,8 +109,8 @@ class ExtensionPrimaryResource extends Resource
         
                 TextInput::make('contributing_unit')->label('Contributing Unit'),
 
-                DatePicker::make('start_date')->label('Start Date (mm/dd/yyyy)'),
-                DatePicker::make('end_date')->label('End Date based on actual completion (mm/dd/yyyy)'),
+                DatePicker::make('start_date')->label('Start Date (dd/mm/yyyy)'),
+                DatePicker::make('end_date')->label('End Date based on actual completion (dd/mm/yyyy)'),
                 DatePicker::make('extension_date')->label('Extension Date'),
 
                 Select::make('status')
@@ -134,7 +134,8 @@ class ExtensionPrimaryResource extends Resource
                 TextInput::make('type_of_funding')->label('Type of Funding'),
                 TextInput::make('fund_code')->label('Fund Code'),
 
-                FileUpload::make('pdf_image_file')->label('PDF Image File'),
+                TextInput::make('pdf_image_file')->label('PDF/Image File Link')->url(),
+
 
                 Textarea::make('training_courses')->label('Training Courses (non-degree and non-credit)'),
                 Textarea::make('technical_service')->label('Technical/Advisory Service for external clients'),
@@ -184,7 +185,7 @@ class ExtensionPrimaryResource extends Resource
                         default => 'secondary',
                     }),
     
-                TextColumn::make('title_of_extension_program')->label('Title of Extension Program')->sortable()->searchable(),
+                TextColumn::make('title_of_extension_program')->label('Title of Extension Program')->limit(20)->tooltip(fn ($record) => $record->title_of_extension_program)->sortable()->searchable(),
                 TextColumn::make('objectives')->label('Objectives')->limit(50)->searchable(),
                 TextColumn::make('expected_output')->label('Expected Output/Scope of Work')->limit(50)->searchable(),
     
