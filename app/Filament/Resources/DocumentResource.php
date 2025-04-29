@@ -114,7 +114,11 @@ class DocumentResource extends Resource
             ->label('Organizing such as symposium, forum, exhibit, performance, conference'),
 
             Textarea::make('scope_of_work')->nullable(),
-            TextInput::make('pdf_file_url')->label('PDF File URL')->url(),
+            TextInput::make('documents_file_path')
+                ->label('Documents File URL')
+                ->placeholder('https://drive.google.com/...')
+                ->url()
+                ->maxLength(500),
         ]);
     }
 
@@ -183,11 +187,13 @@ class DocumentResource extends Resource
                     ->label('Orginizing Events')
                     ->colors(['success' => 'Yes', 'danger' => 'No']),
                     
-                TextColumn::make('pdf_file_url')
-                    ->label('PDF')
-                    ->formatStateUsing(fn ($state) => $state ? 
-                        "<a href='{$state}' target='_blank' class='text-primary-600 hover:underline'>View</a>" : '')
-                    ->html(),
+                TextColumn::make('documents_file_path')
+                    ->label('File')
+                    ->formatStateUsing(fn ($state) => $state ? '🔗 View File' : 'None')
+                    ->url(fn ($record) => $record->documents_file_path)
+                    ->openUrlInNewTab()
+                    ->color('primary'),
+                
             ])
             ->defaultSort('start_date', 'desc')
             ->filters([
@@ -205,122 +211,120 @@ class DocumentResource extends Resource
                 Tables\Actions\Action::make('export')
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function (array $data) {
-                        $query = Document::query();
-                        
-                        if ($data['type'] === 'MOA') {
-                            $query->where('partnership_type', 'Memorandum of Agreement (MOA)');
-                        } elseif ($data['type'] === 'MOU') {
-                            $query->where('partnership_type', 'Memorandum of Understanding (MOU)');
-                        }
-                        
-                        $records = $query->get();
-                        
-                        return response()->streamDownload(function () use ($records) {
-                            $csv = Writer::createFromFileObject(new SplTempFileObject());
-                            
-                            $csv->insertOne([
-                                'Unit', 'Type', 'Title', 'Partner', 
-                                'Start Date', 'End Date', 'Training',
-                                'Tech Service', 'Info Dissemination',
-                                'Consultancy', 'Community Outreach',
-                                'Tech Transfer', 'Organizing Events',
-                                'Scope of Work', 'PDF URL'
-                            ]);
-                            
-                            foreach ($records as $record) {
-                                $csv->insertOne([
-                                    $record->contributing_unit,
-                                    str_contains($record->partnership_type, 'MOA') ? 'MOA' : 'MOU',
-                                    $record->extension_title,
-                                    $record->partner_stakeholder,
-                                    $record->start_date,
-                                    $record->end_date,
-                                    $record->training_courses,
-                                    $record->technical_advisory_service,
-                                    $record->information_dissemination,
-                                    $record->consultancy,
-                                    $record->community_outreach,
-                                    $record->technology_transfer,
-                                    $record->organizing_events,
-                                    $record->scope_of_work,
-                                    $record->pdf_file_url,
-                                ]);
-                            }
-                            
-                            echo $csv->toString();
-                        }, 'documents_export_' . now()->format('Ymd_His') . '.csv');
-                    })
                     ->form([
                         Select::make('type')
+                            ->label('Document Type')
                             ->options([
                                 'ALL' => 'All Documents',
                                 'MOA' => 'MOA',
                                 'MOU' => 'MOU',
                             ])
                             ->default('ALL'),
-                    ]),
+                        Select::make('format')
+                            ->label('Export Format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        $query = Document::query();
+            
+                        if ($data['type'] === 'MOA') {
+                            $query->where('partnership_type', 'Memorandum of Agreement (MOA)');
+                        } elseif ($data['type'] === 'MOU') {
+                            $query->where('partnership_type', 'Memorandum of Understanding (MOU)');
+                        }
+            
+                        $records = $query->get();
+            
+                        return static::exportData($records, $data['format'], $data['type']);
+                    }),
             ])
+            
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\BulkAction::make('export')
+                Tables\Actions\BulkAction::make('exportBulk')
                     ->label('Export Selected')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function (Collection $records, array $data) {
-                        $filteredRecords = $records;
-                        
-                        if ($data['type'] === 'MOA') {
-                            $filteredRecords = $records->where('partnership_type', 'Memorandum of Agreement (MOA)');
-                        } elseif ($data['type'] === 'MOU') {
-                            $filteredRecords = $records->where('partnership_type', 'Memorandum of Understanding (MOU)');
-                        }
-                        
-                        return response()->streamDownload(function () use ($filteredRecords) {
-                            $csv = Writer::createFromFileObject(new SplTempFileObject());
-                            
-                            $csv->insertOne([
-                                'Unit', 'Type', 'Title', 'Partner', 
-                                'Start Date', 'End Date', 'Training',
-                                'Tech Service', 'Info Dissemination',
-                                'Consultancy', 'Community Outreach',
-                                'Tech Transfer', 'Organizing Events',
-                                'Scope of Work', 'PDF URL'
-                            ]);
-                            
-                            foreach ($filteredRecords as $record) {
-                                $csv->insertOne([
-                                    $record->contributing_unit,
-                                    str_contains($record->partnership_type, 'MOA') ? 'MOA' : 'MOU',
-                                    $record->extension_title,
-                                    $record->partner_stakeholder,
-                                    $record->start_date,
-                                    $record->end_date,
-                                    $record->training_courses,
-                                    $record->technical_advisory_service,
-                                    $record->information_dissemination,
-                                    $record->consultancy,
-                                    $record->community_outreach,
-                                    $record->technology_transfer,
-                                    $record->organizing_events,
-                                    $record->scope_of_work,
-                                    $record->pdf_file_url,
-                                ]);
-                            }
-                            
-                            echo $csv->toString();
-                        }, 'selected_documents_' . now()->format('Ymd_His') . '.csv');
-                    })
                     ->form([
                         Select::make('type')
+                            ->label('Document Type')
                             ->options([
                                 'ALL' => 'All Selected',
                                 'MOA' => 'MOA',
                                 'MOU' => 'MOU',
                             ])
                             ->default('ALL'),
+                        Select::make('format')
+                            ->label('Export Format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->required(),
                     ])
-                    ->deselectRecordsAfterCompletion(),
+                    ->action(function (array $data, $records) {
+                        if ($data['type'] === 'MOA') {
+                            $records = $records->where('partnership_type', 'Memorandum of Agreement (MOA)');
+                        } elseif ($data['type'] === 'MOU') {
+                            $records = $records->where('partnership_type', 'Memorandum of Understanding (MOU)');
+                        }
+            
+                        return static::exportData($records, $data['format'], $data['type']);
+                    }),
             ]);
+    }            
+
+    public static function exportData($records, $format, $type)
+    {
+        if ($format === 'csv') {
+            $csv = Writer::createFromFileObject(new \SplTempFileObject());
+
+            $csv->insertOne([
+                'Unit', 'Type', 'Title', 'Partner', 
+                'Start Date', 'End Date', 'Training',
+                'Tech Service', 'Info Dissemination',
+                'Consultancy', 'Community Outreach',
+                'Tech Transfer', 'Organizing Events',
+                'Scope of Work', 'Document File Path'
+            ]);
+
+            foreach ($records as $record) {
+                $csv->insertOne([
+                    $record->contributing_unit,
+                    str_contains($record->partnership_type, 'MOA') ? 'MOA' : 'MOU',
+                    $record->extension_title,
+                    $record->partner_stakeholder,
+                    $record->start_date,
+                    $record->end_date,
+                    $record->training_courses,
+                    $record->technical_advisory_service,
+                    $record->information_dissemination,
+                    $record->consultancy,
+                    $record->community_outreach,
+                    $record->technology_transfer,
+                    $record->organizing_events,
+                    $record->scope_of_work,
+                    $record->documents_file_path,
+                ]);
+            }
+
+            return response()->streamDownload(function () use ($csv) {
+                echo $csv->toString();
+            }, 'documents_export_' . now()->format('Ymd_His') . '.csv');
+        }
+
+        if ($format === 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.documents', [
+                'documents' => $records,
+                'type' => $type,
+            ]);
+    
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->stream();
+            }, 'documents_export_' . now()->format('Ymd_His') . '.pdf');
+        }
     }
 
     public static function getPages(): array

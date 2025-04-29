@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Actions\EditAction;
@@ -112,15 +113,11 @@ class FSRorRSRResource extends Resource
                     ->searchable()
                     ->getStateUsing(fn($record) => $record->user->name . ' ' . $record->user->last_name),
 
-                TextColumn::make('year')
-                    ->badge()
-                    ->color('info')
+                BadgeColumn::make('year')
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('sem')
-                    ->badge()
-                    ->color('success')
+                BadgeColumn::make('sem')
                     ->sortable()
                     ->searchable(),
 
