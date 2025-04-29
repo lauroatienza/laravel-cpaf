@@ -32,15 +32,15 @@ class AdminPanelProvider extends PanelProvider
         
             ->brandLogo(asset('brand3 (1).svg'))
             ->brandLogoHeight('100px')
-            
+            ->darkModeBrandLogo('/brand4.svg')
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
             ->path('admin')
-            ->darkMode(false)
+            ->darkMode(true)
             ->databaseNotifications()
             ->login()
-
+            
             
             //->registration(Register::class) 
             ->plugins([
