@@ -19,7 +19,7 @@ class CreateTrainingAttendedsTable extends Migration
             $table->string('specific_title')->nullable();
             $table->text('highlights')->nullable();
             $table->boolean('has_gender_component')->default(false);
-            $table->integer('total_hours');
+            $table->integer('total_hours')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

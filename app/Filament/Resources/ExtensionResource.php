@@ -197,6 +197,8 @@ class ExtensionResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->headerActions([
@@ -206,7 +208,7 @@ class ExtensionResource extends Resource
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
-                        // Fetch all extensions
+
                         $extensions = Extension::all([
                             'name',
                             'extension_involvement',
@@ -234,7 +236,7 @@ class ExtensionResource extends Resource
                             ]);
                         }
 
-                        // Return CSV 
+                        // Return CSV
                         return response()->streamDownload(function () use ($csv) {
                             echo $csv->toString();
                         }, 'extensions_export_' . now()->format('Ymd_His') . '.csv');
@@ -259,7 +261,7 @@ class ExtensionResource extends Resource
         return [
             'index' => Pages\ListExtensions::route('/'),
             'create' => Pages\CreateExtension::route('/create'),
-            'view' => Pages\ViewExtension::route('/{record}'),
+            //'view' => Pages\ViewExtension::route('/{record}'),
             'edit' => Pages\EditExtension::route('/{record}/edit'),
         ];
     }

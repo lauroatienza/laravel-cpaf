@@ -26,23 +26,17 @@ html {
     -o-tab-size: 4;
     tab-size: 4
 }
-
+.filament-main-topbar {
+    position: relative;
+}
 body {
     line-height: inherit;
     margin: 0
 }
 
-.fi-topbar > nav {
-    background-color: inherit !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
 
-.fi-sidebar-header {
-    background-color: inherit !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
+
+
 
 hr {
     border-top-width: 1px;

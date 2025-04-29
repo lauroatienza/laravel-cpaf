@@ -213,6 +213,7 @@ class AwardsRecognitionsResource extends Resource
                     ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
