@@ -62,13 +62,13 @@ class ResearchResource extends Resource
     $normalizeName = function ($name) use ($titles, $user) {
         // Remove titles
         $nameWithoutTitles = str_ireplace($titles, '', $name);
-        
+
         // If the middle name exists and is not already an initial, replace it with the initial
         if ($user->middle_name) {
             $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
             $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
         }
-        
+
         // Replace multiple spaces with a single space
         return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
     };
@@ -87,7 +87,11 @@ class ResearchResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
+<<<<<<< HEAD
         return 'secondary'; 
+=======
+        return 'primary';
+>>>>>>> 92a50f948bc030917fafa486adce5c182a0c12dc
     }
 
     public static function form(Form $form): Form
@@ -104,7 +108,7 @@ class ResearchResource extends Resource
 
                 DatePicker::make('start_date')->label('Start Date')
                     ->format('Y/m/d')->required(),
-                
+
                 DatePicker::make('end_date')->label('End Date')
                 ->format('Y/m/d')->required(),
 
@@ -119,8 +123,8 @@ class ResearchResource extends Resource
                 Select::make('faculty_id')
                      ,
 
-                
-                
+
+
 
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
@@ -131,9 +135,13 @@ class ResearchResource extends Resource
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
+<<<<<<< HEAD
                 ])->required(),
+=======
+                ])->default('no'),
 
-                
+>>>>>>> 92a50f948bc030917fafa486adce5c182a0c12dc
+
 
                 RichEditor::make('objectives')->columnSpan('full')->nullable(),
                 RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output')->nullable(),
@@ -218,16 +226,22 @@ class ResearchResource extends Resource
                         'On-going' => 'warning',   // Orange
                         default => 'secondary',    // Gray
                     }),
-                
+
                 TextColumn::make('title')->label('Title')
-                    ->sortable()->searchable()->limit(18) 
+                    ->sortable()->searchable()->limit(18)
                     ->tooltip(fn ($state) => $state),
+<<<<<<< HEAD
                     TextColumn::make('objectives')->label('Objectives')
                     ->sortable()
                     ->searchable()
                     ->limit(18)
                     ->html()
                     ->tooltip(fn ($state) => strip_tags($state)),
+=======
+                TextColumn::make('objectives')->label('Objectives')
+                ->sortable()->searchable()->limit(18)
+                ->tooltip(fn ($state) => $state),
+>>>>>>> 92a50f948bc030917fafa486adce5c182a0c12dc
                 TextColumn::make('expected_output')->label('Expected Output')
                     ->sortable()
                     ->searchable()
@@ -292,7 +306,7 @@ class ResearchResource extends Resource
                     ->label('Create Research Project')
                     ->color('secondary')
                     ->icon('heroicon-o-pencil-square'),
-                    
+
                 Action::make('exportAll')
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -319,13 +333,13 @@ class ResearchResource extends Resource
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-    
+
         return response()->streamDownload(function () use ($records) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
                 'Contributing Unit', 'Start Date', 'End Date', 'Status', 'Title', 'Objectives', 'Expected Output', 'Name of Researchers', 'Project Leader', 'Source of Funding', 'Category of Source of Funding', 'Budget', 'Type of Funding', 'SDG Theme', 'Upload Status'
             ]);
-    
+
             foreach ($records as $record) {
                 fputcsv($handle, [
                     $record->contributing_unit,
@@ -345,7 +359,7 @@ class ResearchResource extends Resource
                     $record->pbms_upload_status
                 ]);
             }
-    
+
             fclose($handle);
         }, 'research_data.csv');
     }
@@ -388,7 +402,7 @@ class ResearchResource extends Resource
     $normalizeName = function ($name) use ($titles, $user) {
         // Remove titles
         $nameWithoutTitles = str_ireplace($titles, '', $name);
-        
+
         // If the middle name exists and is not already an initial, replace it with the initial
         if ($user->middle_name) {
             $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';

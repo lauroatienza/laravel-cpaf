@@ -100,7 +100,7 @@ class ExtensionResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->label('Full Name')
-                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name) // Gets logged-in user's name
+                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name) 
                     ->hidden()
                     ->required(),
 
@@ -115,9 +115,9 @@ class ExtensionResource extends Resource
                         'Session Chair' => 'Session Chair',
                         'Editor' => 'Editor',
                         'Examiner' => 'Examiner',
-                        'Other' => 'Other (Specify)', // Adds "Other" as an option
+                        'Other' => 'Other (Specify)', 
                     ])
-                    ->reactive(), // Allows dynamic updates based on selection
+                    ->reactive(), 
 
                 Select::make('location')
                     ->label('Type of Extension')
@@ -126,13 +126,13 @@ class ExtensionResource extends Resource
                         'Conference' => 'Conference',
                         'Editorial Team/Board' => 'Editorial Team/Board',
                         'Workshop' => 'Workshop',
-                        'Other' => 'Other (Specify)', // Adds "Other" as an option
+                        'Other' => 'Other (Specify)', 
                     ])
-                    ->reactive(), // Allows dynamic updates based on selection
+                    ->reactive(), 
 
                 TextInput::make('custom_involvement')
                     ->label('Specify Other')
-                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other') // Show only if "Other" is selected
+                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other') 
                     ->maxLength(255),
 
                 TextInput::make('event_title')
@@ -197,6 +197,8 @@ class ExtensionResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->headerActions([
@@ -206,7 +208,7 @@ class ExtensionResource extends Resource
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
-                        // Fetch all extensions
+
                         $extensions = Extension::all([
                             'name',
                             'extension_involvement',
@@ -234,7 +236,7 @@ class ExtensionResource extends Resource
                             ]);
                         }
 
-                        // Return CSV 
+                        // Return CSV
                         return response()->streamDownload(function () use ($csv) {
                             echo $csv->toString();
                         }, 'extensions_export_' . now()->format('Ymd_His') . '.csv');
@@ -259,7 +261,7 @@ class ExtensionResource extends Resource
         return [
             'index' => Pages\ListExtensions::route('/'),
             'create' => Pages\CreateExtension::route('/create'),
-            'view' => Pages\ViewExtension::route('/{record}'),
+            //'view' => Pages\ViewExtension::route('/{record}'),
             'edit' => Pages\EditExtension::route('/{record}/edit'),
         ];
     }

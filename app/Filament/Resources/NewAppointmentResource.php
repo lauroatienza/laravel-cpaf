@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\DatePicker;
@@ -175,27 +176,21 @@ public static function table(Table $table): Table
                 ->sortable()
                 ->searchable(),
 
-            TextColumn::make('type_of_appointments')
+            BadgeColumn::make('type_of_appointments')
                 ->label('Type of Appointment')
-                ->badge()
-                ->color('info')
                 ->sortable()
                 ->searchable()
                 ->formatStateUsing(function ($state, $record) {
                     return $state === 'Other' ? $record->type_of_appointments_other : $state;
                 }),
 
-            TextColumn::make('position')
+            BadgeColumn::make('position')
                 ->label('Position')
-                ->badge()
-                ->color('success')
                 ->sortable()
                 ->searchable(),
 
-            TextColumn::make('appointment')
+            BadgeColumn::make('appointment')
                 ->label('Appointment')
-                ->badge()
-                ->color('info')
                 ->sortable()
                 ->searchable()
                 ->formatStateUsing(function ($state, $record) {
@@ -212,7 +207,7 @@ public static function table(Table $table): Table
                 ->formatStateUsing(fn ($state) => $state ? '🔗 View File' : 'None')
                 ->url(fn ($record) => $record->new_appointment_file_path ?: null)
                 ->openUrlInNewTab()
-                ->color('info'),
+                ->color('primary'),
         ])
             ->filters([
                 //

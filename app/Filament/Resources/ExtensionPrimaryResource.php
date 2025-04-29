@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExtensionPrimaryResource\Pages;
 use App\Models\ExtensionPrime;
+use Doctrine\DBAL\Query\Limit;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
@@ -37,42 +38,42 @@ class ExtensionPrimaryResource extends Resource
         if ($user->hasRole(['super-admin', 'admin'])) {
             return static::$model::count();
         }
-        
+
         $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
         $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
         $simpleName = trim("{$user->name} {$user->last_name}");
-        
+
         // Format: Lapitan, A.V.
         $initials = strtoupper(substr($user->name, 0, 1)) . '.';
         if ($user->middle_name) {
             $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
         }
         $reversedInitialsName = "{$user->last_name}, {$initials}";
-        
+
         $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-        
+
         // Normalize function
         $normalizeName = function ($name) use ($titles, $user) {
             $nameWithoutTitles = str_ireplace($titles, '', $name);
-        
+
             if ($user->middle_name) {
                 $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
                 $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
             }
-        
+
             return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
         };
-        
+
         // Normalized name variations
         $normalizedFullName = $normalizeName($fullName);
         $normalizedFullNameReversed = $normalizeName($fullNameReversed);
         $normalizedSimpleName = $normalizeName($simpleName);
         $normalizedReversedInitials = $normalizeName($reversedInitialsName);
-        
+
         // SQL-friendly column name replacements
         $columns = ['researcher_names', 'project_leader'];
         $replacers = [];
-        
+
         foreach ($columns as $column) {
             $colReplacer = $column;
             foreach ($titles as $title) {
@@ -80,7 +81,7 @@ class ExtensionPrimaryResource extends Resource
             }
             $replacers[$column] = $colReplacer;
         }
-        
+
         // Main query with all normalized formats and both columns
         return static::$model::where(function ($query) use (
             $replacers,
@@ -96,17 +97,17 @@ class ExtensionPrimaryResource extends Resource
                     ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
             }
         })->count();
-        
+
     }
     public static function getNavigationBadgeColor(): string
     {
         return 'primary';
-    }    
+    }
         public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
-        
+
                 TextInput::make('contributing_unit')->label('Contributing Unit'),
 
                 DatePicker::make('start_date')->label('Start Date (dd/mm/yyyy)'),
@@ -124,7 +125,7 @@ class ExtensionPrimaryResource extends Resource
                 Textarea::make('objectives')->label('Objectives'),
                 Textarea::make('expected_output')->label('Expected Output/Scope of Work'),
 
-                TextInput::make('original_timeframe_months')->label('Number of Months in Original Timeframe'),
+                TextInput::make('original_timeframe_months')->label('Number of Months in Original Timeframe')->numeric(),
 
                 TextInput::make('researcher_names')->label('Name of Researcher/s or Extensionist'),
                 TextInput::make('project_leader')->label('Project Leader'),
@@ -134,8 +135,7 @@ class ExtensionPrimaryResource extends Resource
                 TextInput::make('type_of_funding')->label('Type of Funding'),
                 TextInput::make('fund_code')->label('Fund Code'),
 
-                TextInput::make('pdf_image_file')->label('PDF/Image File Link')->url(),
-
+                TextInput::make('pdf_image_file')->label('PDF Image File')->placeholder('Input URL here'),
 
                 Textarea::make('training_courses')->label('Training Courses (non-degree and non-credit)'),
                 Textarea::make('technical_service')->label('Technical/Advisory Service for external clients'),
@@ -176,7 +176,7 @@ class ExtensionPrimaryResource extends Resource
                 TextColumn::make('start_date')->label('Start Date')->sortable(),
                 TextColumn::make('end_date')->label('End Date')->sortable(),
                 TextColumn::make('extension_date')->label('Extension Date')->sortable(),
-    
+
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->color(fn ($state) => match ($state) {
@@ -184,31 +184,31 @@ class ExtensionPrimaryResource extends Resource
                         'On-going' => 'warning',
                         default => 'secondary',
                     }),
-    
-                TextColumn::make('title_of_extension_program')->label('Title of Extension Program')->limit(20)->tooltip(fn ($record) => $record->title_of_extension_program)->sortable()->searchable(),
+
+                TextColumn::make('title_of_extension_program')->label('Title of Extension Program')->sortable()->searchable()->limit(50)->tooltip(fn ($state) => $state),
                 TextColumn::make('objectives')->label('Objectives')->limit(50)->searchable(),
                 TextColumn::make('expected_output')->label('Expected Output/Scope of Work')->limit(50)->searchable(),
-    
+
                 TextColumn::make('original_timeframe_months')->label('Number of Months')->sortable(),
-    
-                TextColumn::make('researcher_names')->label('Name of Researcher/s')->sortable()->searchable(),
+
+                TextColumn::make('researcher_names')->label('Name of Researcher/s')->sortable()->searchable()->limit(50)->tooltip(fn ($state) => $state),
                 TextColumn::make('project_leader')->label('Project Leader')->sortable()->searchable(),
-    
+
                 TextColumn::make('source_of_funding')->label('Source of Funding')->sortable(),
                 TextColumn::make('budget')->label('Budget')->sortable(),
                 TextColumn::make('type_of_funding')->label('Type of Funding')->sortable(),
                 TextColumn::make('fund_code')->label('Fund Code')->sortable(),
-    
+
                 TextColumn::make('pbms_upload_status')->label('PBMS Uploading Status')->sortable(),
             ])
             ->filters([])
-    
+
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->label('Create Extension Program')
                     ->color('secondary')
                     ->icon('heroicon-o-pencil-square'),
-    
+
                 Action::make('exportAll')
                     ->label('Export')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -223,16 +223,16 @@ class ExtensionPrimaryResource extends Resource
                     ])
                     ->action(fn (array $data) => static::exportData(ExtensionPrime::all(), $data['format'])),
             ])
-    
+
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
-    
+
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-    
+
                 BulkAction::make('exportBulk')
                     ->label('Export Selected')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -249,13 +249,13 @@ class ExtensionPrimaryResource extends Resource
                     ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
             ]);
     }
-    
+
     public static function exportData($records, $format)
     {
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-    
+
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
@@ -278,7 +278,7 @@ class ExtensionPrimaryResource extends Resource
                     'Fund Code',
                     'PBMS Upload Status',
                 ]);
-    
+
                 foreach ($records as $record) {
                     fputcsv($handle, [
                         $record->id_no,
@@ -300,17 +300,17 @@ class ExtensionPrimaryResource extends Resource
                         $record->pbms_upload_status,
                     ]);
                 }
-    
+
                 fclose($handle);
             }, 'extension_programs.csv');
         }
-    
+
         if ($format === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.extensionprimary', ['records' => $records]);
             return response()->streamDownload(fn () => print($pdf->output()), 'extensionprimary.pdf');
         }
     }
-    
+
 
     public static function getRelations(): array
     {

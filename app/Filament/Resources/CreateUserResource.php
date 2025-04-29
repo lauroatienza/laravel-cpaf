@@ -51,7 +51,7 @@ class CreateUserResource extends Resource
     }
     public static function getNavigationBadgeColor(): string
     {
-        return 'primary';
+        return 'secondary';
     }
     public static function form(Form $form): Form
     {
@@ -198,6 +198,8 @@ class CreateUserResource extends Resource
                     ->getStateUsing(fn($record) => "{$record->name} {$record->last_name}")
                     ->searchable(['name', 'last_name']) // ← Just pass array directly
                     ->sortable(),
+
+
                 TextColumn::make('unit')
                     ->label('Unit')
                     ->sortable()

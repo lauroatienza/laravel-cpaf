@@ -16,8 +16,6 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 
 
-
-
 class TrainingAttendedResource extends Resource
 {
     protected static ?string $model = TrainingAttended::class;
@@ -108,7 +106,7 @@ class TrainingAttendedResource extends Resource
                         'Seminar' => 'Seminar',
                         'Forum' => 'Forum',
                         'Symposium' => 'Symposium',
-                        'Other' => 'Other',
+                        'Other' => 'Other...',
                     ])
                     ->live()
                     ->required()
@@ -165,6 +163,7 @@ class TrainingAttendedResource extends Resource
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Full Name')
                     ->searchable()
+                    ->sortable()
                     ->limit(20)
                     ->tooltip(fn ($state) => $state),
 
