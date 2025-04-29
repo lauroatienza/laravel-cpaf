@@ -9,8 +9,8 @@ class AddDriveLinkAndPathToFsrOrRsrTable extends Migration
     public function up(): void
     {
         Schema::table('f_s_ror_r_s_r_s', function (Blueprint $table) {
-            $table->string('file_path')->nullable(); // for local file path
-            $table->string('drive_link')->nullable(); // for Google Drive link
+            $table->string('file_path')->nullable(); 
+            $table->string('drive_link')->nullable(); 
         });
     }
 

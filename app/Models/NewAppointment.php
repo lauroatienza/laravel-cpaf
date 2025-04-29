@@ -9,7 +9,7 @@ class NewAppointment extends Model
 {
     use HasFactory;
 
-    protected $table = 'new_appointments'; // Ensures correct table mapping
+    protected $table = 'new_appointments'; 
 
     protected $fillable = [
         'created_at',   
@@ -19,9 +19,10 @@ class NewAppointment extends Model
         'appointment',
         'appointment_effectivity_date',
         'full_name',
-        'photo_url',
+        'photo_url', //This is not used 
         'time_stamp',
         'created_at',
         'updated_at',
+        'new_appointment_file_path',
     ];
 }

@@ -11,7 +11,7 @@ class Extension extends Model
     use HasFactory;
 
     protected $table = 'extensionnew'; // Ensures it uses the correct table name
-  
+
     protected $fillable = [
         'activity_date',
         'created_at',
@@ -33,9 +33,8 @@ class Extension extends Model
     parent::boot();
 
     static::creating(function ($model) {
-        if (auth()->check()) {
-            $model->id_no = auth()->id();
-           
+        if (Auth::check()) {
+            $model->id_no = Auth::id();
         }
     });
 }
