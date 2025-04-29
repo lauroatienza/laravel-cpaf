@@ -136,11 +136,11 @@ class ResearchResource extends Resource
                 
 
                 RichEditor::make('objectives')->columnSpan('full'),
-                RichEditor::make('expected_output')->columnSpan('full'),
-                TextInput::make('no_months_orig_timeframe')->default('N/A')->label('Months No. from original timeframe'),
+                RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output'),
+                TextInput::make('no_months_orig_timeframe')->label('Months No. from Original Timeframe'),
                 TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
 
-                TextInput::make('source_funding')->required(),
+                TextInput::make('source_funding')->required()->label('Source Funding'),
                 Select::make('category_source_funding')->label('Source of Funding Category')
                 ->options([
                     'UP Entity' => 'UP Entity',

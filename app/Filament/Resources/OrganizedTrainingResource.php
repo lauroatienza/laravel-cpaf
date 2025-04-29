@@ -141,7 +141,7 @@ class OrganizedTrainingResource extends Resource
             Section::make('Trainee Details')
                 ->schema([
                     TextInput::make('total_trainees')->label('Total Trainees')->numeric()->required(),
-                    TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(),
+                    TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric()->helperText('Formula: Total Number of Trainees X Weight Value')->helperText('Weight Value: (<8 hours = 0.5; 8 hours (1 day) = 1, 3-4 days = 1.5; 5 days or (discontinued)'),
                     TextInput::make('training_hours')->label('Training Hours')->numeric()->required(),
                     Select::make('funding_source')->label('Funding Source')
                         ->options([
