@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
             'panels::auth.login.form.after',
             fn (): View => view('filament.login_extra') // Returns a View instance
         );
+        
         User::observe(UserObserver::class);
         Research::observe(ResearchObserver::class);
         
