@@ -18,7 +18,7 @@ class EditOrganizedTraining extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $fullName = "{$data['first_name']} {$data['last_name']}";
+        $fullName = $data['full_name'] ?? null;
 
         // Match Extension
         $extensionMatch = ExtensionPrime::where(function ($query) use ($fullName) {

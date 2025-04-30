@@ -1,3 +1,4 @@
+@import "resources/css/filament/admin/theme.css";
 
 /*! tailwindcss v3.4.1 | MIT License | https://tailwindcss.com*/
 *,
@@ -33,9 +34,6 @@ body {
     line-height: inherit;
     margin: 0
 }
-
-
-
 
 
 hr {
@@ -120,7 +118,17 @@ textarea {
     margin: 0;
     padding: 0
 }
+.fi-topbar > nav {
+    background-color: inherit !important;
+    box-shadow: 2px !important;
+    outline: 2px!important;
+}
 
+.fi-sidebar-header {
+    background-color: inherit !important;
+    box-shadow: 2px !important;
+    outline: 2px !important;
+}
 button,
 select {
     text-transform: none

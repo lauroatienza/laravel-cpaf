@@ -1,4 +1,3 @@
-
 /*! tailwindcss v3.4.1 | MIT License | https://tailwindcss.com*/
 *,
 :after,
@@ -30,18 +29,6 @@ html {
 body {
     line-height: inherit;
     margin: 0
-}
-
-.fi-topbar > nav {
-    background-color: inherit !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-.fi-sidebar-header {
-    background-color: inherit !important;
-    box-shadow: none !important;
-    outline: none !important;
 }
 
 hr {
