@@ -100,7 +100,7 @@ class ExtensionResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->label('Full Name')
-                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name) 
+                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
                     ->hidden()
                     ->required(),
 
@@ -115,9 +115,9 @@ class ExtensionResource extends Resource
                         'Session Chair' => 'Session Chair',
                         'Editor' => 'Editor',
                         'Examiner' => 'Examiner',
-                        'Other' => 'Other (Specify)', 
+                        'Other' => 'Other (Specify)',
                     ])
-                    ->reactive(), 
+                    ->reactive(),
 
                 Select::make('location')
                     ->label('Type of Extension')
@@ -126,13 +126,13 @@ class ExtensionResource extends Resource
                         'Conference' => 'Conference',
                         'Editorial Team/Board' => 'Editorial Team/Board',
                         'Workshop' => 'Workshop',
-                        'Other' => 'Other (Specify)', 
+                        'Other' => 'Other (Specify)',
                     ])
-                    ->reactive(), 
+                    ->reactive(),
 
                 TextInput::make('custom_involvement')
                     ->label('Specify Other')
-                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other') 
+                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other')
                     ->maxLength(255),
 
                 TextInput::make('event_title')
@@ -144,7 +144,7 @@ class ExtensionResource extends Resource
                 DatePicker::make('activity_date')
                     ->label('Activity Date'),
 
-            ])->columns(1);
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -186,7 +186,7 @@ class ExtensionResource extends Resource
                     ->sortable()->searchable(),
                 TextColumn::make('venue')->label('Event Venue')
                     ->sortable()->searchable()
-                    ->limit(10) // Only show first 20 characters
+                    ->limit(20) // Only show first 20 characters
                     ->tooltip(fn($state) => $state),
                 TextColumn::make('date_end')->label('End Date')
                     ->sortable()->searchable(),
