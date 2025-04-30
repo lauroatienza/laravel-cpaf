@@ -100,7 +100,7 @@ class ExtensionResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->label('Full Name')
-                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name) // Gets logged-in user's name
+                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name) 
                     ->hidden()
                     ->required(),
 
@@ -115,9 +115,9 @@ class ExtensionResource extends Resource
                         'Session Chair' => 'Session Chair',
                         'Editor' => 'Editor',
                         'Examiner' => 'Examiner',
-                        'Other' => 'Other (Specify)', // Adds "Other" as an option
+                        'Other' => 'Other (Specify)', 
                     ])
-                    ->reactive(), // Allows dynamic updates based on selection
+                    ->reactive(), 
 
                 Select::make('location')
                     ->label('Type of Extension')
@@ -126,13 +126,13 @@ class ExtensionResource extends Resource
                         'Conference' => 'Conference',
                         'Editorial Team/Board' => 'Editorial Team/Board',
                         'Workshop' => 'Workshop',
-                        'Other' => 'Other (Specify)', // Adds "Other" as an option
+                        'Other' => 'Other (Specify)', 
                     ])
-                    ->reactive(), // Allows dynamic updates based on selection
+                    ->reactive(), 
 
                 TextInput::make('custom_involvement')
                     ->label('Specify Other')
-                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other') // Show only if "Other" is selected
+                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other') 
                     ->maxLength(255),
 
                 TextInput::make('event_title')

@@ -71,40 +71,18 @@ class OrganizedTrainingResource extends Resource
     }
 
     public static function form(Forms\Form $form): Forms\Form
-{
-    return $form
-        ->schema([
-            Section::make('Training Details')
-                ->schema([
-                    Grid::make(3)->schema([
-                        TextInput::make('first_name')
-                            ->label('First Name')
-                            //->required()
-                            ->reactive(), // 👈 Make reactive
-
-                        TextInput::make('middle_name')
-                            ->label('Middle Name'),
-
-                        TextInput::make('last_name')
-                            ->label('Last Name')
-                            //->required()
-                            ->reactive() // 👈 Make reactive
-                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                $firstName = $get('first_name');
-                                $lastName = $state;
-
-                                if (!$firstName || !$lastName) return;
-
-                                $fullName = trim("$firstName $lastName");
-                                $fullNameReversed = trim("$lastName, $firstName");
-
+    {
+        return $form
+            ->schema([
+                Section::make('Training Details')
+                    ->schema([
+                        TextInput::make('full_name')
+                            ->label('Full Name (First Name, MI, Last Name)')
+                            ->reactive() // no longer required
+                            ->afterStateUpdated(function ($state, callable $set) {
                                 $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-                                $normalizeName = function ($name) use ($titles) {
-                                    return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
-                                };
-
-                                $normalizedFullName = $normalizeName($fullName);
-                                $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+                                $normalizedFullName = preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $state)));
+                                $normalizedFullNameReversed = implode(', ', array_reverse(explode(' ', $normalizedFullName)));
 
                                 $matchedProgram = \App\Models\ExtensionPrime::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed) {
                                     $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
@@ -114,7 +92,6 @@ class OrganizedTrainingResource extends Resource
 
                                 $set('related_extension_program', $matchedProgram?->title_of_extension_program);
                             }),
-                    ]),
                     Select::make('contributing_unit')->label('Contributing Unit')
                         ->options([
                             'CSPPS' => 'CSPPS',
@@ -142,7 +119,7 @@ class OrganizedTrainingResource extends Resource
 
             Section::make('Trainee Details')
                 ->schema([
-                    TextInput::make('total_trainees')->label('Total Trainees')->numeric(),//->required(),
+                    TextInput::make('total_trainees')->label('Total Trainees')->helperText('Formula: Total Number of Trainees X Weight Value;Weight Value: (<8 hours = 0.5; 8 hours (1 day) = 1, 3-4 days = 1.5; 5 days or (discontinued)')->numeric(),//->required(),
                     TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(),
                     TextInput::make('training_hours')->label('Training Hours')->numeric(),//->required(),
                     Select::make('funding_source')->label('Funding Source')

@@ -10,7 +10,7 @@ class OrganizedTraining extends Model
     use HasFactory;
 
     protected $fillable = [
-        'first_name', 'middle_name', 'last_name',
+        'first_name', 'middle_name', 'last_name', 
         'contributing_unit', 'title', 'start_date', 'end_date',
         'special_notes', 'resource_persons', 'activity_category', 'venue',
         'total_trainees', 'weighted_trainees', 'training_hours',
@@ -98,8 +98,8 @@ class OrganizedTraining extends Model
 
         $match = \App\Models\ExtensionPrime::where(function ($query) use ($normalized, $reversed) {
             $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalized%"])
-                  ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$reversed%"])
-                  ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%$normalized%"]);
+                ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$reversed%"])
+                ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%$normalized%"]);
         })->first();
 
         return $match?->title_of_extension_program;

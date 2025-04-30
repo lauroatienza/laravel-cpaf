@@ -167,7 +167,7 @@ class TrainingAttendedResource extends Resource
                     ->limit(20)
                     ->tooltip(fn ($state) => $state),
 
-                Tables\Columns\TextColumn::make('unit_center')
+                Tables\Columns\BadgeColumn::make('unit_center')
                     ->label('Unit/Center')
                     ->sortable()
                     ->alignCenter(),
