@@ -125,7 +125,7 @@ class ResearchResource extends Resource
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
 
-                RichEditor::make('event_highlight')->columnSpan('full'),
+                RichEditor::make('event_highlight')->columnSpan('full')->nullable(),
 
                 Select::make('has_gender_component')->label('Has gender component')
                 ->options([
@@ -135,12 +135,12 @@ class ResearchResource extends Resource
 
 
 
-                RichEditor::make('objectives')->columnSpan('full'),
-                RichEditor::make('expected_output')->columnSpan('full'),
-                TextInput::make('no_months_orig_timeframe')->default('N/A')->label('Months No. from original timeframe'),
+                RichEditor::make('objectives')->columnSpan('full')->nullable(),
+                RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output')->nullable(),
+                TextInput::make('no_months_orig_timeframe')->label('Months No. from Original Timeframe'),
                 TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
 
-                TextInput::make('source_funding')->required(),
+                TextInput::make('source_funding')->required()->label('Source Funding'),
                 Select::make('category_source_funding')->label('Source of Funding Category')
                 ->options([
                     'UP Entity' => 'UP Entity',
@@ -223,11 +223,17 @@ class ResearchResource extends Resource
                     ->sortable()->searchable()->limit(18)
                     ->tooltip(fn ($state) => $state),
                 TextColumn::make('objectives')->label('Objectives')
-                ->sortable()->searchable()->limit(18)
-                ->tooltip(fn ($state) => $state),
+                    ->sortable()
+                    ->searchable()
+                    ->limit(18)
+                    ->html()
+                    ->tooltip(fn ($state) => strip_tags($state)),
                 TextColumn::make('expected_output')->label('Expected Output')
-                    ->sortable()->searchable()->limit(18) // Only show first 20 characters
-                    ->tooltip(fn ($state) => $state),
+                    ->sortable()
+                    ->searchable()
+                    ->limit(18)
+                    ->html()
+                    ->tooltip(fn ($state) => strip_tags($state)),
                 TextColumn::make('name_of_researchers')->label("Name of Researchers")
                     ->sortable()->searchable()
                     ->limit(10) // Only show first 20 characters
@@ -297,7 +303,14 @@ class ResearchResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('exportBulk')
+                        ->label('Export Selected')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => static::exportData($records)),
+                ]),
             ]);
     }
 

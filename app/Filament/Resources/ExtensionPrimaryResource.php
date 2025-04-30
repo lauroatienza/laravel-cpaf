@@ -110,8 +110,8 @@ class ExtensionPrimaryResource extends Resource
 
                 TextInput::make('contributing_unit')->label('Contributing Unit'),
 
-                DatePicker::make('start_date')->label('Start Date (mm/dd/yyyy)'),
-                DatePicker::make('end_date')->label('End Date based on actual completion (mm/dd/yyyy)'),
+                DatePicker::make('start_date')->label('Start Date (dd/mm/yyyy)'),
+                DatePicker::make('end_date')->label('End Date based on actual completion (dd/mm/yyyy)'),
                 DatePicker::make('extension_date')->label('Extension Date'),
 
                 Select::make('status')

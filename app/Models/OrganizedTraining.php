@@ -98,8 +98,8 @@ class OrganizedTraining extends Model
 
         $match = \App\Models\ExtensionPrime::where(function ($query) use ($normalized, $reversed) {
             $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalized%"])
-                  ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$reversed%"])
-                  ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%$normalized%"]);
+                ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$reversed%"])
+                ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%$normalized%"]);
         })->first();
 
         return $match?->title_of_extension_program;
