@@ -18,7 +18,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
-
+use Filament\Navigation\MenuItem;
+use Filament\Navigation\UserMenuItem;
 
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
@@ -40,6 +41,13 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->login()
             
+            ->userMenuItems([
+                // Custom item for Documentation link
+                UserMenuItem::make()
+                    ->label('Official Website')
+                    ->url('https://cpaf.uplb.edu.ph/')
+                    ->icon('heroicon-o-book-open'),
+            ])
             
             //->registration(Register::class) 
             ->plugins([
