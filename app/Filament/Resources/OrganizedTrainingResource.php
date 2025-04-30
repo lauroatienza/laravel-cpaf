@@ -333,7 +333,7 @@ class OrganizedTrainingResource extends Resource
     }
     public static function getEloquentQuery(): Builder
 {
-    $user = Auth::user();
+    //$user = Auth::user();
 
     $userUnit = auth()->user()->unit;
 
