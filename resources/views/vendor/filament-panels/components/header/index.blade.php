@@ -6,7 +6,7 @@
 ])
 
 <header
-    {{ $attributes->class(['fi-header flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between']) }}
+    {{ $attributes->class(['fi-header  flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between']) }}
 >
     <div>
         @if ($breadcrumbs)

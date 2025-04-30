@@ -1,56 +1,50 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\OrganizedTraining;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\Reader;
+use Carbon\Carbon;
 
 class OrganizedTrainingSeeder extends Seeder
 {
     public function run()
     {
-        // Ensure the file exists in storage/app
-        $filePath = storage_path('app/imports/OrganizedTraining.csv');
+        $filePath = storage_path('app/imports/OrganizedTraining.csv'); // Fixed path separator
 
         if (!file_exists($filePath)) {
             $this->command->error("File not found: $filePath");
             return;
         }
 
-        // Read CSV
         $csv = Reader::createFromPath($filePath, 'r');
-        $csv->setHeaderOffset(0); // Assuming first row is headers
+        $csv->setHeaderOffset(0); // First row as header
 
-        // Function to convert empty strings to null for integer fields
         function toIntOrNull($value) {
             return is_numeric($value) ? (int) $value : null;
         }
 
-        foreach ($csv as $record) {
-            // Extract first, middle, and last names separately
-            $firstName = $record['First Name'] ?? null;
-            $middleName = $record['Middle Name'] ?? null;
-            $lastName = $record['Last Name'] ?? null;
+        function formatDate($date) {
+            return !empty($date) ? Carbon::parse($date)->toDateString() : null;
+        }
 
-            // Ensure last name is not null (avoid integrity constraint error)
-            if (empty($lastName)) {
-                $this->command->error("Skipping entry: Last Name cannot be null. Record: " . json_encode($record));
+        foreach ($csv as $record) {
+            $fullName = $record['Full Name'] ?? null;
+
+            if (empty($fullName)) {
+                $this->command->error("Skipping entry: Full Name cannot be null. Record: " . json_encode($record));
                 continue;
             }
 
-            // Insert into the database
             OrganizedTraining::create([
-                'first_name' => $firstName,
-                'middle_name' => $middleName,
-                'last_name' => $lastName,
+                'full_name' => $fullName,
                 'contributing_unit' => $record['Contributing Unit'] ?? null,
                 'title' => $record['Title of the Event'] ?? null,
-                'start_date' => $record['Start Date'] ?? null,
-                'end_date' => $record['End Date'] ?? null,
+                'start_date' => formatDate($record['Start Date']),
+                'end_date' => formatDate($record['End Date']),
                 'special_notes' => $record['Special Notes about the Schedule'] ?? null,
-                'resource_persons' => substr($record['Resource Person(s)'] ?? null, '', 0, 255),
+                'resource_persons' => substr($record['Resource Person(s)'] ?? null, 0, 255),
                 'activity_category' => $record['Type of Activity Organized'] ?? null,
                 'venue' => $record['Venue'] ?? null,
                 'total_trainees' => toIntOrNull($record['Total Number of Trainees']),

@@ -28,21 +28,20 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-        
-        
+
+
             ->brandLogo(asset('brand3 (1).svg'))
             ->brandLogoHeight('100px')
             ->darkModeBrandLogo('/brand4.svg')
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
-            ->path('admin')
+            ->path('cpaf')
             ->darkMode(true)
             ->databaseNotifications()
             ->login()
-            
-            
-            //->registration(Register::class) 
+
+            //->registration(Register::class)
             ->plugins([
                 FilamentEditProfilePlugin::make()
                     ->setIcon('heroicon-o-user')
@@ -51,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
                         directory: 'avatars' // Corrected path
                     )
             ])
-            
+
             ->colors([
         'primary' => '#2b3189',
             'secondary' => '#175b40',
@@ -64,7 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 // Pages\Dashboard::class,
             ])
-            
+
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 //Widgets\AccountWidget::class,
@@ -84,8 +83,8 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->brandName('CPAf Intranet');  
-            
+            ->brandName('CPAf Intranet');
+
         }
-    
+
 }

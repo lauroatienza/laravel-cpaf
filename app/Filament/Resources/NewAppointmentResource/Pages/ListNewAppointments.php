@@ -14,6 +14,7 @@ class ListNewAppointments extends ListRecords
     {
         return [
             //Actions\CreateAction::make()->label('Create Appointment'),
-        ];
+            
+        ]; 
     }
 }

@@ -1,16 +1,1 @@
 @import '/vendor/filament/filament/resources/css/theme.css';
-
-.fi-topbar > nav {
-    background-color: inherit !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-.fi-sidebar-header {
-    background-color: inherit !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-
-

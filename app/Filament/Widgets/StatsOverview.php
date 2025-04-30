@@ -42,23 +42,23 @@ class StatsOverview extends BaseWidget
             return [
                 Stat::make('Total: Faculty and REPS', User::whereIn('staff', ['faculty', 'representatives'])->count())
                     ->chart([1, 3, 5])
-                    ->color('success'),
+                    ->color('primary'),
 
                 Stat::make('Total: Research Project', Research::whereBetween('start_date', [$startDate, $endDate])->count())
                     ->chart([1, 3, 5])
-                    ->color('success'),
+                    ->color('primary'),
 
                 Stat::make('Total: Extension', Extension::whereBetween('activity_date', [$startDate, $endDate])->count()) // Use activity_date for Extension
                     ->chart([1, 3, 5])
-                    ->color('success'),
+                    ->color('primary'),
 
                 Stat::make('Total: Training Organized', TrainingOrganize::whereBetween('start_date', [$startDate, $endDate])->count())
                     ->chart([1, 3, 5])
-                    ->color('success'),
+                    ->color('secondary'),
 
                 Stat::make('Total: Publications', ChapterInBook::count())
                     ->chart([1, 3, 5])
-                    ->color('success'),
+                    ->color('secondary'),
 
                 Stat::make('Total: Awards', AwardsRecognitions::whereBetween('date_awarded', [$startDate, $endDate])->count()) // Use date_awarded for Awards
                     ->chart([1, 3, 5])
