@@ -30,44 +30,66 @@ class OrganizedTrainingResource extends Resource
     protected static ?string $label = 'Organized Training';
 
     public static function getNavigationBadge(): ?string
-{
-    
-    $user = Auth::user();
+    {
 
-    // If the user is an admin, show the total count
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return static::$model::count();
+        $user = Auth::user();
+
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
+        }
+
+        // Name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+
+        // New: Lastname, F.M. format
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
+
+        // Titles to strip
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+        // Prepare SQL REPLACE chain
+        $replacer = 'full_name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
+
+        // Normalizer function
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+        // Normalize all formats
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+        // Final query
+        return static::$model::where(function ($query) use ($replacer, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $normalizedReversedInitials) {
+            $query->whereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+        })->count();
+
     }
-
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-    // List of titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-    // Function to normalize names by removing titles and extra spaces
-    $normalizeName = function ($name) use ($titles) {
-        return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
-    };
-
-    // Normalize names
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
-
-    return static::$model::where(function ($query) use ($user, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-        $query->whereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(middle_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedFullName%"])
-        ->orWhereRaw("LOWER(CONCAT(TRIM(last_name), ', ', TRIM(first_name), ' ', TRIM(middle_name))) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-        ->orWhereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
-    })->count();
-
-}
 
     public static function getNavigationBadgeColor(): string
     {
-        return 'primary'; 
+        return 'primary';
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -91,57 +113,57 @@ class OrganizedTrainingResource extends Resource
 
                                 $set('related_extension_program', $matchedProgram?->title_of_extension_program);
                             }),
-                    Select::make('contributing_unit')->label('Contributing Unit')
-                        ->options([
-                            'CSPPS' => 'CSPPS',
-                            'CISC' => 'CISC',
-                            'IGRD' => 'IGRD',
-                            'CPAf' => 'CPAf',
-                        ])
-                        ->required(),
-                    TextInput::make('title')->label('Title of the Event')->required(),
-                    Grid::make(2)->schema([
-                        DatePicker::make('start_date')->label('Start Date')->required(),
-                        DatePicker::make('end_date')->label('End Date')->required(),
+                        Select::make('contributing_unit')->label('Contributing Unit')
+                            ->options([
+                                'CSPPS' => 'CSPPS',
+                                'CISC' => 'CISC',
+                                'IGRD' => 'IGRD',
+                                'CPAf' => 'CPAf',
+                            ])
+                            ->required(),
+                        TextInput::make('title')->label('Title of the Event')->required(),
+                        Grid::make(2)->schema([
+                            DatePicker::make('start_date')->label('Start Date')->required(),
+                            DatePicker::make('end_date')->label('End Date')->required(),
+                        ]),
+                        Textarea::make('special_notes')->label('Special Notes'),
+                        Textarea::make('resource_persons')->label('Resource Person(s)')
+                            ->nullable(),
+                        Select::make('activity_category')->label('Activity Category')
+                            ->options([
+                                'Training/Workshop' => 'Training/Workshop',
+                                'Seminar/Forum/Round Table' => 'Seminar/Forum/Round Table',
+                            ])
+                            ->required(),
+                        TextInput::make('venue')->label('Venue')->required(),
                     ]),
-                    Textarea::make('special_notes')->label('Special Notes'),
-                    Textarea::make('resource_persons')->label('Resource Person(s)')
-                        ->nullable(),
-                    Select::make('activity_category')->label('Activity Category')
-                        ->options([
-                            'Training/Workshop' => 'Training/Workshop',
-                            'Seminar/Forum/Round Table' => 'Seminar/Forum/Round Table',
-                        ])
-                        ->required(),
-                    TextInput::make('venue')->label('Venue')->required(),
-                ]),
 
-            Section::make('Trainee Details')
-                ->schema([
-                    TextInput::make('total_trainees')->label('Total Trainees')->helperText('Formula: Total Number of Trainees X Weight Value. 
+                Section::make('Trainee Details')
+                    ->schema([
+                        TextInput::make('total_trainees')->label('Total Trainees')->helperText('Formula: Total Number of Trainees X Weight Value. 
                     Weight Value: (<8 hours = 0.5; 8 hours (1 day) = 1, 3-4 days = 1.5; 5 days or (discontinued)')->numeric(),//->required(),
-                    TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(),
-                    TextInput::make('training_hours')->label('Training Hours')->numeric(),//->required(),
-                    Select::make('funding_source')->label('Funding Source')
-                        ->options([
-                            'UP Entity' => 'UP Entity',
-                            'RP Government Entity or Public Sector Entity' => 'RP Government Entity or Public Sector Entity',
-                            'RP Private Sector Entity' => 'RP Private Sector Entity',
-                            'Foreign or Non-Domestic Entity' => 'Foreign or Non-Domestic Entity',
-                        ])
+                        TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(),
+                        TextInput::make('training_hours')->label('Training Hours')->numeric(),//->required(),
+                        Select::make('funding_source')->label('Funding Source')
+                            ->options([
+                                'UP Entity' => 'UP Entity',
+                                'RP Government Entity or Public Sector Entity' => 'RP Government Entity or Public Sector Entity',
+                                'RP Private Sector Entity' => 'RP Private Sector Entity',
+                                'Foreign or Non-Domestic Entity' => 'Foreign or Non-Domestic Entity',
+                            ])
                         //->required(),
-                ]),
+                    ]),
 
-            Section::make('Survey Responses')
-                ->schema([
-                    TextInput::make('sample_size')->label('Sample Size')->numeric(),
-                    TextInput::make('responses_poor')->label('Number of Responses - Poor/Below Fair')->numeric(),
-                    TextInput::make('responses_fair')->label('Number of Responses - Fair')->numeric(),
-                    TextInput::make('responses_satisfactory')->label('Number of Responses - Satisfactory')->numeric(),
-                    TextInput::make('responses_very_satisfactory')->label('Number of Responses - Very Satisfactory')->numeric(),
-                    TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
-                ]),
-                
+                Section::make('Survey Responses')
+                    ->schema([
+                        TextInput::make('sample_size')->label('Sample Size')->numeric(),
+                        TextInput::make('responses_poor')->label('Number of Responses - Poor/Below Fair')->numeric(),
+                        TextInput::make('responses_fair')->label('Number of Responses - Fair')->numeric(),
+                        TextInput::make('responses_satisfactory')->label('Number of Responses - Satisfactory')->numeric(),
+                        TextInput::make('responses_very_satisfactory')->label('Number of Responses - Very Satisfactory')->numeric(),
+                        TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
+                    ]),
+
                 Section::make('Supporting Documents')
                     ->schema([
                         Select::make('related_extension_program')
@@ -151,33 +173,28 @@ class OrganizedTrainingResource extends Resource
                                 if (!$user) {
                                     return [];
                                 }
-                
+
                                 $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
                                 $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
                                 $simpleName = trim("{$user->name} {$user->last_name}");
-                
+
                                 $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
                                 $normalizeName = function ($name) use ($titles) {
                                     return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
                                 };
-                
+
                                 $normalizedFullName = $normalizeName($fullName);
                                 $normalizedFullNameReversed = $normalizeName($fullNameReversed);
                                 $normalizedSimpleName = $normalizeName($simpleName);
-                
+
                                 // Fetching related extension programs
-                                $relatedPrograms = \App\Models\ExtensionPrime::where(function ($query) use (
-                                    $normalizedFullName,
-                                    $normalizedFullNameReversed,
-                                    $normalizedSimpleName,
-                                    $user
-                                ) {
+                                $relatedPrograms = \App\Models\ExtensionPrime::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $user) {
                                     $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
                                         ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
                                         ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
                                         ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
                                 })->get();
-                
+
                                 // Prepare options for the dropdown
                                 return $relatedPrograms->mapWithKeys(function ($program) {
                                     return [$program->id => $program->project_article]; // You can adjust this based on the column name you want to display in the dropdown.
@@ -185,171 +202,101 @@ class OrganizedTrainingResource extends Resource
                             })
                             ->searchable() // This makes the dropdown searchable
                             ->placeholder('Select related extension program'),
-                            //->required(),
-                
+                        //->required(),
+
                         TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
                         TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)'),
-                        
+
                         TextInput::make('relevant_documents')->label('Documents Link'),
-                
+
                         TextInput::make('project_title')
                             ->label('Project Title')
-                            ->default(function () {
-                                $user = Auth::user();
-                                if (!$user) {
-                                    return null;
-                                }
-                
-                                $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-                                $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-                                $simpleName = trim("{$user->name} {$user->last_name}");
-                
-                                $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-                                $normalizeName = function ($name) use ($titles) {
-                                    return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
-                                };
-                
-                                $normalizedFullName = $normalizeName($fullName);
-                                $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-                                $normalizedSimpleName = $normalizeName($simpleName);
-                
-                                $match = \App\Models\ExtensionPrime::where(function ($query) use (
-                                    $normalizedFullName,
-                                    $normalizedFullNameReversed,
-                                    $normalizedSimpleName,
-                                    $user
-                                ) {
-                                    $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
-                                        ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
-                                })->first();
-                
-                                return $match?->project_article;
-                            })
-                            ->disabled(),
-                    ]),                
+                    
+                    ]),
 
-            Section::make()
-                ->schema([
-                    TextInput::make('related_research_program')
-                        ->label('Related Research Program')
-                        ->default(function () {
-                            $user = Auth::user();
+                Section::make()
+                    ->schema([
+                        TextInput::make('related_research_program')
+                            ->label('Related Research Program')
+                            ->columnSpan('full')
+                    ])
 
-                            if (!$user) return null;
+            ]);
+    }
 
-                            // Normalize helper
-                            $normalize = function ($value) {
-                                $value = strtolower($value);
-                                $value = str_replace(
-                                    ['Dr.', 'Prof.', 'Project Leader', 'Program Leader', 'Study Leaders', 'Project Staff', 'Associate', 'Assistant', 'Program experts', 'Site Coordinator', 'Operations Manager', 'Specialist', 'Part-time URA', 'RAs', 'Enumerators', '(', ')', ':', ';', '-', '\n'],
-                                    '',
-                                    $value
-                                );
-                                $value = preg_replace('/[^a-zA-Z\s]/', '', $value); // remove any remaining symbols
-                                return trim(preg_replace('/\s+/', ' ', $value)); // collapse multiple spaces
-                            };
 
-                            // Build variations of the user's name
-                            $fullName = $normalize("{$user->first_name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-                            $fullNameReversed = $normalize("{$user->last_name}, {$user->first_name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-                            $simpleName = $normalize("{$user->first_name} {$user->last_name}");
-
-                            // Match against all research name_of_researchers
-                            $match = Research::get()->first(function ($research) use ($normalize, $fullName, $fullNameReversed, $simpleName) {
-                            $field = $research->name_of_researchers ?? '';
-
-                            // Flatten and normalize the field
-                            $cleaned = $normalize($field);
-
-                            return Str::contains($cleaned, $fullName)
-                                || Str::contains($cleaned, $fullNameReversed)
-                                || Str::contains($cleaned, $simpleName);
-                        });
-
-                        return $match?->title ?? null;
-                    })
-                    ->disabled()
-                    ->columnSpan('full')
+    public static function table(Tables\Table $table): Tables\Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('full_name')->label('Full Name')->searchable(),
+                TextColumn::make('title')->label('Title')->searchable()
+                    ->limit(20)
+                    ->tooltip(fn($state) => $state),
+                TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
+                TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
+                BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
             ])
-            
-        ]);
-}
+            ->filters([])
+            ->headerActions([
+                // Custom create button
+                Tables\Actions\CreateAction::make()
+                    ->label('Create Organized Training')
+                    ->color('secondary')
+                    ->icon('heroicon-o-pencil-square'),
+
+                Tables\Actions\Action::make('exportAll')
+                    ->label('Export')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn(array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
+            ])
+
+            ->actions([
+                Actions\ViewAction::make(),
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('exportBulk')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn(array $data, $records) => static::exportData($records, $data['format'])),
+            ])
+            ->selectable();
+    }
 
 
-public static function table(Tables\Table $table): Tables\Table
-{
-    return $table
-        ->columns([
-            TextColumn::make('full_name')->label('Full Name')->searchable(),
-            TextColumn::make('title')->label('Title')->searchable()
-                ->limit(20)
-                ->tooltip(fn ($state) => $state),
-            TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
-            TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
-            BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
-        ])
-        ->filters([])
-        ->headerActions([
-            // Custom create button
-            Tables\Actions\CreateAction::make()
-                ->label('Create Organized Training')
-                ->color('secondary')
-                ->icon('heroicon-o-pencil-square'),
-        
-            Tables\Actions\Action::make('exportAll')
-                ->label('Export')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->form([
-                    Forms\Components\Select::make('format')
-                        ->options([
-                            'csv' => 'CSV',
-                            'pdf' => 'PDF',
-                        ])
-                        ->label('Export Format')
-                        ->required(),
-                ])
-                ->action(fn (array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
-        ])
-        
-        ->actions([
-            Actions\ViewAction::make(),
-            Actions\EditAction::make(),
-            Actions\DeleteAction::make(),
-        ])
-        ->bulkActions([
-            Actions\DeleteBulkAction::make(),
-            Tables\Actions\BulkAction::make('exportBulk')
-                ->label('Export Selected')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->requiresConfirmation()
-                ->form([
-                    Forms\Components\Select::make('format')
-                        ->options([
-                            'csv' => 'CSV',
-                            'pdf' => 'PDF',
-                        ])
-                        ->label('Export Format')
-                        ->required(),
-                ])
-                ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
-        ])
-        ->selectable(); 
-}
-
-    
     public static function exportData($records, $format)
     {
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-    
+
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, ['First Name', 'Last Name', 'Title', 'Start Date', 'End Date']);
-    
+
                 foreach ($records as $record) {
                     fputcsv($handle, [
                         $record->first_name,
@@ -359,16 +306,16 @@ public static function table(Tables\Table $table): Tables\Table
                         $record->end_date,
                     ]);
                 }
-    
+
                 fclose($handle);
             }, 'organized_trainings.csv');
         }
-    
+
         if ($format === 'pdf') {
             $pdf = Pdf::loadView('exports.organized_trainings', ['records' => $records]);
-            return response()->streamDownload(fn () => print($pdf->output()), 'organized_trainings.pdf');
+            return response()->streamDownload(fn() => print ($pdf->output()), 'organized_trainings.pdf');
         }
-    }    
+    }
 
 
     public static function getRelations(): array
@@ -386,7 +333,7 @@ public static function table(Tables\Table $table): Tables\Table
     }
     public static function getEloquentQuery(): Builder
 {
-    //$user = Auth::user();
+    $user = Auth::user();
 
     $userUnit = auth()->user()->unit;
 
@@ -396,28 +343,49 @@ public static function table(Tables\Table $table): Tables\Table
                 ->orWhere('contributing_unit', 'like', '%CPAF%');
         });
 
-    // If the user is an admin, return all records
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return parent::getEloquentQuery();
-    }
+        // If the user is an admin, return all records
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
 
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
+        // Build possible name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
 
-    // List of titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+        // New format: Lastname, F.M.
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
 
-    // Function to normalize names by removing titles and extra spaces
-    $normalizeName = function ($name) use ($titles) {
-        return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
-    };
+        // Titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
 
-    // Normalize names
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
+        // Function to normalize names
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+        // Normalize each name variant
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+        // Create full REPLACE chain for SQL title-stripping
+        $replacer = 'full_name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
 
     return parent::getEloquentQuery()
         ->where(function ($query) use ($user, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {

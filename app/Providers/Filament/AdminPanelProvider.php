@@ -28,15 +28,14 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-        
-        
+            
             ->brandLogo(asset('brand3 (1).svg'))
             ->brandLogoHeight('100px')
             ->darkModeBrandLogo('/brand4.svg')
             ->default()
             ->id('admin')
             ->sidebarCollapsibleOnDesktop()
-            ->path('admin')
+            ->path('cpaf')
             ->darkMode(true)
             ->databaseNotifications()
             ->login()
