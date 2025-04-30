@@ -386,7 +386,15 @@ public static function table(Tables\Table $table): Tables\Table
     }
     public static function getEloquentQuery(): Builder
 {
-    $user = Auth::user();
+    //$user = Auth::user();
+
+    $userUnit = auth()->user()->unit;
+
+    return parent::getEloquentQuery()
+        ->where(function ($query) use ($userUnit) {
+            $query->where('contributing_unit', $userUnit)
+                ->orWhere('contributing_unit', 'like', '%CPAF%');
+        });
 
     // If the user is an admin, return all records
     if ($user->hasRole(['super-admin', 'admin'])) {
@@ -414,8 +422,8 @@ public static function table(Tables\Table $table): Tables\Table
     return parent::getEloquentQuery()
         ->where(function ($query) use ($user, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
             $query->whereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(middle_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                  ->orWhereRaw("LOWER(CONCAT(TRIM(last_name), ', ', TRIM(first_name), ' ', TRIM(middle_name))) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                  ->orWhereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+                ->orWhereRaw("LOWER(CONCAT(TRIM(last_name), ', ', TRIM(first_name), ' ', TRIM(middle_name))) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                ->orWhereRaw("LOWER(CONCAT(TRIM(first_name), ' ', TRIM(last_name))) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
         });
 }
 

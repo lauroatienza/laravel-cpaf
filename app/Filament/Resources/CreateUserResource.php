@@ -51,7 +51,7 @@ class CreateUserResource extends Resource
     }
     public static function getNavigationBadgeColor(): string
     {
-        return 'secondary';
+        return 'primary';
     }
     public static function form(Form $form): Form
     {
@@ -294,7 +294,7 @@ class CreateUserResource extends Resource
                             ->required(),
                     ])
                     ->modalButton('Download')
-                    ->color('gray')
+                    ->color('primary')
                     ->action(function (array $data) {
                         $users = User::where('staff', $data['role'])->get();
                         $pdf = Pdf::loadView('exports.faculty', compact('users'));

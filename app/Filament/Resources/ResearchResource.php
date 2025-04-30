@@ -80,8 +80,8 @@ class ResearchResource extends Resource
 
     return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
         $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+            ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+            ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
     })->count();
 }
 
@@ -116,8 +116,7 @@ class ResearchResource extends Resource
 
                 TextInput::make('title')->label('Title')->required(),
 
-                Select::make('faculty_id')
-                     ,
+                Select::make('faculty_id'),
 
 
 
@@ -253,7 +252,7 @@ class ResearchResource extends Resource
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
                     ->sortable()->searchable(),
                 IconColumn::make('pbms_upload_status')
-                     ->icon(fn (string $state): string => match ($state) {
+                    ->icon(fn (string $state): string => match ($state) {
                             'uploaded' => 'heroicon-o-check-badge',
                             'pending' => 'heroicon-o-clock',
                 })
@@ -407,8 +406,8 @@ class ResearchResource extends Resource
     return parent::getEloquentQuery()
         ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
             $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+                ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
         });
 }
 

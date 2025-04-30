@@ -1,5 +1,5 @@
 <?php
- 
+
 namespace App\Filament\Pages;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -8,12 +8,11 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use App\Filament\Widgets\CalendarWidget;
 use App\Filament\Widgets\StatsOverview;
- 
+
 class Dashboard extends \Filament\Pages\Dashboard
 {
- use HasFiltersForm;
- public function filtersForm(Form $form): Form
- {
+use HasFiltersForm;
+public function filtersForm(Form $form): Form{
 
     return $form->schema([
         Section::make('')->schema([
@@ -23,7 +22,6 @@ class Dashboard extends \Filament\Pages\Dashboard
     ]);
 
     
- } 
- 
- 
+} 
+
 }
