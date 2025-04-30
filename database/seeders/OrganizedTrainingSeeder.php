@@ -1,18 +1,18 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\OrganizedTraining;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\Reader;
+use Carbon\Carbon; // Added for date formatting
 
 class OrganizedTrainingSeeder extends Seeder
 {
     public function run()
     {
         // Ensure the file exists in storage/app
-        $filePath = storage_path('app/imports/OrganizedTraining.csv');
+        $filePath = storage_path('app/Training_Seminar Organized 2025.csv');
 
         if (!file_exists($filePath)) {
             $this->command->error("File not found: $filePath");
@@ -26,6 +26,12 @@ class OrganizedTrainingSeeder extends Seeder
         // Function to convert empty strings to null for integer fields
         function toIntOrNull($value) {
             return is_numeric($value) ? (int) $value : null;
+        }
+
+        // Function to safely format dates
+        function formatDate($date) {
+            // If the date is not empty, try to format it using Carbon, otherwise return null
+            return !empty($date) ? Carbon::parse($date)->toDateString() : null;
         }
 
         foreach ($csv as $record) {
@@ -47,10 +53,10 @@ class OrganizedTrainingSeeder extends Seeder
                 'last_name' => $lastName,
                 'contributing_unit' => $record['Contributing Unit'] ?? null,
                 'title' => $record['Title of the Event'] ?? null,
-                'start_date' => $record['Start Date'] ?? null,
-                'end_date' => $record['End Date'] ?? null,
+                'start_date' => formatDate($record['Start Date']), // Fixed date format
+                'end_date' => formatDate($record['End Date']), // Fixed date format
                 'special_notes' => $record['Special Notes about the Schedule'] ?? null,
-                'resource_persons' => substr($record['Resource Person(s)'] ?? null, '', 0, 255),
+                'resource_persons' => substr($record['Resource Person(s)'] ?? null, 0, 255), // Corrected substr usage
                 'activity_category' => $record['Type of Activity Organized'] ?? null,
                 'venue' => $record['Venue'] ?? null,
                 'total_trainees' => toIntOrNull($record['Total Number of Trainees']),

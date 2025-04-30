@@ -305,9 +305,15 @@ public static function table(Tables\Table $table): Tables\Table
 {
     return $table
         ->columns([
-            TextColumn::make('first_name')->label('First Name')->searchable(),
-            TextColumn::make('last_name')->label('Last Name')->searchable(),
-            TextColumn::make('title')->label('Title')->searchable()
+            TextColumn::make('first_name')
+            ->label('First Name')
+            ->searchable(),
+            TextColumn::make('last_name')
+            ->label('Last Name')
+            ->searchable(),
+            TextColumn::make('title')
+            ->label('Title')
+            ->searchable()
                 ->limit(20)
                 ->tooltip(fn ($state) => $state),
             TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
