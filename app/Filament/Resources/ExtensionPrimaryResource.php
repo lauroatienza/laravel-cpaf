@@ -107,27 +107,51 @@ class ExtensionPrimaryResource extends Resource
     {
         return $form
             ->schema([
+                Select::make('contributing_unit')->label('Contributing Unit')
+                ->options([
+                    'CSPPS' => 'CSPPS',
+                    'CISC' => 'CISC',
+                    'CPAf' => 'CPAf',
+                    'IGRD' => 'IGRD',
+                ])->required(),
 
-                TextInput::make('contributing_unit')->label('Contributing Unit'),
+                DatePicker::make('start_date')
+                ->label('Start Date (mm/dd/yyyy)')
+                ->format('Y/m/d')->required(),
 
-                DatePicker::make('start_date')->label('Start Date (mm/dd/yyyy)'),
-                DatePicker::make('end_date')->label('End Date based on actual completion (mm/dd/yyyy)'),
-                DatePicker::make('extension_date')->label('Extension Date'),
+                DatePicker::make('end_date')
+                ->label('End Date based on actual completion')
+                ->format('Y/m/d')->required(),
+
+                DatePicker::make('extension_date')
+                ->label('Extension Date')
+                ->format('Y/m/d')->required(),
 
                 Select::make('status')
                     ->label('Status')
                     ->options([
                         'Completed' => 'Completed',
                         'On-going' => 'On-going',
-                    ]),
+                    ])->required(),
 
-                TextInput::make('title_of_extension_program')->label('Title of Extension Program'),
-                Textarea::make('objectives')->label('Objectives'),
-                Textarea::make('expected_output')->label('Expected Output/Scope of Work'),
+                TextInput::make('title_of_extension_program')
+                ->label('Title of Extension Program')
+                ->required(),
 
-                TextInput::make('original_timeframe_months')->label('Number of Months in Original Timeframe')->numeric(),
+                Textarea::make('objectives')
+                ->label('Objectives'),
 
-                TextInput::make('researcher_names')->label('Name of Researcher/s or Extensionist'),
+                Textarea::make('expected_output')
+                ->label('Expected Output/Scope of Work'),
+
+                TextInput::make('original_timeframe_months')
+                ->label('Number of Months in Original Timeframe')
+                ->numeric(),
+
+                TextInput::make('researcher_names')
+                ->label('Name of Researcher/s or Extensionist')
+                ->required(),
+
                 TextInput::make('project_leader')->label('Project Leader'),
 
                 TextInput::make('source_of_funding')->label('Source of Funding'),
@@ -171,7 +195,6 @@ class ExtensionPrimaryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id_no')->label('ID No.')->sortable(),
                 TextColumn::make('contributing_unit')->label('Contributing Unit')->sortable()->searchable(),
                 TextColumn::make('start_date')->label('Start Date')->sortable(),
                 TextColumn::make('end_date')->label('End Date')->sortable(),
@@ -260,7 +283,6 @@ class ExtensionPrimaryResource extends Resource
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, [
-                    'ID No.',
                     'Contributing Unit',
                     'Start Date',
                     'End Date',
@@ -281,7 +303,6 @@ class ExtensionPrimaryResource extends Resource
 
                 foreach ($records as $record) {
                     fputcsv($handle, [
-                        $record->id_no,
                         $record->contributing_unit,
                         $record->start_date,
                         $record->end_date,
