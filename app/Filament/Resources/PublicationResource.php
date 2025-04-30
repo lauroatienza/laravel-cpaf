@@ -363,7 +363,7 @@
 
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Add new Publication')
+                    ->label('New Publication')
                     ->color('secondary')
                     ->icon('heroicon-o-pencil-square'),
 

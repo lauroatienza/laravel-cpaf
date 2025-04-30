@@ -275,7 +275,6 @@ class TrainingAttendedResource extends Resource
         return [
             'index' => Pages\ListTrainingAttendeds::route('/'),
             'create' => Pages\CreateTrainingAttended::route('/create'),
-            // 'view' => Pages\ViewTrainingAttended::route('/{record}'),
             'edit' => Pages\EditTrainingAttended::route('/{record}/edit'),
         ];
     }
