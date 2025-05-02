@@ -80,8 +80,8 @@ class ResearchResource extends Resource
 
     return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
         $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-            ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-            ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
     })->count();
 }
 
@@ -100,7 +100,7 @@ class ResearchResource extends Resource
                     'CISC' => 'CISC',
                     'CPAf' => 'CPAf',
                     'IGRD' => 'IGRD',
-                ])->required(),
+                ])->required()->default('CPAf'),
 
                 DatePicker::make('start_date')->label('Start Date')
                     ->format('Y/m/d')->required(),
@@ -116,7 +116,8 @@ class ResearchResource extends Resource
 
                 TextInput::make('title')->label('Title')->required(),
 
-                Select::make('faculty_id'),
+                Select::make('faculty_id')
+                     ,
 
 
 
@@ -124,7 +125,7 @@ class ResearchResource extends Resource
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
 
-                RichEditor::make('event_highlight')->columnSpan('full')->nullable(),
+                RichEditor::make('event_highlight')->columnSpan('full'),
 
                 Select::make('has_gender_component')->label('Has gender component')
                 ->options([
@@ -134,12 +135,12 @@ class ResearchResource extends Resource
 
 
 
-                RichEditor::make('objectives')->columnSpan('full')->nullable(),
-                RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output')->nullable(),
-                TextInput::make('no_months_orig_timeframe')->label('Months No. from Original Timeframe'),
+                RichEditor::make('objectives')->columnSpan('full'),
+                RichEditor::make('expected_output')->columnSpan('full'),
+                TextInput::make('no_months_orig_timeframe')->default('N/A')->label('Months No. from original timeframe'),
                 TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
 
-                TextInput::make('source_funding')->required()->label('Source Funding'),
+                TextInput::make('source_funding')->required(),
                 Select::make('category_source_funding')->label('Source of Funding Category')
                 ->options([
                     'UP Entity' => 'UP Entity',
@@ -222,17 +223,11 @@ class ResearchResource extends Resource
                     ->sortable()->searchable()->limit(18)
                     ->tooltip(fn ($state) => $state),
                 TextColumn::make('objectives')->label('Objectives')
-                    ->sortable()
-                    ->searchable()
-                    ->limit(18)
-                    ->html()
-                    ->tooltip(fn ($state) => strip_tags($state)),
+                ->sortable()->searchable()->limit(18)
+                ->tooltip(fn ($state) => $state),
                 TextColumn::make('expected_output')->label('Expected Output')
-                    ->sortable()
-                    ->searchable()
-                    ->limit(18)
-                    ->html()
-                    ->tooltip(fn ($state) => strip_tags($state)),
+                    ->sortable()->searchable()->limit(18) // Only show first 20 characters
+                    ->tooltip(fn ($state) => $state),
                 TextColumn::make('name_of_researchers')->label("Name of Researchers")
                     ->sortable()->searchable()
                     ->limit(10) // Only show first 20 characters
@@ -252,7 +247,7 @@ class ResearchResource extends Resource
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
                     ->sortable()->searchable(),
                 IconColumn::make('pbms_upload_status')
-                    ->icon(fn (string $state): string => match ($state) {
+                     ->icon(fn (string $state): string => match ($state) {
                             'uploaded' => 'heroicon-o-check-badge',
                             'pending' => 'heroicon-o-clock',
                 })
@@ -303,14 +298,7 @@ class ResearchResource extends Resource
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('exportBulk')
-                        ->label('Export Selected')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->requiresConfirmation()
-                        ->action(fn ($records) => static::exportData($records)),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -407,8 +395,8 @@ class ResearchResource extends Resource
     return parent::getEloquentQuery()
         ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
             $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
         });
 }
 

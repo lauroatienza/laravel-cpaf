@@ -157,15 +157,15 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Survey Responses')
                     ->schema([
                         TextInput::make('sample_size')->label('Sample Size')->numeric(),
-                        //Placeholder::make('Responses Count'),//->label('Responses'),
                         Grid::make('5')->schema([
                             TextInput::make('responses_poor')->label('Poor/Below Fair')->numeric(),
                             TextInput::make('responses_fair')->label('Fair')->numeric(),
                             TextInput::make('responses_satisfactory')->label('Satisfactory')->numeric(),
                             TextInput::make('responses_very_satisfactory')->label('Very Satisfactory')->numeric(),
                             TextInput::make('responses_outstanding')->label('Outstanding')->numeric(),
-                    ])
-                ]),
+                        ])
+                    ]),
+
 
                 Section::make('Supporting Documents')
                     ->schema([
@@ -200,7 +200,7 @@ class OrganizedTrainingResource extends Resource
 
                                 // Prepare options for the dropdown
                                 return $relatedPrograms->mapWithKeys(function ($program) {
-                                    return [$program->id => $program->project_article]; // You can adjust this based on the column name you want to display in the dropdown.
+                                    return [$program->id => $program->project_article];
                                 });
                             })
                             ->searchable() // This makes the dropdown searchable
@@ -215,6 +215,7 @@ class OrganizedTrainingResource extends Resource
 
                         TextInput::make('project_title')
                             ->label('Project Title')
+
 
                     ]),
 
@@ -233,10 +234,8 @@ class OrganizedTrainingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('full_name')->label('Full Name')->searchable(),
-                TextColumn::make('title')->label('Title')->searchable()
-                    ->limit(20)
-                    ->tooltip(fn($state) => $state),
+                TextColumn::make('full_name')->label('Full Name')->searchable()->tooltip(fn($state) => $state),
+                TextColumn::make('title')->label('Title')->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
@@ -357,7 +356,7 @@ class OrganizedTrainingResource extends Resource
                   ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
         });
 
-    
+
 }
 
 
