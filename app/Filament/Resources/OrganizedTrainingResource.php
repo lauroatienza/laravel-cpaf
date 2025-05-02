@@ -242,51 +242,11 @@ class OrganizedTrainingResource extends Resource
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
             ])
             ->filters([])
-            ->headerActions([
-                // Custom create button
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Organized Training')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Tables\Actions\Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn(array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
-            ])
-
             ->actions([
                 Actions\ViewAction::make(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Actions\DeleteBulkAction::make(),
-                Tables\Actions\BulkAction::make('exportBulk')
-                    ->label('Export Selected')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->requiresConfirmation()
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn(array $data, $records) => static::exportData($records, $data['format'])),
-            ])
-            ->selectable();
+            ]);
     }
 
 
@@ -299,15 +259,15 @@ class OrganizedTrainingResource extends Resource
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
-                fputcsv($handle, ['First Name', 'Last Name', 'Title', 'Start Date', 'End Date']);
+                fputcsv($handle, ['Full Name', 'Title', 'Start Date', 'End Date', 'Contributing Unit']);
 
                 foreach ($records as $record) {
                     fputcsv($handle, [
-                        $record->first_name,
-                        $record->last_name,
+                        $record->full_name,
                         $record->title,
                         $record->start_date,
                         $record->end_date,
+                        $record->contributing_unit,
                     ]);
                 }
 
