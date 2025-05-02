@@ -45,7 +45,6 @@
     <table>
         <thead>
             <tr>
-                <th>ID No.</th>
                 <th>Contributing Unit</th>
                 <th>Start Date</th>
                 <th>End Date</th>
@@ -60,7 +59,6 @@
         <tbody>
             @foreach ($records as $record)
                 <tr>
-                    <td>{{ $record->id_no }}</td>
                     <td>{{ $record->contributing_unit }}</td>
                     <td>{{ $record->start_date }}</td>
                     <td>{{ $record->end_date }}</td>

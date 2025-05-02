@@ -134,10 +134,10 @@ class TrainingAttendedResource extends Resource
                     ->required(),
 
                 Forms\Components\Textarea::make('highlights')
-                    ->label('Highlights of Event')
-                    ->rows(4)
+                    ->label('Highlights of the Event')
+                    ->rows(3)
                     ->nullable()
-                    ->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you')
+                    ->placeholder("Do not leave the box blank. Please put 'NA' if you have no answers. Thank you")
                     ->required(),
 
                 Forms\Components\Radio::make('has_gender_component')
@@ -151,7 +151,7 @@ class TrainingAttendedResource extends Resource
                 Forms\Components\TextInput::make('total_hours')
                     ->label('Total Hrs. Spent')
                     ->numeric()
-                    ->helperText('Please put "0" if you have no answer. Thank you')
+                    ->placeholder("Please put '0' if you have no answer. Thank you")
                     ->nullable(),
             ]);
     }
@@ -167,7 +167,7 @@ class TrainingAttendedResource extends Resource
                     ->limit(20)
                     ->tooltip(fn ($state) => $state),
 
-                Tables\Columns\TextColumn::make('unit_center')
+                Tables\Columns\BadgeColumn::make('unit_center')
                     ->label('Unit/Center')
                     ->sortable()
                     ->alignCenter(),
@@ -192,7 +192,7 @@ class TrainingAttendedResource extends Resource
                     ->tooltip(fn ($state) => $state),
 
                 Tables\Columns\TextColumn::make('highlights')
-                    ->label('Highlights of Event')
+                    ->label('Highlights of the Event')
                     ->sortable()
                     ->limit(20)
                     ->tooltip(fn ($state) => $state),
@@ -255,7 +255,7 @@ class TrainingAttendedResource extends Resource
                     $record->start_date,
                     $record->end_date,
                     $record->category,
-                    $record->training_title,// "Specific title"
+                    $record->training_title,
                     $record->has_gender_component ? 'Yes' : 'No',
                     $record->total_hours,
                 ]);
@@ -275,7 +275,6 @@ class TrainingAttendedResource extends Resource
         return [
             'index' => Pages\ListTrainingAttendeds::route('/'),
             'create' => Pages\CreateTrainingAttended::route('/create'),
-            // 'view' => Pages\ViewTrainingAttended::route('/{record}'),
             'edit' => Pages\EditTrainingAttended::route('/{record}/edit'),
         ];
     }

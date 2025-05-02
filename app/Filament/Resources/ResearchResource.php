@@ -100,7 +100,7 @@ class ResearchResource extends Resource
                     'CISC' => 'CISC',
                     'CPAf' => 'CPAf',
                     'IGRD' => 'IGRD',
-                ])->required()->default('CPAf'),
+                ])->required(),
 
                 DatePicker::make('start_date')->label('Start Date')
                     ->format('Y/m/d')->required(),

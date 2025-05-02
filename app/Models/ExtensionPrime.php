@@ -11,16 +11,12 @@ class ExtensionPrime extends Model
     use HasFactory;
 
     protected $table = 'extension'; 
-    protected $primaryKey = 'id_no';
-
     
-    public $incrementing = true; 
 
-    protected $keyType = 'int'; 
+    protected $keyType = 'string'; 
 
     public $timestamps = false;
     protected $fillable = [
-        'id_no',
         'name',
         'contributing_unit',
         'start_date',

@@ -138,7 +138,8 @@ class AwardsRecognitionsResource extends Resource
                 TextColumn::make('award_type')
                     ->label('Type of Award')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->tooltip(fn($state) => $state),
 
                 TextColumn::make('award_title')
                     ->label('Title of Paper or Award')

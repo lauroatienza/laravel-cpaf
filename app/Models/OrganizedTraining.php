@@ -10,7 +10,7 @@ class OrganizedTraining extends Model
     use HasFactory;
 
     protected $fillable = [
-        'full_name', 
+        'full_name',
         'contributing_unit', 'title', 'start_date', 'end_date',
         'special_notes', 'resource_persons', 'activity_category', 'venue',
         'total_trainees', 'weighted_trainees', 'training_hours',
