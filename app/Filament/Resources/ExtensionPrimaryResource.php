@@ -125,7 +125,7 @@ class ExtensionPrimaryResource extends Resource
 
                 DatePicker::make('extension_date')
                 ->label('Extension Date')
-                ->format('Y/m/d')->required(),
+                ->format('Y/m/d'),
 
                 Select::make('status')
                     ->label('Status')

@@ -7,7 +7,7 @@ use App\Http\Controllers\FileViewController;
 
 // Redirect root URL to admin login
 Route::get('/', function () {
-    return redirect('/cpaf');
+    return redirect('/cpaf/login');
 });
 
 // Document routes
