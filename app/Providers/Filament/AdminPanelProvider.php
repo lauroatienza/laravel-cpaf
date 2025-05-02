@@ -60,8 +60,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             
             ->colors([
-        'primary' => '#2b3189',
-            'secondary' => '#175b40',
+        'primary' => '#4ab7ff',
+            'secondary' => '#00573e',
 
             ])
             ->favicon(asset('cpaflogo.png'))// add favicon
