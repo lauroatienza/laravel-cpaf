@@ -31,6 +31,7 @@
     use Filament\Forms\Get;
     use Filament\Forms\Set;
     use Illuminate\Contracts\View\View;
+    use Filament\Tables\Columns\CheckboxColumn;
 
     class PublicationResource extends Resource
     {
@@ -78,7 +79,7 @@
                 ->schema([
                     Section::make('Section 1')
                     ->schema([
-                        TextInput::make('name')->label('Full Name')->required(),
+                        TextInput::make('name')->label('Full Name')->placeholder('First Name, Middle Initial, Last Name')->required(),
                         Select::make('contributing_unit')->label('Contributing Unit')->options([
                             'CISC' => 'CISC',
                             'CSPPS' => 'CSPPS',
@@ -134,7 +135,7 @@
                                 'International' => 'International',
                             ])->required(),
                             Textarea::make('editors')->label('Name of Editor(s)')->placeholder("Separate editors' names with semi-colons.\nExample: John Doe; Jane Smith; Alex Johnson ")->rows(3),
-                            TextInput::make('volume_issue')->label('Volume No. and Issue No.')->placeholder('Enter volume and issue number')->maxLength(255),
+                            TextInput::make('volume_issue')->label('Volume No. and Issue No.')->placeholder('Ex: Volume 1 Issue 3')->maxLength(255),
                             Grid::make(3)->schema([
                                 DatePicker::make('date_published')->label('Date Published or Accepted')->placeholder('Select date')->required(),
                                 DatePicker::make('conference_start_date')->label('Conference START Date')->placeholder('Select start date'),
@@ -151,7 +152,7 @@
                     Section::make('Section 3')
                         ->schema([
 
-                            Textarea::make('collection_database')->placeholder('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized:(Do not leave the box blank. Please put "NA" if you have no answers. Thank you)')->placeholder('Description')->required(),
+                            Textarea::make('collection_database')->placeholder('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized')->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')->required(),
                             Radio::make('web_science')->label('Web Science (formerly ISI)')->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('scopus')->label("Elsevier's Scopus")->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('science_direct')->label("Elsevier's ScienceDirect")->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
@@ -271,8 +272,8 @@
             ])
 
             ->bulkActions([
-                DeleteBulkAction::make(),
-                BulkAction::make('exportSelected')
+                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('exportSelected')
                     ->label('Export Selected (CSV)')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($records) {
