@@ -6,6 +6,9 @@ use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Blade;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Navigation\MenuItem;
+
+use Filament\Navigation\Topbar;
 use App\Models\Research;
 use App\Observers\UserObserver;
 use App\Observers\ResearchObserver;
@@ -33,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
             fn (): View => view('filament.login_extra') // Returns a View instance
         );
         
+    
+
         User::observe(UserObserver::class);
         Research::observe(ResearchObserver::class);
         
