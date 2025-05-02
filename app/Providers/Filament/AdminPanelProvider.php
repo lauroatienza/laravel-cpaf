@@ -41,8 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(true)
             ->databaseNotifications()
             ->login()
-<<<<<<< HEAD
-            
+
             ->userMenuItems([
                 // Custom item for Documentation link
                 UserMenuItem::make()
@@ -52,10 +51,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             
             //->registration(Register::class) 
-=======
 
-            //->registration(Register::class)
->>>>>>> 8cbe1d5da0b04e9c4e6e5182bfae89c50cde6290
             ->plugins([
                 FilamentEditProfilePlugin::make()
                     ->setIcon('heroicon-o-user')
