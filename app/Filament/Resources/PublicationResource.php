@@ -158,7 +158,7 @@
                             Radio::make('science_direct')->label("Elsevier's ScienceDirect")->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('pubmed')->label('PubMed/MEDLINE')->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('ched_journals')->label('CHED-Recognized Journals')->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
-                            Textarea::make('other_database')->label('Other Reputable Collection/Database')->placeholder('Leave blank if there is no such other database.'),
+                            Textarea::make('other_reputable_collection')->label('Other Reputable Collection/Database')->placeholder('Leave blank if there is no such other database.'),
                             TextInput::make('citations')->label('Number of Citations')->numeric()->placeholder('If none, please put zero (0).')->required(),
                         ])->columns(1),
 
