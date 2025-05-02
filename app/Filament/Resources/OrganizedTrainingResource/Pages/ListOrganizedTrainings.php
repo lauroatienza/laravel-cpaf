@@ -4,6 +4,7 @@ namespace App\Filament\Resources\OrganizedTrainingResource\Pages;
 
 use App\Filament\Resources\OrganizedTrainingResource;
 use Filament\Actions;
+use Filament\Tables\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
 class ListOrganizedTrainings extends ListRecords
@@ -14,6 +15,7 @@ class ListOrganizedTrainings extends ListRecords
     {
         return [
             // Actions\CreateAction::make(),
+
         ];
     }
 }

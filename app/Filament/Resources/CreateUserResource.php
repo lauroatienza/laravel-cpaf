@@ -270,8 +270,8 @@ class CreateUserResource extends Resource
                     ->color('danger')
                     ->label('Delete Permanently'),
 
-                Tables\Actions\EditAction::make()
-                ->color('secondary'),
+                //Tables\Actions\EditAction::make()
+                //->color('secondary'),
 
 
             ])
@@ -316,8 +316,9 @@ class CreateUserResource extends Resource
                     ->action(fn(Collection $records) => $records->each->forceDelete())
                     ->label('Delete Permanently')
                     ->requiresConfirmation(),
-
             ]);
+
+        
     }
 
     public static function getRelations(): array
@@ -337,5 +338,5 @@ class CreateUserResource extends Resource
         ];
     }
 
-    //CREATED BY JULIUS ASHER P. AUSTRIA HARD CODED NO GPT
+
 }
