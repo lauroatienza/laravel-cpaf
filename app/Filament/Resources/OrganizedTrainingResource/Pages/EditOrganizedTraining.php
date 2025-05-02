@@ -15,30 +15,4 @@ class EditOrganizedTraining extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        $fullName = $data['full_name'] ?? null;
-
-        // Match Extension
-        $extensionMatch = ExtensionPrime::where(function ($query) use ($fullName) {
-            $query->where('researcher_names', 'LIKE', "%$fullName%")
-                  ->orWhere('project_leader', 'LIKE', "%$fullName%");
-        })->first();
-
-        if ($extensionMatch) {
-            $data['related_extension_program'] = $extensionMatch->id_no;
-        }
-
-        // Match Research
-        $researchMatch = Research::where(function ($query) use ($fullName) {
-            $query->where('name_of_researchers', 'LIKE', "%$fullName%");
-        })->first();
-
-        if ($researchMatch) {
-            $data['related_research_program'] = $researchMatch->id; 
-        }
-
-        return $data;
-    }
 }
