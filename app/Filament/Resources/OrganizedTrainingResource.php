@@ -234,7 +234,7 @@ class OrganizedTrainingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('full_name')->label('Full Name')->searchable()->tooltip(fn($state) => $state),
+                BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
                 TextColumn::make('title')->label('Title')->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
@@ -245,7 +245,26 @@ class OrganizedTrainingResource extends Resource
                 Actions\ViewAction::make(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
-            ]);
+            ])
+            ->bulkActions([
+                Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('exportBulk')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn(array $data, $records) => static::exportData($records, $data['format'])),
+            ])
+            ->selectable();
+
     }
 
 

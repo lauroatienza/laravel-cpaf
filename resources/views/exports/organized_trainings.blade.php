@@ -29,8 +29,7 @@
     <table>
         <thead>
             <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
+                <th>Contributing Unit</th>
                 <th>Title</th>
                 <th>Start Date</th>
                 <th>End Date</th>
@@ -39,8 +38,7 @@
         <tbody>
             @foreach ($records as $record)
                 <tr>
-                    <td>{{ $record->first_name }}</td>
-                    <td>{{ $record->last_name }}</td>
+                    <td>{{ $record->contributing_unit }}</td>
                     <td>{{ $record->title }}</td>
                     <td>{{ $record->start_date }}</td>
                     <td>{{ $record->end_date }}</td>
