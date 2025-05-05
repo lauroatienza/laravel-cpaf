@@ -145,15 +145,15 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Survey Responses')
                     ->schema([
                         TextInput::make('sample_size')->label('Sample Size')->numeric(),
-                        //Placeholder::make('Responses Count'),//->label('Responses'),
                         Grid::make('5')->schema([
                             TextInput::make('responses_poor')->label('Poor/Below Fair')->numeric(),
                             TextInput::make('responses_fair')->label('Fair')->numeric(),
                             TextInput::make('responses_satisfactory')->label('Satisfactory')->numeric(),
                             TextInput::make('responses_very_satisfactory')->label('Very Satisfactory')->numeric(),
                             TextInput::make('responses_outstanding')->label('Outstanding')->numeric(),
-                    ])
-                ]),
+                        ])
+                    ]),
+
 
                 Section::make('Supporting Documents')
                     ->schema([
@@ -170,6 +170,7 @@ class OrganizedTrainingResource extends Resource
 
                         TextInput::make('project_title')
                             ->label('Project Title')
+
 
                     ]),
 
@@ -188,60 +189,18 @@ class OrganizedTrainingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('full_name')->label('Full Name')->searchable(),
-                TextColumn::make('title')->label('Title')->searchable()
-                    ->limit(20)
-                    ->tooltip(fn($state) => $state),
+                TextColumn::make('full_name')->label('Full Name')->searchable()->tooltip(fn($state) => $state),
+                TextColumn::make('title')->label('Title')->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
             ])
             ->filters([])
-            ->headerActions([
-                // Custom create button
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Organized Training')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Tables\Actions\Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn(array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
-            ])
-
             ->actions([
                 Actions\ViewAction::make(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Actions\DeleteBulkAction::make(),
-                Tables\Actions\BulkAction::make('exportBulk')
-                    ->label('Export Selected')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->requiresConfirmation()
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn(array $data, $records) => static::exportData($records, $data['format'])),
-            ])
-            ->selectable();
+            ]);
     }
 
 
@@ -254,15 +213,15 @@ class OrganizedTrainingResource extends Resource
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
-                fputcsv($handle, ['First Name', 'Last Name', 'Title', 'Start Date', 'End Date']);
+                fputcsv($handle, ['Full Name', 'Title', 'Start Date', 'End Date', 'Contributing Unit']);
 
                 foreach ($records as $record) {
                     fputcsv($handle, [
-                        $record->first_name,
-                        $record->last_name,
+                        $record->full_name,
                         $record->title,
                         $record->start_date,
                         $record->end_date,
+                        $record->contributing_unit,
                     ]);
                 }
 
@@ -352,7 +311,7 @@ class OrganizedTrainingResource extends Resource
                   ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
         });
 
-    
+
 }
 
 
