@@ -99,20 +99,8 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Training Details')
                     ->schema([
                         TextInput::make('full_name')
-                            ->label('Full Name (First Name, MI, Last Name)')
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-                                $normalizedFullName = preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $state)));
-                                $normalizedFullNameReversed = implode(', ', array_reverse(explode(' ', $normalizedFullName)));
-
-                                $matchedProgram = \App\Models\ExtensionPrime::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed) {
-                                    $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                                        ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%$normalizedFullName%"]);
-                                })->first();
-
-                                $set('related_extension_program', $matchedProgram?->title_of_extension_program);
-                            }),
+                            ->label('Full Name (First Name, MI, Last Name)'),
+    
                         Select::make('contributing_unit')->label('Contributing Unit')
                             ->options([
                                 'CSPPS' => 'CSPPS',
@@ -171,41 +159,8 @@ class OrganizedTrainingResource extends Resource
                     ->schema([
                         Select::make('related_extension_program')
                             ->label('Related Extension Program, if applicable')
-                            ->options(function () {
-                                $user = Auth::user();
-                                if (!$user) {
-                                    return [];
-                                }
-
-                                $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-                                $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-                                $simpleName = trim("{$user->name} {$user->last_name}");
-
-                                $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-                                $normalizeName = function ($name) use ($titles) {
-                                    return preg_replace('/\s+/', ' ', trim(str_ireplace($titles, '', $name)));
-                                };
-
-                                $normalizedFullName = $normalizeName($fullName);
-                                $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-                                $normalizedSimpleName = $normalizeName($simpleName);
-
-                                // Fetching related extension programs
-                                $relatedPrograms = \App\Models\ExtensionPrime::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $user) {
-                                    $query->whereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                                        ->orWhereRaw("LOWER(REPLACE(researcher_names, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
-                                        ->orWhereRaw("LOWER(project_leader) LIKE LOWER(?)", ["%{$user->name}%"]);
-                                })->get();
-
-                                // Prepare options for the dropdown
-                                return $relatedPrograms->mapWithKeys(function ($program) {
-                                    return [$program->id => $program->project_article]; // You can adjust this based on the column name you want to display in the dropdown.
-                                });
-                            })
-                            ->searchable() // This makes the dropdown searchable
-                            ->placeholder('Select related extension program'),
-                        //->required(),
+                            ->disabled(),
+                        
                         Grid::make('2')->schema([
                             TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
                             TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)')
