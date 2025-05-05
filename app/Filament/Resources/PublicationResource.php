@@ -31,6 +31,7 @@
     use Filament\Forms\Get;
     use Filament\Forms\Set;
     use Illuminate\Contracts\View\View;
+    use Filament\Tables\Columns\CheckboxColumn;
 
     class PublicationResource extends Resource
     {
@@ -78,7 +79,7 @@
                 ->schema([
                     Section::make('Section 1')
                     ->schema([
-                        TextInput::make('name')->label('Full Name')->required(),
+                        TextInput::make('name')->label('Full Name')->placeholder('First Name, Middle Initial, Last Name')->required(),
                         Select::make('contributing_unit')->label('Contributing Unit')->options([
                             'CISC' => 'CISC',
                             'CSPPS' => 'CSPPS',
@@ -134,7 +135,7 @@
                                 'International' => 'International',
                             ])->required(),
                             Textarea::make('editors')->label('Name of Editor(s)')->placeholder("Separate editors' names with semi-colons.\nExample: John Doe; Jane Smith; Alex Johnson ")->rows(3),
-                            TextInput::make('volume_issue')->label('Volume No. and Issue No.')->placeholder('Enter volume and issue number')->maxLength(255),
+                            TextInput::make('volume_issue')->label('Volume No. and Issue No.')->placeholder('Ex: Volume 1 Issue 3')->maxLength(255),
                             Grid::make(3)->schema([
                                 DatePicker::make('date_published')->label('Date Published or Accepted')->placeholder('Select date')->required(),
                                 DatePicker::make('conference_start_date')->label('Conference START Date')->placeholder('Select start date'),
@@ -151,13 +152,13 @@
                     Section::make('Section 3')
                         ->schema([
 
-                            Textarea::make('collection_database')->placeholder('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized:(Do not leave the box blank. Please put "NA" if you have no answers. Thank you)')->placeholder('Description')->required(),
+                            Textarea::make('collection_database')->placeholder('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized')->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')->required(),
                             Radio::make('web_science')->label('Web Science (formerly ISI)')->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('scopus')->label("Elsevier's Scopus")->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('science_direct')->label("Elsevier's ScienceDirect")->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('pubmed')->label('PubMed/MEDLINE')->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('ched_journals')->label('CHED-Recognized Journals')->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
-                            Textarea::make('other_database')->label('Other Reputable Collection/Database')->placeholder('Leave blank if there is no such other database.'),
+                            Textarea::make('other_reputable_collection')->label('Other Reputable Collection/Database')->placeholder('Leave blank if there is no such other database.'),
                             TextInput::make('citations')->label('Number of Citations')->numeric()->placeholder('If none, please put zero (0).')->required(),
                         ])->columns(1),
 
@@ -187,24 +188,23 @@
                 // SECTION 1 of 5: Author and Publication Info
                 TextColumn::make('name')->label('Name')->sortable()->searchable(),
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit')->searchable()->sortable()->limit(20),
-                TextColumn::make('type_of_publication')->label('Type of Publication')->searchable()->sortable()->limit(20)->tooltip(fn ($record) => $record->type_of_publication),
-                //TextColumn::make('other_type')->label('Other Type')->searchable()->sortable()->limit(20)->tooltip(fn ($record) => $record->other_type),
-                TextColumn::make('title_of_publication')->label('Title of Publication')->searchable()->sortable()->limit(20)->tooltip(fn ($record) => $record->title_of_publication),
-                TextColumn::make('co_authors')->label('Co-author(s)')->searchable()->sortable()->limit(20)->tooltip(fn ($record) => $record->co_authors),
+                TextColumn::make('type_of_publication')->label('Type of Publication')->searchable()->sortable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('title_of_publication')->label('Title of Publication')->searchable()->sortable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('co_authors')->label('Co-author(s)')->searchable()->sortable()->limit(20)->tooltip(fn($state) => $state),
 
                 // SECTION 2 of 5: Journal & Publisher Info
-                TextColumn::make('research_conference_publisher_details')->label('Research/Conference/Publisher Details')->searchable()->limit(20)->sortable()->tooltip(fn ($record) => $record->research_conference_publisher_details),
-                TextColumn::make('study_research_project')->label('Study/Research Project')->searchable()->limit(20)->sortable()->tooltip(fn ($record) => $record->study_research_project),
-                TextColumn::make('journal_book_conference')->label('Journal/Book/Conference Name')->sortable()->searchable()->limit(20)->tooltip(fn ($record) => $record->journal_book_conference),
-                TextColumn::make('publisher_organizer')->label('Publisher/Organizer')->sortable()->searchable()->limit(20)->tooltip(fn ($record) => $record->publisher_organizer),
-                TextColumn::make('type_of_publisher')->label('Type of Publisher')->sortable()->searchable()->limit(20)->tooltip(fn ($record) => $record->type_of_publisher),
-                TextColumn::make('location_of_publisher')->label('Location of Publisher')->sortable()->searchable()->limit(20)->tooltip(fn ($record) => $record->location_of_publisher),
-                TextColumn::make('editors')->label('Editor(s)')->sortable()->searchable()->limit(20)->tooltip(fn ($record) => $record->other_type),
-                TextColumn::make('volume_issue')->label('Volume/Issue')->sortable()->searchable()->limit(20),
+                TextColumn::make('research_conference_publisher_details')->label('Research/Conference/Publisher Details')->searchable()->limit(20)->sortable()->tooltip(fn($state) => $state),
+                TextColumn::make('study_research_project')->label('Study/Research Project')->searchable()->limit(20)->sortable()->tooltip(fn($state) => $state),
+                TextColumn::make('journal_book_conference')->label('Journal/Book/Conference Name')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('publisher_organizer')->label('Publisher/Organizer')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('type_of_publisher')->label('Type of Publisher')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('location_of_publisher')->label('Location of Publisher')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('editors')->label('Editor(s)')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('volume_issue')->label('Volume/Issue')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('date_published')->label('Date Published')->date()->sortable()->limit(20),
-                TextColumn::make('conference_start_date')->label('Conference Start')->date()->sortable()->limit(20),
+                TextColumn::make('conference_start_date')->label('Conference Start')->date()->sortable(),
                 TextColumn::make('conference_end_date')->label('Conference End')->date()->sortable(),
-                TextColumn::make('conference_venue')->label('Conference Venue')->searchable()->sortable()->limit(20)->tooltip(fn ($record) => $record->conference_venue),
+                TextColumn::make('conference_venue')->label('Conference Venue')->searchable()->sortable()->limit(20)->tooltip(fn($state) => $state),
 
                 //COPY DOI OR LINK TO OTHER LINKS FROM SECTION 4
                 TextColumn::make('doi_or_link')
@@ -217,20 +217,21 @@
                     ->openUrlInNewTab()
                     ->limit(30)
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->tooltip(fn($state) => $state),
                 //
 
                 TextColumn::make('isbn_issn')->label('ISBN/ISSN')->searchable()->sortable(),
 
                 // SECTION 3 of 5: Indexing and Citations
-                TextColumn::make('collection_database')->label('Collection Database')->sortable()->searchable()->limit(20)->tooltip(fn ($record) => $record->collection_database),
+                TextColumn::make('collection_database')->label('Collection Database')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('web_science')->label('Web Science')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
                 TextColumn::make('scopus')->label('Scopus')->alignCenter()->sortable()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
                 TextColumn::make('science_direct')->label('Science Direct')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
                 TextColumn::make('pubmed')->label('PubMed/MEDLINE')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
                 TextColumn::make('ched_journals')->label('CHED-Recognized Journals')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
-                TextColumn::make('other_reputable_collection')->label('Other Reputable Collection/Database')->sortable()->searchable()->limit(20)->tooltip(fn ($record) => $record->other_reputable_collection),
-                TextColumn::make('citations')->label('Citations')->sortable()->sortable()->limit(20)->tooltip(fn ($record) => $record->citations)->alignCenter(),
+                TextColumn::make('other_reputable_collection')->label('Other Reputable Collection/Database')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
+                TextColumn::make('citations')->label('Citations')->sortable()->sortable()->limit(20)->tooltip(fn($state) => $state)->alignCenter(),
 
                 // SECTION 4 of 5: Proofs
                 TextColumn::make('pdf_proof_1')
@@ -243,7 +244,8 @@
                     )
                     ->openUrlInNewTab()
                     ->limit(30)
-                    ->searchable(),
+                    ->searchable()
+                    ->tooltip(fn($state) => $state),
 
                     TextColumn::make('pdf_proof_2')
                     ->label('PDF Proof 2')
@@ -255,11 +257,12 @@
                     )
                     ->openUrlInNewTab()
                     ->limit(30)
-                    ->searchable(),
+                    ->searchable()
+                    ->tooltip(fn($state) => $state),
 
                 // SECTION 5 of 5: Awards
                 TextColumn::make('received_award')->sortable()->label('Received Award')->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger')->alignCenter(),
-                TextColumn::make('award_title')->sortable()->label('Award Title')->searchable(),
+                TextColumn::make('award_title')->sortable()->label('Award Title')->searchable()->tooltip(fn($state) => $state),
                 TextColumn::make('date_awarded')->sortable()->label('Date Awarded')->date(),
             ])
 
@@ -271,8 +274,8 @@
             ])
 
             ->bulkActions([
-                DeleteBulkAction::make(),
-                BulkAction::make('exportSelected')
+                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('exportSelected')
                     ->label('Export Selected (CSV)')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($records) {

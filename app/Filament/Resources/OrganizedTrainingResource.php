@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrganizedTrainingResource\Pages;
 use App\Models\OrganizedTraining;
 use Filament\Forms;
-use Filament\Forms\Components\{TextInput, Select, DatePicker, Textarea, FileUpload, Section, Grid};
+use Filament\Forms\Components\{TextInput, Select, DatePicker, Textarea, FileUpload, Section, Grid, Placeholder};
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Illuminate\Support\Facades\Auth;
@@ -140,7 +140,7 @@ class OrganizedTrainingResource extends Resource
 
                 Section::make('Trainee Details')
                     ->schema([
-                        TextInput::make('total_trainees')->label('Total Trainees')->helperText('Formula: Total Number of Trainees X Weight Value. 
+                        TextInput::make('total_trainees')->label('Total Trainees')->helperText('Formula: Total Number of Trainees X Weight Value.
                     Weight Value: (<8 hours = 0.5; 8 hours (1 day) = 1, 3-4 days = 1.5; 5 days or (discontinued)')->numeric(),//->required(),
                         TextInput::make('weighted_trainees')->label('Weighted Trainees')->numeric(),
                         TextInput::make('training_hours')->label('Training Hours')->numeric(),//->required(),
@@ -157,12 +157,15 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Survey Responses')
                     ->schema([
                         TextInput::make('sample_size')->label('Sample Size')->numeric(),
-                        TextInput::make('responses_poor')->label('Number of Responses - Poor/Below Fair')->numeric(),
-                        TextInput::make('responses_fair')->label('Number of Responses - Fair')->numeric(),
-                        TextInput::make('responses_satisfactory')->label('Number of Responses - Satisfactory')->numeric(),
-                        TextInput::make('responses_very_satisfactory')->label('Number of Responses - Very Satisfactory')->numeric(),
-                        TextInput::make('responses_outstanding')->label('Number of Responses - Outstanding')->numeric(),
+                        Grid::make('5')->schema([
+                            TextInput::make('responses_poor')->label('Poor/Below Fair')->numeric(),
+                            TextInput::make('responses_fair')->label('Fair')->numeric(),
+                            TextInput::make('responses_satisfactory')->label('Satisfactory')->numeric(),
+                            TextInput::make('responses_very_satisfactory')->label('Very Satisfactory')->numeric(),
+                            TextInput::make('responses_outstanding')->label('Outstanding')->numeric(),
+                        ])
                     ]),
+
 
                 Section::make('Supporting Documents')
                     ->schema([
@@ -197,21 +200,23 @@ class OrganizedTrainingResource extends Resource
 
                                 // Prepare options for the dropdown
                                 return $relatedPrograms->mapWithKeys(function ($program) {
-                                    return [$program->id => $program->project_article]; // You can adjust this based on the column name you want to display in the dropdown.
+                                    return [$program->id => $program->project_article];
                                 });
                             })
                             ->searchable() // This makes the dropdown searchable
                             ->placeholder('Select related extension program'),
                         //->required(),
-
-                        TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
-                        TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)'),
+                        Grid::make('2')->schema([
+                            TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
+                            TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)')
+                    ]),
 
                         TextInput::make('relevant_documents')->label('Documents Link'),
 
                         TextInput::make('project_title')
                             ->label('Project Title')
-                    
+
+
                     ]),
 
                 Section::make()
@@ -229,60 +234,18 @@ class OrganizedTrainingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('full_name')->label('Full Name')->searchable(),
-                TextColumn::make('title')->label('Title')->searchable()
-                    ->limit(20)
-                    ->tooltip(fn($state) => $state),
+                TextColumn::make('full_name')->label('Full Name')->searchable()->tooltip(fn($state) => $state),
+                TextColumn::make('title')->label('Title')->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
                 BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
             ])
             ->filters([])
-            ->headerActions([
-                // Custom create button
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Organized Training')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Tables\Actions\Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn(array $data) => static::exportData(OrganizedTraining::all(), $data['format'])),
-            ])
-
             ->actions([
                 Actions\ViewAction::make(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Actions\DeleteBulkAction::make(),
-                Tables\Actions\BulkAction::make('exportBulk')
-                    ->label('Export Selected')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->requiresConfirmation()
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn(array $data, $records) => static::exportData($records, $data['format'])),
-            ])
-            ->selectable();
+            ]);
     }
 
 
@@ -295,15 +258,15 @@ class OrganizedTrainingResource extends Resource
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
-                fputcsv($handle, ['First Name', 'Last Name', 'Title', 'Start Date', 'End Date']);
+                fputcsv($handle, ['Full Name', 'Title', 'Start Date', 'End Date', 'Contributing Unit']);
 
                 foreach ($records as $record) {
                     fputcsv($handle, [
-                        $record->first_name,
-                        $record->last_name,
+                        $record->full_name,
                         $record->title,
                         $record->start_date,
                         $record->end_date,
+                        $record->contributing_unit,
                     ]);
                 }
 
@@ -393,9 +356,9 @@ class OrganizedTrainingResource extends Resource
                   ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
         });
 
-    
+
 }
 
-    
-    
+
+
 }
