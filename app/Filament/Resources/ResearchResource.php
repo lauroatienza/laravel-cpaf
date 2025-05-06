@@ -232,7 +232,7 @@ class ResearchResource extends Resource
                     ->sortable()->searchable()
                     ->limit(10) // Only show first 20 characters
                 ->tooltip(fn ($state) => $state),
-                TextColumn::make('project_leader')->label("Project Leader")
+                TextColumn::make('poject_leader')->label("Project Leader")
                     ->sortable()->searchable()
                     ->limit(10) // Only show first 20 characters
                 ->tooltip(fn ($state) => $state),
@@ -324,7 +324,7 @@ class ResearchResource extends Resource
                     $record->objectives,
                     $record->expected_output,
                     $record->name_of_researchers,
-                    $record->project_leader,
+                    $record->poject_leader,
                     $record->source_funding,
                     $record->category_source_funding,
                     $record->budget,
