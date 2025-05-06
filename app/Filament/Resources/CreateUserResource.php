@@ -246,15 +246,15 @@ class CreateUserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'faculty' => 'Faculty',
-                        'representative' => 'REPS',
+                        'reps' => 'REPS',
                     ])
                     ->query(function ($query, $data) {
                         if ($data['value'] === 'admin') {
                             return $query->where('staff', 'admin');
                         } elseif ($data['value'] === 'faculty') {
                             return $query->where('staff', 'faculty');
-                        } elseif ($data['value'] === 'representative') {
-                            return $query->where('staff', 'representative');
+                        } elseif ($data['value'] === 'reps') {
+                            return $query->where('staff', 'reps');
                         }
                         return $query;
                     }),
