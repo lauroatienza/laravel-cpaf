@@ -35,9 +35,8 @@ class AppServiceProvider extends ServiceProvider
     {
         FilamentView::registerRenderHook(
             'panels::auth.login.form.after',
-            fn (): View => view('filament.login_extra') // Returns a View instance
+            fn (): View => view('filament.login_extra')
         );
-        
     
 
         User::observe(UserObserver::class);

@@ -100,6 +100,7 @@ class OrganizedTrainingResource extends Resource
                     ->schema([
                         TextInput::make('full_name')
                             ->label('Full Name (First Name, MI, Last Name)'),
+    
                         Select::make('contributing_unit')->label('Contributing Unit')
                             ->options([
                                 'CSPPS' => 'CSPPS',
@@ -157,8 +158,9 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Supporting Documents')
                     ->schema([
                         Select::make('related_extension_program')
-                            ->label('Related Extension Program, if applicable'),
-                        //->required(),
+                            ->label('Related Extension Program, if applicable')
+                            ->disabled(),
+                        
                         Grid::make('2')->schema([
                             TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
                             TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)')
@@ -187,7 +189,7 @@ class OrganizedTrainingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('full_name')->label('Full Name')->searchable()->tooltip(fn($state) => $state),
+                BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
                 TextColumn::make('title')->label('Title')->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
@@ -198,7 +200,26 @@ class OrganizedTrainingResource extends Resource
                 Actions\ViewAction::make(),
                 Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
-            ]);
+            ])
+            ->bulkActions([
+                Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('exportBulk')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->label('Export Format')
+                            ->required(),
+                    ])
+                    ->action(fn(array $data, $records) => static::exportData($records, $data['format'])),
+            ])
+            ->selectable();
+
     }
 
 
