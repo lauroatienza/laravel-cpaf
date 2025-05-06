@@ -171,26 +171,6 @@ class AwardsRecognitionsResource extends Resource
             ->filters([
 
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Awards/Recognitions')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn (array $data) => static::exportData(\App\Models\AwardsRecognitions::all(), $data['format'])),
-            ])
             ->bulkActions([
                 BulkAction::make('Delete Selected')
                     ->label('Delete Selected')
@@ -217,46 +197,8 @@ class AwardsRecognitionsResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()->label('New Awards/Recognitions')->icon('heroicon-o-pencil-square')->color('secondary'),
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function () {
-                        // Fetch all Awards/Recognitions
-                        $awardsrecognitions = AwardsRecognitions::all([
-                            'award_type',
-                            'award_title',
-                            'name',
-                            'granting_organization',
-                            'date_awarded',
-                        ]);
-
-                        // Create CSV writer
-                        $csv = Writer::createFromFileObject(new SplTempFileObject());
-
-                        // Add CSV headers
-                        $csv->insertOne(['award_type', 'award_title', 'name', 'granting_organization', 'date_awarded']);
-
-                        // Add data rows
-                        foreach ($awardsrecognitions as $award) {
-                            $csv->insertOne([
-                                $award->award_type,
-                                $award->award_title,
-                                $award->name,
-                                $award->granting_organization,
-                                $award->date_awarded
-                            ]);
-                        }
-
-
-                        // Return CSV
-                        return response()->streamDownload(function () use ($csv) {
-                            echo $csv->toString();
-                        }, 'awards_recognitions_export_' . now()->format('Ymd_His') . '.csv');
-                    }),
             ]);
+
     }
 
     public static function exportData($records, $format)
