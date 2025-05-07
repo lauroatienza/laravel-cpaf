@@ -195,7 +195,7 @@ class ExtensionPrimaryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('contributing_unit')->label('Contributing Unit')->sortable()->searchable(),
+                BadgeColumn::make('contributing_unit')->label('Contributing Unit')->sortable()->searchable(),
                 TextColumn::make('start_date')->label('Start Date')->sortable(),
                 TextColumn::make('end_date')->label('End Date')->sortable(),
                 TextColumn::make('extension_date')->label('Extension Date')->sortable(),
