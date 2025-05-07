@@ -118,41 +118,7 @@ class CreateUserResource extends Resource
                     ])
                     ->default('faculty')
                     ->required(),
-            Select::make('employment_status')->label('Employment Status')
-                ->options([
-                    'Part-Time' => 'Part-Time',
-                    'Temporary' => 'Temporary',
-                    'Full Time' => 'Full Time',
-                ])
-                ->required(),
-            TextInput::make('designation')->label('Designation/Position')
-            ->required(),
-            Select::make('unit')
-                ->label('Unit')
-                ->options([
-                    'DO' => 'DO',
-                    'KMO' => 'KMO',
-                    'IGRD' => 'IGRD',
-                    'CISC' => 'CISC',
-                    'CSPPS' => 'CSPPS',
-                ])
-                ->required(),
-            Select::make('ms_phd')
-                ->label('Highest Degree Attained')
-                ->options([
-                    'BS' => 'BS',
-                    'MS' => 'MS',
-                    'PhD' => 'PhD',
-                ])
-                ->required(),
-            Select::make('staff')
-                ->options([
-                    'admin' => 'Admin',
-                    'faculty' => 'Faculty',
-                    'reps' => 'REPS',
-                ])
-                ->default('faculty')
-                ->required(),
+
 
                 Select::make('systemrole')
                     ->label('User Role')
@@ -238,7 +204,7 @@ class CreateUserResource extends Resource
                     ->label('Fields of Specialization')
                     ->sortable()
                     ->searchable(),
-                
+
             ])
             ->filters([
                 SelectFilter::make('staff')
@@ -318,7 +284,7 @@ class CreateUserResource extends Resource
                     ->requiresConfirmation(),
             ]);
 
-        
+
     }
 
     public static function getRelations(): array
