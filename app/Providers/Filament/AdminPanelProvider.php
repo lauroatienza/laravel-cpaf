@@ -47,7 +47,8 @@ class AdminPanelProvider extends PanelProvider
                 UserMenuItem::make()
                     ->label('Official Website')
                     ->url('https://cpaf.uplb.edu.ph/')
-                    ->icon('heroicon-o-book-open'),
+                    ->icon('heroicon-o-book-open')
+                    ->openUrlInNewTab(),
             ])
             
             //->registration(Register::class) 
@@ -57,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
                     ->setIcon('heroicon-o-user')
                     ->shouldShowAvatarForm(
                         value: true,
-                        directory: 'avatars' // Corrected path
+                        directory: 'avatars' 
                     )
             ])
 
@@ -66,12 +67,11 @@ class AdminPanelProvider extends PanelProvider
             'secondary' => '#00573e',
 
             ])
-            ->favicon(asset('cpaflogo.png'))// add favicon
+            ->favicon(asset('cpaflogo.png'))
             ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                // Pages\Dashboard::class,
             ])
 
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')

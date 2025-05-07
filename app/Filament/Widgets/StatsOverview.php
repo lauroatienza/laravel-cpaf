@@ -114,15 +114,15 @@ class StatsOverview extends BaseWidget
 
             Stat::make('Total: Training Organized', OrganizedTraining::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
                 $query->whereRaw(
-                    "LOWER(REPLACE(CONCAT_WS(' ', first_name, middle_name, last_name), 'Dr.', '')) LIKE LOWER(?)",
+                    "LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)",
                     ["%$normalizedFullName%"]
                 )
                     ->orWhereRaw(
-                        "LOWER(REPLACE(CONCAT_WS(' ', last_name, first_name, middle_name), 'Dr.', '')) LIKE LOWER(?)",
+                        "LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)",
                         ["%$normalizedFullNameReversed%"]
                     )
                     ->orWhereRaw(
-                        "LOWER(REPLACE(CONCAT_WS(' ', first_name, last_name), 'Dr.', '')) LIKE LOWER(?)",
+                        "LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)",
                         ["%$normalizedSimpleName%"]
                     );
             })->whereBetween('start_date', [$startDate, $endDate])->count())

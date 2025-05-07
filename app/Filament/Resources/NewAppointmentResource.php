@@ -26,6 +26,7 @@ use Filament\Forms\Components\Text;
 use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ViewAction;
 use Symfony\Contracts\Service\Attribute\Required;
 use League\Csv\Writer;
 use Illuminate\Support\Facades\Response;
@@ -213,6 +214,7 @@ public static function table(Table $table): Table
                 //
             ])
             ->actions([
+                ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
             ])

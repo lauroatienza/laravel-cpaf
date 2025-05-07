@@ -48,30 +48,4 @@ class ListOrganizedTrainings extends ListRecords
         ];
     }
 
-    protected function getTableBulkActions(): array
-    {
-        return [
-            Tables\Actions\DeleteBulkAction::make(),
-            Tables\Actions\BulkAction::make('exportBulk')
-                ->label('Export Selected')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->requiresConfirmation()
-                ->form([
-                    Forms\Components\Select::make('format')
-                        ->options([
-                            'csv' => 'CSV',
-                            'pdf' => 'PDF',
-                        ])
-                        ->label('Export Format')
-                        ->required(),
-                ])
-                ->action(fn(array $data, $records) => OrganizedTrainingResource::exportData($records, $data['format'])),
-        ];
-    }
-
-    public function getTable(): Tables\Table
-    {
-        return parent::getTable()
-            ->selectable();
-    }
 }

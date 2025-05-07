@@ -101,12 +101,12 @@ class CreateUserResource extends Resource
                 Select::make('ms_phd')
                     ->label('Highest Degree Attained')
                     ->options([
-                        'BS' => 'BS',
-                        'MS' => 'MS',
-                        'PhD' => 'PhD',
-                        'vocational' => 'Vocational',
-                        'hs' => 'High School',
-                        'n/a' => 'N/A',
+                        "Bachelor's Degree" => "Bachelor's Degree",
+                        "Master's Degree" => "Master's Degree",
+                        'Doctoral Degree' => 'Doctoral Degree',
+                        'Vocational/Technical' => 'Vocational/Technical',
+                        'High School Diploma' => 'High School Diploma',
+                        'N/A' => 'N/A',
                     ])
                     ->required(),
                 Select::make('staff')
@@ -114,7 +114,7 @@ class CreateUserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'faculty' => 'Faculty',
-                        'reps' => 'REPS',
+                        'REPS' => 'REPS',
                     ])
                     ->default('faculty')
                     ->required(),
@@ -212,15 +212,15 @@ class CreateUserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'faculty' => 'Faculty',
-                        'representative' => 'REPS',
+                        'reps' => 'REPS',
                     ])
                     ->query(function ($query, $data) {
                         if ($data['value'] === 'admin') {
                             return $query->where('staff', 'admin');
                         } elseif ($data['value'] === 'faculty') {
                             return $query->where('staff', 'faculty');
-                        } elseif ($data['value'] === 'representative') {
-                            return $query->where('staff', 'representative');
+                        } elseif ($data['value'] === 'reps') {
+                            return $query->where('staff', 'reps');
                         }
                         return $query;
                     }),

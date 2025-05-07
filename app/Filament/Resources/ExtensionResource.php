@@ -15,6 +15,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\Select;
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Radio;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 use League\Csv\Writer;
 use SplTempFileObject;
 use Filament\Forms\Components\DateTimePicker;
@@ -201,53 +203,62 @@ class ExtensionResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()->label('Create Extension Involvement')
-                    ->color('secondary')->icon('heroicon-o-pencil-square'),
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function () {
-
-                        $extensions = Extension::all([
-                            'name',
-                            'extension_involvement',
-                            'event_title',
-                            'activity_date',
-                            'venue',
-                            'date_end',
-                        ]);
-
-                        // Create CSV writer
-                        $csv = Writer::createFromFileObject(new SplTempFileObject());
-
-                        // Add CSV headers
-                        $csv->insertOne(['Full Name', 'Type of Extension Involvement', 'Event Title', 'Activity Date', 'Venue', 'End Date']);
-
-                        // Add data rows
-                        foreach ($extensions as $extension) {
-                            $csv->insertOne([
-                                $extension->name,
-                                $extension->extension_involvement,
-                                $extension->event_title,
-                                $extension->activity_date,
-                                $extension->venue,
-                                $extension->date_end
-                            ]);
-                        }
-
-                        // Return CSV
-                        return response()->streamDownload(function () use ($csv) {
-                            echo $csv->toString();
-                        }, 'extensions_export_' . now()->format('Ymd_His') . '.csv');
-                    }),
-            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+            
+                    Tables\Actions\BulkAction::make('exportSelected')
+                        ->label('Export Selected')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->form([
+                            Select::make('format')
+                                ->label('Select Export Format')
+                                ->options([
+                                    'csv' => 'CSV',
+                                    'pdf' => 'PDF',
+                                ])
+                                ->required(),
+                        ])
+                        ->action(fn(array $data, $records) =>
+                            static::exportData($records, $data['format'])
+                        ),
                 ]),
             ]);
     }
+
+    public static function exportData($records, $format)
+    {
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records selected for export.');
+        }  
+    
+        if ($format === 'csv') {
+            return response()->streamDownload(function () use ($records) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['Full Name', 'Type of Extension Involvement', 'Event Title', 'Start Date', 'End Date', 'Extension Type', 'Venue']);  // CSV headers
+    
+                foreach ($records as $record) {
+                    fputcsv($handle, [
+                        $record->name,
+                        $record->extension_involvement,
+                        $record->event_title,
+                        $record->created_at,
+                        $record->date_end,
+                        $record->extensiontype,
+                        $record->venue,
+                    ]);
+                }
+    
+                fclose($handle);
+            }, 'extension_involvements.csv');
+        }
+    
+        if ($format === 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.extension_involvements', ['records' => $records]);  // Your PDF view
+            return response()->streamDownload(fn() => print($pdf->output()), 'extension_involvements.pdf');
+        }
+    }    
+
 
     public static function getRelations(): array
     {

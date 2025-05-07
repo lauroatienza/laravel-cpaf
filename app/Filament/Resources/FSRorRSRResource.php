@@ -17,6 +17,7 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Hidden;
@@ -76,10 +77,11 @@ class FSRorRSRResource extends Resource
 
                 TextInput::make('full_name')
                     ->label('Full Name')
-                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
                     ->disabled()
+                    ->dehydrated(false) 
+                    ->formatStateUsing(fn ($record) => $record?->full_name ?? Auth::user()->name . ' ' . Auth::user()->last_name)
                     ->required(),
-
+            
                 TextInput::make('year')
                     ->label('Year')
                     ->required(),
@@ -152,6 +154,7 @@ class FSRorRSRResource extends Resource
                     ->action(fn (array $data) => static::exportData(FSRorRSR::all(), $data['format'])),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
