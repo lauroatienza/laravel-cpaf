@@ -18,7 +18,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\ExtensionPrime;
 use Illuminate\Support\Str;
-use App\Models\Research;
+use Illuminate\Database\Eloquent\Model;
+
+
 
 class OrganizedTrainingResource extends Resource
 {
@@ -158,8 +160,19 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Supporting Documents')
                     ->schema([
                         Select::make('related_extension_program')
-                            ->label('Related Extension Program, if applicable')
-                            ->disabled(),
+                        ->label('Extension Program')
+                        ->options(function (?Model $record) {
+                            if (!$record) {
+                                // No record yet, maybe during creation — return all or empty
+                                return [];
+                            }
+            
+                            return ExtensionPrime::where('contributing_unit', $record->contributing_unit)
+                                ->pluck('title_of_extension_program', 'id');
+                        })
+                        ->searchable(),
+        
+    
                         
                         Grid::make('2')->schema([
                             TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
