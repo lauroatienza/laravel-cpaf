@@ -17,6 +17,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\ExtensionPrime;
+use App\Models\Research;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 
@@ -187,12 +189,19 @@ class OrganizedTrainingResource extends Resource
 
                     ]),
 
-                Section::make()
-                    ->schema([
-                        TextInput::make('related_research_program')
-                            ->label('Related Research Program')
-                            ->columnSpan('full')
-                    ])
+                    Select::make('related_research_program')
+                    ->label('Related Research Program')
+                    ->options(function (?Model $record) {
+                        if (!$record) {
+                            // No record yet, maybe during creation — return all or empty
+                            return [];
+                        }
+        
+                        return Research::where('contributing_unit', $record->contributing_unit)
+                            ->pluck('title', 'id');
+                    })
+                    ->searchable(),
+                
 
             ]);
     }
@@ -209,7 +218,29 @@ class OrganizedTrainingResource extends Resource
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
 
             ])
-            ->filters([])
+            ->filters([
+                SelectFilter::make('contributing_unit')
+                    ->label('User Classification')
+                    ->options([
+                        'CISC' => 'CISC',
+                        'CPAf' => 'CPAf',
+                        'CSPPS' => 'CSPPS',
+                        'IGRD' => 'IGRD',
+                    ])
+                    ->query(function ($query, $data) {
+                        if ($data['value'] === 'CISC') {
+                            return $query->where('contributing_unit', 'CISC');
+                        } elseif ($data['value'] === 'CPAf') {
+                            return $query->where('contributing_unit', 'CPAf');
+                        } elseif ($data['value'] === 'CSPPS') {
+                            return $query->where('contributing_unit', 'CSPPS');
+                        }
+                        elseif ($data['value'] === 'IGRD') {
+                            return $query->where('contributing_unit', 'IGRD');
+                        }
+                        return $query;
+                    }),
+            ])
             ->actions([
                 Actions\ViewAction::make(),
                 Actions\EditAction::make(),
