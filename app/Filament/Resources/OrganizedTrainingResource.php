@@ -102,7 +102,7 @@ class OrganizedTrainingResource extends Resource
                     ->schema([
                         TextInput::make('full_name')
                             ->label('Full Name (First Name, MI, Last Name)'),
-    
+
                         Select::make('contributing_unit')->label('Contributing Unit')
                             ->options([
                                 'CSPPS' => 'CSPPS',
@@ -202,11 +202,12 @@ class OrganizedTrainingResource extends Resource
     {
         return $table
             ->columns([
-                BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
-                TextColumn::make('title')->label('Title')->searchable()->limit(20)->tooltip(fn($state) => $state),
+                //TextColumn::make('full_name')->label('Full Name')->searchable()->tooltip(fn($state) => $state),
+                BadgeColumn::make('contributing_unit')->label('Contributing Unit')->alignCenter(),
+                TextColumn::make('title')->label('Title')->searchable()->limit(30)->tooltip(fn($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d'),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d'),
-                BadgeColumn::make('contributing_unit')->label('Contributing Unit'),
+
             ])
             ->filters([])
             ->actions([

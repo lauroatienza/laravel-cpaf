@@ -240,14 +240,13 @@
                     ->url(fn ($record) =>
                         str_starts_with($record->pdf_proof_1, 'http')
                             ? $record->pdf_proof_1
-                            : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/')
-                    )
+                            : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/'))
                     ->openUrlInNewTab()
-                    ->limit(30)
+                    ->limit(20)
                     ->searchable()
                     ->tooltip(fn($state) => $state),
 
-                    TextColumn::make('pdf_proof_2')
+                TextColumn::make('pdf_proof_2')
                     ->label('PDF Proof 2')
                     ->sortable()
                     ->url(fn ($record) =>
