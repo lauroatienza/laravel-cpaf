@@ -10,7 +10,7 @@ class Extension extends Model
 {
     use HasFactory;
 
-    protected $table = 'extensionnew'; // Ensures it uses the correct table name
+    protected $table = 'extensionnew'; 
 
     protected $fillable = [
         'activity_date',
@@ -28,18 +28,15 @@ class Extension extends Model
         'venue',
     ];
 
-    protected static function boot()
-{
-    parent::boot();
-
-    static::creating(function ($model) {
-        if (Auth::check()) {
-            $model->id_no = Auth::id();
-        }
-    });
-}
-
-
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (Auth::check()) {
+                $model->user_id = Auth::id(); 
+            }
+        });
+    }
+    
 }
 
 

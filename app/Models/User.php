@@ -30,6 +30,9 @@ class User extends Authenticatable implements HasAvatar
         'systemrole', // ✅ Ensure systemrole is handled properly
         'fulltime_partime',
         'avatar_url',
+        'research_interests',
+        'fields_of_specialization',
+
     ];
 
     protected $hidden = [

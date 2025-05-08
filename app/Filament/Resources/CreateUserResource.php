@@ -101,12 +101,12 @@ class CreateUserResource extends Resource
                 Select::make('ms_phd')
                     ->label('Highest Degree Attained')
                     ->options([
-                        'BS' => 'BS',
-                        'MS' => 'MS',
-                        'PhD' => 'PhD',
-                        'vocational' => 'Vocational',
-                        'hs' => 'High School',
-                        'n/a' => 'N/A',
+                        "Bachelor's Degree" => "Bachelor's Degree",
+                        "Master's Degree" => "Master's Degree",
+                        'Doctoral Degree' => 'Doctoral Degree',
+                        'Vocational/Technical' => 'Vocational/Technical',
+                        'High School Diploma' => 'High School Diploma',
+                        'N/A' => 'N/A',
                     ])
                     ->required(),
                 Select::make('staff')
@@ -114,45 +114,11 @@ class CreateUserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'faculty' => 'Faculty',
-                        'reps' => 'REPS',
+                        'REPS' => 'REPS',
                     ])
                     ->default('faculty')
                     ->required(),
-            Select::make('employment_status')->label('Employment Status')
-                ->options([
-                    'Part-Time' => 'Part-Time',
-                    'Temporary' => 'Temporary',
-                    'Full Time' => 'Full Time',
-                ])
-                ->required(),
-            TextInput::make('designation')->label('Designation/Position')
-            ->required(),
-            Select::make('unit')
-                ->label('Unit')
-                ->options([
-                    'DO' => 'DO',
-                    'KMO' => 'KMO',
-                    'IGRD' => 'IGRD',
-                    'CISC' => 'CISC',
-                    'CSPPS' => 'CSPPS',
-                ])
-                ->required(),
-            Select::make('ms_phd')
-                ->label('Highest Degree Attained')
-                ->options([
-                    'BS' => 'BS',
-                    'MS' => 'MS',
-                    'PhD' => 'PhD',
-                ])
-                ->required(),
-            Select::make('staff')
-                ->options([
-                    'admin' => 'Admin',
-                    'faculty' => 'Faculty',
-                    'reps' => 'REPS',
-                ])
-                ->default('faculty')
-                ->required(),
+
 
                 Select::make('systemrole')
                     ->label('User Role')
@@ -167,7 +133,7 @@ class CreateUserResource extends Resource
                     ->afterStateUpdated(function ($state, $set, $get, $record) {
                         if ($record) {
                             $record->update(['systemrole' => $state]);
-                            $record->syncRoles([$state]); // ✅ Sync Spatie role
+                            $record->syncRoles([$state]);
                         }
                     }),
 
@@ -193,29 +159,37 @@ class CreateUserResource extends Resource
             ->columns([
 
 
-                TextColumn::make('full_name')
+                TextColumn::make('name')
                     ->label('Full Name')
                     ->getStateUsing(fn($record) => "{$record->name} {$record->last_name}")
-                    ->searchable(['name', 'last_name']) // ← Just pass array directly
+                    ->searchable(['name', 'last_name'])
                     ->sortable(),
 
-
-                TextColumn::make('unit')
+                BadgeColumn::make('unit')
                     ->label('Unit')
+                    ->color('primary')
                     ->sortable()
+                    ->alignCenter()
                     ->searchable(),
+
                 BadgeColumn::make('staff')
                     ->label('Classification')
                     ->sortable()
                     ->searchable()
-                    ->formatStateUsing(fn(string $state): string => ucfirst(strtolower($state))),
+                    ->alignCenter()
+                    ->colors([
+                        'info' => 'faculty',
+                        'success' => 'admin',
+                        'warning' => 'REPS',
+                    ])->formatStateUsing(fn(string $state): string => ucfirst(strtoupper($state))),
 
-                BadgeColumn::make('ms_phd')
+
+                TextColumn::make('ms_phd')
                     ->label('Highest Degree Attained')
                     ->sortable()
-                    ->color('secondary')
+                    //->color('secondary')
                     ->searchable()
-                    ->limit(10) // Only show first 20 characters
+                    ->limit(20)
                     ->tooltip(fn($state) => $state),
                 BadgeColumn::make('systemrole')
                     ->label('User Role')
@@ -238,7 +212,7 @@ class CreateUserResource extends Resource
                     ->label('Fields of Specialization')
                     ->sortable()
                     ->searchable(),
-                
+
             ])
             ->filters([
                 SelectFilter::make('staff')
@@ -246,15 +220,15 @@ class CreateUserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'faculty' => 'Faculty',
-                        'reps' => 'REPS',
+                        'REPS' => 'REPS',
                     ])
                     ->query(function ($query, $data) {
                         if ($data['value'] === 'admin') {
                             return $query->where('staff', 'admin');
                         } elseif ($data['value'] === 'faculty') {
                             return $query->where('staff', 'faculty');
-                        } elseif ($data['value'] === 'reps') {
-                            return $query->where('staff', 'reps');
+                        } elseif ($data['value'] === 'REPS') {
+                            return $query->where('staff', 'REPS');
                         }
                         return $query;
                     }),
@@ -264,7 +238,7 @@ class CreateUserResource extends Resource
 
                 Tables\Actions\DeleteAction::make()
                     ->action(function (Model $record) {
-                        $record->forceDelete(); // 🧨 Bypass soft delete
+                        $record->forceDelete();
                     })
                     ->requiresConfirmation()
                     ->color('danger')
@@ -275,6 +249,7 @@ class CreateUserResource extends Resource
 
 
             ])
+
             ->headerActions([
 
                 Tables\Actions\CreateAction::make()->label('Create New User')
@@ -288,8 +263,7 @@ class CreateUserResource extends Resource
                             ->options([
                                 'admin' => 'Admin',
                                 'faculty' => 'Faculty',
-                                'representative' => 'REPS',
-                                'reps' => 'REPS',
+                                'REPS' => 'REPS',
                             ])
                             ->required(),
                     ])
@@ -297,11 +271,12 @@ class CreateUserResource extends Resource
                     ->color('primary')
                     ->action(function (array $data) {
                         $users = User::where('staff', $data['role'])->get();
-                        $pdf = Pdf::loadView('exports.faculty', compact('users'));
+                        $title = ucfirst($data['role']) . ' List';
+                        $pdf = Pdf::loadView('exports.faculty', compact('users', 'title'));
 
 
                         return response()->streamDownload(
-                            fn() => print ($pdf->output()),
+                            fn() => print($pdf->output()),
                             "{$data['role']}_list.pdf"
                         );
                     }),
@@ -318,7 +293,7 @@ class CreateUserResource extends Resource
                     ->requiresConfirmation(),
             ]);
 
-        
+
     }
 
     public static function getRelations(): array

@@ -50,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-book-open')
                     ->openUrlInNewTab(),
             ])
-            
+
             //->registration(Register::class) 
 
             ->plugins([
@@ -58,13 +58,13 @@ class AdminPanelProvider extends PanelProvider
                     ->setIcon('heroicon-o-user')
                     ->shouldShowAvatarForm(
                         value: true,
-                        directory: 'avatars' 
+                        directory: 'avatars'
                     )
             ])
 
             ->colors([
-        'primary' => '#4ab7ff',
-            'secondary' => '#00573e',
+                'primary' => '#30358b',
+                'secondary' => '#00573e',
 
             ])
             ->favicon(asset('cpaflogo.png'))
@@ -95,6 +95,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->brandName('CPAf Intranet');
 
-        }
+    }
 
 }

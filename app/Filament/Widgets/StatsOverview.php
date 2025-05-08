@@ -5,6 +5,7 @@ use App\Models\ChapterInBook;
 use App\Models\Extension;
 use App\Models\ExtensionPrime;
 use App\Models\Research;
+use App\Models\Publication;
 use App\Models\TrainingOrganize;
 use App\Models\OrganizedTraining;
 use App\Models\User;
@@ -34,8 +35,8 @@ class StatsOverview extends BaseWidget
         $endDate = Carbon::parse($this->filters['EndDate'] ?? now());
 
 
-        \Log::info('Start Date: ' . $startDate);
-        \Log::info('End Date: ' . $endDate);
+        Log::info('Start Date: ' . $startDate);
+        Log::info('End Date: ' . $endDate);
 
         // If the user is an admin, count all records
         if ($user->hasRole(['super-admin', 'admin'])) {
@@ -52,11 +53,11 @@ class StatsOverview extends BaseWidget
                     ->chart([1, 3, 5])
                     ->color('primary'),
 
-                Stat::make('Total: Training Organized', TrainingOrganize::whereBetween('start_date', [$startDate, $endDate])->count())
+                Stat::make('Total: Training Organized', OrganizedTraining::whereBetween('start_date', [$startDate, $endDate])->count())
                     ->chart([1, 3, 5])
                     ->color('secondary'),
 
-                Stat::make('Total: Publications', ChapterInBook::count())
+                Stat::make('Total: Publications', Publication::count())
                     ->chart([1, 3, 5])
                     ->color('secondary'),
 
@@ -129,9 +130,12 @@ class StatsOverview extends BaseWidget
                 ->chart([1, 3, 5])
                 ->color('secondary'),
 
-            Stat::make('Total: Publications', TrainingOrganize::count())
+            Stat::make('Total: Publications', Publication::where('user_id', auth()->id())
+                ->whereBetween('date_published', [$startDate, $endDate])
+                ->count())
                 ->chart([1, 3, 5])
                 ->color('secondary'),
+            
 
             Stat::make('Total: Awards', AwardsRecognitions::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
                 $query->whereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
