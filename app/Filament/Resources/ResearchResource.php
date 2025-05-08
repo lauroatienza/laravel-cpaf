@@ -279,7 +279,13 @@ class ResearchResource extends Resource
              //   $table->timestamps();
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('contributing_unit')
+                    ->options([
+                        'CSPPS' => 'CSPPS',
+                        'CISC' => 'CISC',
+                        'CPAf' => 'CPAf',
+                        'IGRD' => 'IGRD',
+                    ]),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
