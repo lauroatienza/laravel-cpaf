@@ -21,6 +21,7 @@ use SplTempFileObject;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AwardsRecognitionsExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Tables\Filters\SelectFilter;
 
 
 class AwardsRecognitionsResource extends Resource
@@ -169,8 +170,21 @@ class AwardsRecognitionsResource extends Resource
                     ->placeholder('N/A'),
             ])
             ->filters([
+                SelectFilter::make('award_type')
+                    ->label('Type of Awards')
+                    ->options([
+                        'International Publication Awards' => 'International Publication Awards',
+                        'Other Notable Awards' => 'Other Notable Awards',
 
+                    ])
+                    ->query(function ($query, $data) {
+                        if (!empty($data['value'])) {
+                            return $query->where('award_type', $data['value']);
+                        }
+                        return $query;
+                    }),
             ])
+
             ->bulkActions([
                 BulkAction::make('Delete Selected')
                     ->label('Delete Selected')
