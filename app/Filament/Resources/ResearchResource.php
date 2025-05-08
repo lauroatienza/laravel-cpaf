@@ -21,6 +21,8 @@ use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\IconColumn;
 use Illuminate\Database\Eloquent\Builder;
@@ -281,24 +283,21 @@ class ResearchResource extends Resource
             ->filters([
                 //
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Research Project')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn () => static::exportData(Research::all())),
-            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    
+                    BulkAction::make('exportBulk')
+                        ->label('Export Selected')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->requiresConfirmation()
+                        ->action(fn (array $data, $records) => static::exportData($records)),
+                ]),
             ]);
     }
 
@@ -324,7 +323,7 @@ class ResearchResource extends Resource
                     $record->objectives,
                     $record->expected_output,
                     $record->name_of_researchers,
-                    $record->poject_leader,
+                    $record->project_leader,
                     $record->source_funding,
                     $record->category_source_funding,
                     $record->budget,
