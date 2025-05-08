@@ -118,8 +118,7 @@ class ResearchResource extends Resource
 
                 TextInput::make('title')->label('Title')->required(),
 
-                Select::make('faculty_id')
-                     ,
+                
 
 
 
