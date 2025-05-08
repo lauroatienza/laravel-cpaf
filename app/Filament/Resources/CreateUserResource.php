@@ -159,26 +159,35 @@ class CreateUserResource extends Resource
             ->columns([
 
 
-                TextColumn::make('full_name')
+                TextColumn::make('name')
                     ->label('Full Name')
                     ->getStateUsing(fn($record) => "{$record->name} {$record->last_name}")
                     ->searchable(['name', 'last_name'])
                     ->sortable(),
 
-                TextColumn::make('unit')
+                BadgeColumn::make('unit')
                     ->label('Unit')
+                    ->color('primary')
                     ->sortable()
+                    ->alignCenter()
                     ->searchable(),
 
                 BadgeColumn::make('staff')
                     ->label('Classification')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->alignCenter()
+                    ->colors([
+                        'info' => 'faculty',
+                        'success' => 'admin',
+                        'warning' => 'REPS',
+                    ])->formatStateUsing(fn(string $state): string => ucfirst(strtoupper($state))),
 
-                BadgeColumn::make('ms_phd')
+
+                TextColumn::make('ms_phd')
                     ->label('Highest Degree Attained')
                     ->sortable()
-                    ->color('secondary')
+                    //->color('secondary')
                     ->searchable()
                     ->limit(20)
                     ->tooltip(fn($state) => $state),
@@ -240,6 +249,7 @@ class CreateUserResource extends Resource
 
 
             ])
+
             ->headerActions([
 
                 Tables\Actions\CreateAction::make()->label('Create New User')
@@ -253,7 +263,6 @@ class CreateUserResource extends Resource
                             ->options([
                                 'admin' => 'Admin',
                                 'faculty' => 'Faculty',
-                                //'representative' => 'REPS',
                                 'REPS' => 'REPS',
                             ])
                             ->required(),
@@ -262,11 +271,12 @@ class CreateUserResource extends Resource
                     ->color('primary')
                     ->action(function (array $data) {
                         $users = User::where('staff', $data['role'])->get();
-                        $pdf = Pdf::loadView('exports.faculty', compact('users'));
+                        $title = ucfirst($data['role']) . ' List';
+                        $pdf = Pdf::loadView('exports.faculty', compact('users', 'title'));
 
 
                         return response()->streamDownload(
-                            fn() => print ($pdf->output()),
+                            fn() => print($pdf->output()),
                             "{$data['role']}_list.pdf"
                         );
                     }),
