@@ -15,6 +15,10 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-
-*.css
-
+.css
+public/*
+!public/*.svg
+!public/*.png
+!public/*.jpg
+!public/*.jpeg
+!public/*.gif
