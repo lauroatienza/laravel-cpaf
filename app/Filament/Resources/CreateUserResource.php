@@ -133,7 +133,7 @@ class CreateUserResource extends Resource
                     ->afterStateUpdated(function ($state, $set, $get, $record) {
                         if ($record) {
                             $record->update(['systemrole' => $state]);
-                            $record->syncRoles([$state]); // ✅ Sync Spatie role
+                            $record->syncRoles([$state]);
                         }
                     }),
 
@@ -162,26 +162,25 @@ class CreateUserResource extends Resource
                 TextColumn::make('full_name')
                     ->label('Full Name')
                     ->getStateUsing(fn($record) => "{$record->name} {$record->last_name}")
-                    ->searchable(['name', 'last_name']) // ← Just pass array directly
+                    ->searchable(['name', 'last_name'])
                     ->sortable(),
-
 
                 TextColumn::make('unit')
                     ->label('Unit')
                     ->sortable()
                     ->searchable(),
+
                 BadgeColumn::make('staff')
                     ->label('Classification')
                     ->sortable()
-                    ->searchable()
-                    ->formatStateUsing(fn(string $state): string => ucfirst(strtolower($state))),
+                    ->searchable(),
 
                 BadgeColumn::make('ms_phd')
                     ->label('Highest Degree Attained')
                     ->sortable()
                     ->color('secondary')
                     ->searchable()
-                    ->limit(10) // Only show first 20 characters
+                    ->limit(20)
                     ->tooltip(fn($state) => $state),
                 BadgeColumn::make('systemrole')
                     ->label('User Role')
@@ -212,15 +211,15 @@ class CreateUserResource extends Resource
                     ->options([
                         'admin' => 'Admin',
                         'faculty' => 'Faculty',
-                        'reps' => 'REPS',
+                        'REPS' => 'REPS',
                     ])
                     ->query(function ($query, $data) {
                         if ($data['value'] === 'admin') {
                             return $query->where('staff', 'admin');
                         } elseif ($data['value'] === 'faculty') {
                             return $query->where('staff', 'faculty');
-                        } elseif ($data['value'] === 'reps') {
-                            return $query->where('staff', 'reps');
+                        } elseif ($data['value'] === 'REPS') {
+                            return $query->where('staff', 'REPS');
                         }
                         return $query;
                     }),
@@ -230,7 +229,7 @@ class CreateUserResource extends Resource
 
                 Tables\Actions\DeleteAction::make()
                     ->action(function (Model $record) {
-                        $record->forceDelete(); // 🧨 Bypass soft delete
+                        $record->forceDelete();
                     })
                     ->requiresConfirmation()
                     ->color('danger')
@@ -254,8 +253,8 @@ class CreateUserResource extends Resource
                             ->options([
                                 'admin' => 'Admin',
                                 'faculty' => 'Faculty',
-                                'representative' => 'REPS',
-                                'reps' => 'REPS',
+                                //'representative' => 'REPS',
+                                'REPS' => 'REPS',
                             ])
                             ->required(),
                     ])
