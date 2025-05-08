@@ -132,7 +132,15 @@ class FSRorRSRResource extends Resource
                 
                 
             ])
-            ->filters([])
+            ->filters([
+                Tables\Filters\SelectFilter::make('sem')
+                    ->options([
+                        '1st' => '1st Semester',
+                        '2nd' => '2nd Semester',
+                        "Inter" => 'Inter Semester',
+                    ]),
+            ])
+            
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),

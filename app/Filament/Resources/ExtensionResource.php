@@ -30,6 +30,7 @@ use SplTempFileObject;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Hidden;
+use Filament\Tables\Filters\SelectFilter;
 
 
 class ExtensionResource extends Resource
@@ -107,7 +108,6 @@ class ExtensionResource extends Resource
             TextInput::make('name')
                 ->label('Full Name')
                 ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
-                ->disabled()
                 ->required(),
 
             Select::make('extension_involvement')
@@ -189,22 +189,24 @@ class ExtensionResource extends Resource
                 //  })
                 /*TextColumn::make('activity_date')->label('Timestamp')
                 ->sortable()->searchable() ->date('F d, Y'),*/
-                TextColumn::make('name')->label('Full Names')
+                TextColumn::make('name')->label('Full Name')
                     ->sortable()
+                    ->searchable()
+                    ->limit(40)
                     ->tooltip(fn($state) => $state),
                 TextColumn::make('extension_involvement')->label('Type of Extension Involvement')
                     ->sortable()->searchable(),
                 TextColumn::make('event_title')->label('Event Title')
                     ->sortable()->searchable()
-                    ->limit(20) 
-                    ->tooltip(fn($state) => $state), 
+                    ->limit(20)
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('created_at')->label('Start Date')
                     ->sortable()->searchable(),
                 TextColumn::make('extensiontype')->label('Type of Extension')
                     ->sortable()->searchable(),
                 TextColumn::make('venue')->label('Event Venue')
                     ->sortable()->searchable()
-                    ->limit(20) 
+                    ->limit(20)
                     ->tooltip(fn($state) => $state),
                 TextColumn::make('date_end')->label('End Date')
                     ->sortable()->searchable(),
@@ -212,7 +214,7 @@ class ExtensionResource extends Resource
 
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -222,7 +224,7 @@ class ExtensionResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-            
+
                     Tables\Actions\BulkAction::make('exportSelected')
                         ->label('Export Selected')
                         ->icon('heroicon-o-arrow-down-tray')
@@ -246,13 +248,13 @@ class ExtensionResource extends Resource
     {
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
-        }  
-    
+        }
+
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
                 fputcsv($handle, ['Full Name', 'Type of Extension Involvement', 'Event Title', 'Start Date', 'End Date', 'Extension Type', 'Venue']);  // CSV headers
-    
+
                 foreach ($records as $record) {
                     fputcsv($handle, [
                         $record->name,
@@ -264,16 +266,16 @@ class ExtensionResource extends Resource
                         $record->venue,
                     ]);
                 }
-    
+
                 fclose($handle);
             }, 'extension_involvements.csv');
         }
-    
+
         if ($format === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.extension_involvements', ['records' => $records]);  // Your PDF view
             return response()->streamDownload(fn() => print($pdf->output()), 'extension_involvements.pdf');
         }
-    }    
+    }
 
 
     public static function getRelations(): array

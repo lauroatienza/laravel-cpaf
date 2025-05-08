@@ -118,8 +118,7 @@ class ResearchResource extends Resource
 
                 TextInput::make('title')->label('Title')->required(),
 
-                Select::make('faculty_id')
-                     ,
+                
 
 
 
@@ -280,7 +279,13 @@ class ResearchResource extends Resource
              //   $table->timestamps();
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('contributing_unit')
+                    ->options([
+                        'CSPPS' => 'CSPPS',
+                        'CISC' => 'CISC',
+                        'CPAf' => 'CPAf',
+                        'IGRD' => 'IGRD',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

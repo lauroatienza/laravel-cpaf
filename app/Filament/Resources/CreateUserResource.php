@@ -168,7 +168,6 @@ class CreateUserResource extends Resource
 
                 BadgeColumn::make('unit')
                     ->label('Unit')
-                    ->color('primary')
                     ->sortable()
                     ->alignCenter()
                     ->searchable(),
@@ -184,18 +183,22 @@ class CreateUserResource extends Resource
                         'warning' => 'REPS',
                     ])->formatStateUsing(fn(string $state): string => ucfirst(strtoupper($state))),
 
-
                 TextColumn::make('ms_phd')
                     ->label('Highest Degree Attained')
                     ->sortable()
-                    //->color('secondary')
                     ->searchable()
                     ->limit(20)
                     ->tooltip(fn($state) => $state),
+
                 BadgeColumn::make('systemrole')
                     ->label('User Role')
                     ->sortable()
-                    ->color('secondary')
+                    ->colors([
+                        'primary' => 'admin',
+                        'warning' => 'super-admin',
+                        'secondary' => 'user',
+                        'danger' => 'secretary',
+                    ])
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Contact')

@@ -32,6 +32,7 @@
     use Filament\Forms\Set;
     use Illuminate\Contracts\View\View;
     use Filament\Tables\Columns\CheckboxColumn;
+    use Filament\Tables\Filters\SelectFilter;
 
     class PublicationResource extends Resource
     {
@@ -265,7 +266,24 @@
                 TextColumn::make('date_awarded')->sortable()->label('Date Awarded')->date(),
             ])
 
-            ->filters([])
+            ->filters([
+                SelectFilter::make('contributing_unit')
+                    ->label('Contributing Unit')
+                    ->options([
+                        'CISC' => 'CISC',
+                        'CSPPS' => 'CSPPS',
+                        'CPAF' => 'CPAF',
+                        'IGRD' => 'IGRD',
+                    ])
+                    ->query(function ($query, $data) {
+                        if (!empty($data['value'])) {
+                            return $query->where('contributing_unit', $data['value']);
+                        }
+                        return $query;
+                    }),
+            ])
+
+
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),

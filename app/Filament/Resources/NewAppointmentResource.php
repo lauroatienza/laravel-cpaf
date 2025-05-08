@@ -211,7 +211,13 @@ public static function table(Table $table): Table
                 ->color('primary'),
         ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('type_of_appointments')
+                    ->options([
+                        'Affiliate Faculty' => 'Affiliate Faculty',
+                        'Adjunct Faculty' => 'Adjunct Faculty',
+                        'Lecturer' => 'Lecturer',
+                        'Administrator' => 'Administrator',
+                    ]),
             ])
             ->actions([
                 ViewAction::make(),
