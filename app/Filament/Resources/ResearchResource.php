@@ -127,9 +127,9 @@ class ResearchResource extends Resource
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
 
-                RichEditor::make('event_highlight')->columnSpan('full'),
+                RichEditor::make('event_highlight')->columnSpan('full')->label('Event Highlight'),
 
-                Select::make('has_gender_component')->label('Has gender component')
+                Select::make('has_gender_component')->label('Has Gender Component')
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
@@ -137,11 +137,11 @@ class ResearchResource extends Resource
 
 
                 RichEditor::make('objectives')->columnSpan('full'),
-                RichEditor::make('expected_output')->columnSpan('full'),
-                TextInput::make('no_months_orig_timeframe')->label('Months No. from original timeframe'),
-                TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
+                RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output'),
+                TextInput::make('no_months_orig_timeframe')->label('Months No. from Original Timeframe'),
+                TextInput::make('name_of_researchers')->required()->label('Name of Researchers')->placeholder('Use comma to separate names'),
 
-                TextInput::make('source_funding')->required(),
+                TextInput::make('source_funding')->required()->label('Source Funding'),
                 Select::make('category_source_funding')->label('Source of Funding Category')
                 ->options([
                     'UP Entity' => 'UP Entity',
@@ -159,7 +159,7 @@ class ResearchResource extends Resource
                     'In-house' => 'In-house',
                 ])->required(),
 
-                FileUpload::make('pdf_image_1')->preserveFilenames(),
+                FileUpload::make('pdf_image_1')->preserveFilenames()->label('PDF Image 1'),
                 DatePicker::make('completed_date')->label('Completed Date')
                     ->format('Y/m/d')->nullable(),
 
