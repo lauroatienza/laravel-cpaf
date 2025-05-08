@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faculty List</title>
+    <title>{{ $title ?? 'User List' }}</title>
     <style>
         body { font-family: Arial, sans-serif; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <h2>Faculty List</h2>
+    <h2>{{ $title ?? 'User List' }}</h2>
     <table>
         <thead>
             <tr>
