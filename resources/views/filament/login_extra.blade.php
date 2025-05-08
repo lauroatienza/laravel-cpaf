@@ -23,7 +23,7 @@ body {
     }
 
     body {
-    background-image: url('/bg.png') !important;
+    background-image: url('/CPAF INTRANET.png') !important;
     background-size: cover !important;
     background-position: center !important;
     height: 100% !important;
@@ -31,7 +31,7 @@ body {
     background-attachment: fixed !important; /* Makes the background fixed while scrolling */
     
 }
-   
+
 
     .fi-fo-field-wrp-label
     {
