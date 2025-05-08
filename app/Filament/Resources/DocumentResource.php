@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use League\Csv\Writer;
+use Illuminate\Support\Str;
 
 class DocumentResource extends Resource
 {
@@ -24,6 +25,7 @@ class DocumentResource extends Resource
     protected static ?string $navigationLabel = 'MOU and MOA';
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'heroicon-o-document';
+    protected static ?string $label = 'MOU and MOA';
 
     public static function getNavigationBadge(): ?string
     {
@@ -102,7 +104,10 @@ class DocumentResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('contributing_unit')->sortable()->label('Contributing Unit')->searchable(),
-                BadgeColumn::make('partnership_type')->label('Partnership Type')->sortable(),
+                BadgeColumn::make('partnership_type')
+                    ->label('Partnership Type')
+                    ->sortable(),
+
                 TextColumn::make('extension_title')
                     ->searchable()
                     ->label('Extension Title')
@@ -111,13 +116,64 @@ class DocumentResource extends Resource
                 TextColumn::make('partner_stakeholder')->label('Partner Stakeholder')->searchable(),
                 TextColumn::make('start_date')->date('Y-m-d')->sortable(),
                 TextColumn::make('end_date')->date('Y-m-d')->sortable(),
-                BadgeColumn::make('training_courses')->label('Training Courses')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('technical_advisory_service')->label('Technical/Advisory Service')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('information_dissemination')->label('Info Dissemination')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('consultancy')->label('Consultancy')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('community_outreach')->label('Community Outreach')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('technology_transfer')->label('Technology Transfer')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('organizing_events')->label('Organizing Events')->colors(['success' => 'Yes', 'danger' => 'No']),
+                
+                BadgeColumn::make('training_courses')
+                    ->label('Training Courses')
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('technical_advisory_service')
+                    ->label('Technical/Advisory Service')
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('information_dissemination')
+                    ->label('Info Dissemination')
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('consultancy')
+                    ->label('Consultancy')
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('community_outreach')
+                    ->label('Community Outreach')
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('technology_transfer')
+                    ->label('Technology Transfer')
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('organizing_events')
+                    ->label('Organizing Events')
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                
                 TextColumn::make('documents_file_path')
                     ->label('File')
                     ->formatStateUsing(fn ($state) => $state ? '🔗 View File' : 'None')
