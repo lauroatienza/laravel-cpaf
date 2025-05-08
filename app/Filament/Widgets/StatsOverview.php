@@ -5,6 +5,7 @@ use App\Models\ChapterInBook;
 use App\Models\Extension;
 use App\Models\ExtensionPrime;
 use App\Models\Research;
+use App\Models\Publication;
 use App\Models\TrainingOrganize;
 use App\Models\OrganizedTraining;
 use App\Models\User;
@@ -57,6 +58,7 @@ class StatsOverview extends BaseWidget
                     ->chart([1, 3, 5])
                     ->color('secondary'),
 
+                Stat::make('Total: Publications', Publication::count())
                 Stat::make('Total: Publications', Publication::count())
                     ->chart([1, 3, 5])
                     ->color('secondary'),

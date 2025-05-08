@@ -77,10 +77,11 @@ class FSRorRSRResource extends Resource
 
                 TextInput::make('full_name')
                     ->label('Full Name')
-                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
                     ->disabled()
+                    ->dehydrated(false) 
+                    ->formatStateUsing(fn ($record) => $record?->full_name ?? Auth::user()->name . ' ' . Auth::user()->last_name)
                     ->required(),
-
+            
                 TextInput::make('year')
                     ->label('Year')
                     ->required(),

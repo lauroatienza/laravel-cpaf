@@ -208,31 +208,18 @@ class TrainingAttendedResource extends Resource
             ->filters([
                 //
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Training Attended')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Action::make('exportAll') // This should work now
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn () => static::exportData(TrainingAttended::all())),
-            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('exportBulk')
                         ->label('Export Selected')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->requiresConfirmation()
                         ->action(fn ($records) => static::exportData($records)),
-                ]),
             ]);
     }
 

@@ -240,14 +240,13 @@
                     ->url(fn ($record) =>
                         str_starts_with($record->pdf_proof_1, 'http')
                             ? $record->pdf_proof_1
-                            : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/')
-                    )
+                            : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/'))
                     ->openUrlInNewTab()
-                    ->limit(30)
+                    ->limit(20)
                     ->searchable()
                     ->tooltip(fn($state) => $state),
 
-                    TextColumn::make('pdf_proof_2')
+                TextColumn::make('pdf_proof_2')
                     ->label('PDF Proof 2')
                     ->sortable()
                     ->url(fn ($record) =>
@@ -276,7 +275,7 @@
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\BulkAction::make('exportSelected')
-                    ->label('Export Selected (CSV)')
+                    ->label('Export Selected')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($records) {
                         $csv = Writer::createFromFileObject(new SplTempFileObject());
@@ -361,152 +360,7 @@
         }, 'Publications_' . now()->format('Ymd_His') . '.csv');
     })
     ->requiresConfirmation(),
-
-            ])
-
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('New Publication')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function () {
-                        $publications = Publication::all([
-                            'name',
-                            'contributing_unit',
-                            'type_of_publication',
-                            'other_type',
-                            'title_of_publication',
-                            'co_authors',
-
-                            'research_conference_publisher_details',
-                            'study_research_project',
-                            'journal_book_conference',
-                            'publisher_organizer',
-                            'type_of_publisher',
-                            'location_of_publisher',
-                            'editors',
-                            'volume_issue',
-                            'date_published',
-                            'conference_start_date',
-                            'conference_end_date',
-                            'conference_venue',
-                            'doi_or_link',
-                            'isbn_issn',
-
-                            'collection_database',
-                            'web_science',
-                            'scopus',
-                            'science_direct',
-                            'pubmed',
-                            'ched_journals',
-                            'other_reputable_collection',
-                            'citations',
-
-                            'pdf_proof_1',
-                            'pdf_proof_2',
-
-                            'received_award',
-                            'award_title',
-                            'date_awarded',
-                        ]);
-
-                        $csv = Writer::createFromFileObject(new SplTempFileObject());
-
-                        $csv->insertOne([
-                            'name',
-                            'contributing_unit',
-                            'type_of_publication',
-                            'other_type',
-                            'title_of_publication',
-                            'co_authors',
-
-                            'research_conference_publisher_details',
-                            'study_research_project',
-                            'journal_book_conference',
-                            'publisher_organizer',
-                            'type_of_publisher',
-                            'location_of_publisher',
-                            'editors',
-                            'volume_issue',
-                            'date_published',
-                            'research_conference_publisher_details',
-                            'conference_start_date',
-                            'conference_end_date',
-                            'conference_venue',
-                            'doi_or_link',
-                            'isbn_issn',
-
-                            'collection_database',
-                            'web_science',
-                            'scopus',
-                            'science_direct',
-                            'pubmed',
-                            'ched_journals',
-                            'other_reputable_collection',
-                            'citations',
-
-                            'pdf_proof_1',
-                            'pdf_proof_2',
-
-                            'received_award',
-                            'award_title',
-                            'date_awarded',
-                        ]);
-
-                        foreach ($publications as $publication) {
-                            $csv->insertOne([
-                                $publication->name,
-                                $publication->contributing_unit,
-                                $publication->type_of_publication,
-                                $publication->other_type,
-                                $publication->title_of_publication,
-                                $publication->co_authors,
-
-                                $publication->research_conference_publisher_details,
-                                $publication->study_research_project,
-                                $publication->journal_book_conference,
-                                $publication->publisher_organizer,
-                                $publication->type_of_publisher,
-                                $publication->location_of_publisher,
-                                $publication->editors,
-                                $publication->volume_issue,
-                                $publication->date_published,
-                                $publication->research_conference_publisher_details,
-                                $publication->conference_start_date,
-                                $publication->conference_end_date,
-                                $publication->conference_venue,
-                                $publication->doi_or_link,
-                                $publication->isbn_issn,
-
-                                $publication->collection_database,
-                                $publication->web_science,
-                                $publication->scopus,
-                                $publication->science_direct,
-                                $publication->pubmed,
-                                $publication->ched_journals,
-                                $publication->other_reputable_collection,
-                                $publication->citations,
-
-                                $publication->pdf_proof_1,
-                                $publication->pdf_proof_2,
-
-                                $publication->received_award,
-                                $publication->award_title,
-                                $publication->date_awarded,
-
-                            ]);
-                        }
-
-                        return response()->streamDownload(function () use ($csv) {
-                            echo $csv->toString();
-                        }, 'Publications_' . now()->format('Ymd_His') . '.csv');
-                    }),
-            ]);
+        ]);
     }
     public static function getRelations(): array
         {
