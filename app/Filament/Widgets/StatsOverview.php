@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
+
 class StatsOverview extends BaseWidget
 {
     use InteractsWithPageFilters;
@@ -53,10 +54,11 @@ class StatsOverview extends BaseWidget
                     ->chart([1, 3, 5])
                     ->color('primary'),
 
-                Stat::make('Total: Training Organized', TrainingOrganize::whereBetween('start_date', [$startDate, $endDate])->count())
+                Stat::make('Total: Training Organized', OrganizedTraining::whereBetween('start_date', [$startDate, $endDate])->count())
                     ->chart([1, 3, 5])
                     ->color('secondary'),
 
+                
                 Stat::make('Total: Publications', Publication::count())
                     ->chart([1, 3, 5])
                     ->color('secondary'),
@@ -130,9 +132,12 @@ class StatsOverview extends BaseWidget
                 ->chart([1, 3, 5])
                 ->color('secondary'),
 
-            Stat::make('Total: Publications', Publication::count())
+            Stat::make('Total: Publications', Publication::where('user_id', auth()->id())
+                ->whereBetween('date_published', [$startDate, $endDate])
+                ->count())
                 ->chart([1, 3, 5])
                 ->color('secondary'),
+            
 
             Stat::make('Total: Awards', AwardsRecognitions::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
                 $query->whereRaw("LOWER(REPLACE(name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
