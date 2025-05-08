@@ -1,8 +1,5 @@
 /.phpunit.cache
 /node_modules
-/public/build
-/public/hot
-/public/storage
 /storage/*.key
 /vendor
 .env
@@ -18,8 +15,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-<<<<<<< HEAD
+
 *.css
-=======
-*.css
->>>>>>> 42cbae14758c668e141affc7979767f3ce2a1067
+
