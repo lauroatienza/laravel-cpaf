@@ -22,3 +22,7 @@ public/*
 !public/*.jpg
 !public/*.jpeg
 !public/*.gif
+!public/storage/
+!public/storage/avatars/
+!public/storage/avatars/*.jpg
+!public/storage/avatars/*.png
