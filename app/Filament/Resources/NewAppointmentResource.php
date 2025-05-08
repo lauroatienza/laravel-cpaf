@@ -211,44 +211,19 @@ public static function table(Table $table): Table
                 ->color('primary'),
         ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('type_of_appointments')
+                    ->options([
+                        'Affiliate Faculty' => 'Affiliate Faculty',
+                        'Adjunct Faculty' => 'Adjunct Faculty',
+                        'Lecturer' => 'Lecturer',
+                        'Administrator' => 'Administrator',
+                    ]),
             ])
             ->actions([
                 ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Appointment')
-                    ->icon('heroicon-o-pencil-square')
-                    ->color('secondary'),
-            
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->label('Export Format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->required(),
-                    ])
-                    ->action(function (array $data) {
-                        $appointments = NewAppointment::all([
-                            'full_name',
-                            'type_of_appointments',
-                            'position',
-                            'appointment',
-                            'appointment_effectivity_date'
-                        ]);
-            
-                        return static::exportData($appointments, $data['format']);
-                    }),
-            ])
-            
+            ])            
             ->bulkActions([
                 Tables\Actions\BulkAction::make('delete')
                     ->label('Delete Selected')

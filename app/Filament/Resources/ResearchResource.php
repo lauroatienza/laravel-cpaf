@@ -21,6 +21,8 @@ use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\IconColumn;
 use Illuminate\Database\Eloquent\Builder;
@@ -112,7 +114,7 @@ class ResearchResource extends Resource
                 ->options([
                     'Completed' => 'Completed',
                     'On-going' => 'On-going',
-                ])->required()->default('On-going'),
+                ])->required(),
 
                 TextInput::make('title')->label('Title')->required(),
 
@@ -134,10 +136,9 @@ class ResearchResource extends Resource
                 ])->default('no'),
 
 
-
                 RichEditor::make('objectives')->columnSpan('full'),
                 RichEditor::make('expected_output')->columnSpan('full'),
-                TextInput::make('no_months_orig_timeframe')->default('N/A')->label('Months No. from original timeframe'),
+                TextInput::make('no_months_orig_timeframe')->label('Months No. from original timeframe'),
                 TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
 
                 TextInput::make('source_funding')->required(),
@@ -169,13 +170,13 @@ class ResearchResource extends Resource
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
-                ])->required()->default("no"),
+                ])->required(),
 
                 Select::make('disaster_risk_reduction')->label('Disaster Risk Reduction')
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
-                ])->required()->default("no"),
+                ])->required(),
 
                 Select::make('flagship_theme')->label('UP Flagship Theme')
                 ->options([
@@ -195,7 +196,7 @@ class ResearchResource extends Resource
                 ->options([
                     'uploaded' => 'Uploaded',
                     'pending' => 'Pending',
-                ])->required()->default("pending"),
+                ])->required(),
 
             ]);
     }
@@ -246,7 +247,7 @@ class ResearchResource extends Resource
                     ->sortable()->searchable(),
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
                     ->sortable()->searchable(),
-                IconColumn::make('pbms_upload_status')
+                IconColumn::make('pbms_upload_status')->label('PMBS Upload Status')
                      ->icon(fn (string $state): string => match ($state) {
                             'uploaded' => 'heroicon-o-check-badge',
                             'pending' => 'heroicon-o-clock',
@@ -279,18 +280,13 @@ class ResearchResource extends Resource
              //   $table->timestamps();
             ])
             ->filters([
-                //
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Research Project')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn () => static::exportData(Research::all())),
+                Tables\Filters\SelectFilter::make('contributing_unit')
+                    ->options([
+                        'CSPPS' => 'CSPPS',
+                        'CISC' => 'CISC',
+                        'CPAf' => 'CPAf',
+                        'IGRD' => 'IGRD',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -298,7 +294,15 @@ class ResearchResource extends Resource
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    
+                    BulkAction::make('exportBulk')
+                        ->label('Export Selected')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->requiresConfirmation()
+                        ->action(fn (array $data, $records) => static::exportData($records)),
+                ]),
             ]);
     }
 
@@ -324,7 +328,7 @@ class ResearchResource extends Resource
                     $record->objectives,
                     $record->expected_output,
                     $record->name_of_researchers,
-                    $record->poject_leader,
+                    $record->project_leader,
                     $record->source_funding,
                     $record->category_source_funding,
                     $record->budget,

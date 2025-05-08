@@ -1,29 +1,32 @@
-
-
 <style>
+    body .filament-form input, 
+body .filament-form label, 
+body .filament-form .fi-input, 
+body .filament-form .fi-label, 
+
 body {
-    background-image: url('/bg.png') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    height: 100% !important;
+    background-color: #00573e !important; 
     margin: 0;
-    background-attachment: fixed !important; /* Makes the background fixed while scrolling */
-    
+    height: 100%;
 }
+main {
+        position: center; 
+        max-width: 500px;
+        
+    }
 
 
-
-
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1200px) {
     main {
         position: absolute; 
         right:100px;
         max-width: 500px;
         
-    }
+        
+        }
 
     body {
-    background-image: url('/bg.png') !important;
+    background-image: url('/CPAF INTRANET.png') !important;
     background-size: cover !important;
     background-position: center !important;
     height: 100% !important;
@@ -31,7 +34,7 @@ body {
     background-attachment: fixed !important; /* Makes the background fixed while scrolling */
     
 }
-   
+
 
     .fi-fo-field-wrp-label
     {
@@ -63,6 +66,7 @@ body {
     .fi-fo-field-wrp-label
     {
         color:black !important;
+        
     }
 
     
@@ -79,3 +83,7 @@ body {
 
 
 </style>
+
+<div class="text-xs text-center">
+    Copyright &copy; {{ date('Y') }} College of Public Affairs and Development - University of the Philippines Los Baños. All rights reserved.
+</div>
