@@ -140,26 +140,7 @@ class FSRorRSRResource extends Resource
                         "Inter" => 'Inter Semester',
                     ]),
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create FSR/RSR Attachment')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn (array $data) => static::exportData(FSRorRSR::all(), $data['format'])),
-            ])
+            
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
