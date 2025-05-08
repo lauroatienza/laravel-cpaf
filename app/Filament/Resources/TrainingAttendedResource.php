@@ -206,7 +206,15 @@ class TrainingAttendedResource extends Resource
                     ->formatStateUsing(fn ($state) => rtrim(rtrim(number_format($state, 1, '.', ''), '0'), '.')),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('unit_center')
+                    ->label('Unit/Center')
+                    //->multiple()
+                    ->options([
+                        'CSPPS' => 'CSPPS',
+                        'CISC' => 'CISC',
+                        'IGRD' => 'IGRD',
+                        'CPAF' => 'CPAF',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
