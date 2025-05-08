@@ -26,15 +26,40 @@ main {
         }
 
     body {
-    background-image: url('/bg.png') !important;
-    background-size: cover !important;          /* Resizes the image to cover the whole screen */
-    background-position: center !important;     /* Centers the image */
-    background-repeat: no-repeat !important;    /* Prevents tiling */
-    background-attachment: fixed !important;  
-    
-    }
+    background-image: url('/CPAF INTRANET.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    height: 100% !important;
+    margin: 0;
+    background-attachment: fixed !important; /* Makes the background fixed while scrolling */
     
 }
+
+
+    .fi-fo-field-wrp-label
+    {
+        color:black !important;
+    }
+
+    
+    .fi-logo {
+        display: none !important;
+        position: right;
+        left: 100px;
+        font-size: 3em;
+        color: cornsilk;
+    }
+
+    
+}
+
+@media screen and (min-width: 1000px) {
+    main {
+        position: absolute; 
+        right:100px;
+        max-width: 500px;
+        
+    }
 
    
 
