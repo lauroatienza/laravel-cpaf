@@ -29,6 +29,7 @@ use League\Csv\Writer;
 use SplTempFileObject;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\Hidden;
 
 
 class ExtensionResource extends Resource
@@ -97,57 +98,73 @@ class ExtensionResource extends Resource
     }
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Full Name')
-                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
-                    ->hidden()
-                    ->required(),
+{
+    return $form
+        ->schema([
+            Hidden::make('user_id')
+                ->default(Auth::id()),
 
-                Select::make('extension_involvement')
-                    ->label('Type of Extension Involvement')
-                    ->options([
-                        'Resource Person' => 'Resource Person',
-                        'Seminar Speaker' => 'Seminar Speaker',
-                        'Reviewer' => 'Reviewer',
-                        'Evaluator' => 'Evaluator',
-                        'Moderator' => 'Moderator',
-                        'Session Chair' => 'Session Chair',
-                        'Editor' => 'Editor',
-                        'Examiner' => 'Examiner',
-                        'Other' => 'Other (Specify)',
-                    ])
-                    ->reactive(),
+            TextInput::make('name')
+                ->label('Full Name')
+                ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
+                ->disabled()
+                ->required(),
 
-                Select::make('location')
-                    ->label('Type of Extension')
-                    ->options([
-                        'Training' => 'Training',
-                        'Conference' => 'Conference',
-                        'Editorial Team/Board' => 'Editorial Team/Board',
-                        'Workshop' => 'Workshop',
-                        'Other' => 'Other (Specify)',
-                    ])
-                    ->reactive(),
+            Select::make('extension_involvement')
+                ->label('Type of Extension Involvement')
+                ->options([
+                    'Resource Person' => 'Resource Person',
+                    'Seminar Speaker' => 'Seminar Speaker',
+                    'Reviewer' => 'Reviewer',
+                    'Evaluator' => 'Evaluator',
+                    'Moderator' => 'Moderator',
+                    'Session Chair' => 'Session Chair',
+                    'Editor' => 'Editor',
+                    'Examiner' => 'Examiner',
+                    'Other' => 'Other (Specify)',
+                ])
+                ->reactive()
+                ->required(),
 
-                TextInput::make('custom_involvement')
-                    ->label('Specify Other')
-                    ->hidden(fn($get) => $get('type_of_involvement') !== 'Other')
-                    ->maxLength(255),
+            TextInput::make('custom_involvement')
+                ->label('Specify Other Involvement')
+                ->hidden(fn($get) => $get('extension_involvement') !== 'Other')
+                ->required(fn($get) => $get('extension_involvement') === 'Other')
+                ->maxLength(255),
 
-                TextInput::make('event_title')
-                    ->label("Event Title"),
+            Select::make('location')
+                ->label('Type of Extension')
+                ->options([
+                    'Training' => 'Training',
+                    'Conference' => 'Conference',
+                    'Editorial Team/Board' => 'Editorial Team/Board',
+                    'Workshop' => 'Workshop',
+                    'Other' => 'Other (Specify)',
+                ])
+                ->reactive()
+                ->required(),
 
-                TextInput::make('venue')
-                    ->label("Venue and Location"),
+            TextInput::make('custom_location')
+                ->label('Specify Other Type of Extension')
+                ->hidden(fn($get) => $get('location') !== 'Other')
+                ->required(fn($get) => $get('location') === 'Other')
+                ->maxLength(255),
 
-                DatePicker::make('activity_date')
-                    ->label('Activity Date'),
+            TextInput::make('event_title')
+                ->label("Event Title")
+                ->required(),
 
-            ])->columns(2);
-    }
+            TextInput::make('venue')
+                ->label("Venue and Location")
+                ->required(),
+
+            DatePicker::make('activity_date')
+                ->label('Activity Date')
+                ->required(),
+
+        ])->columns(2);
+}
+
 
     public static function table(Table $table): Table
     {
@@ -173,22 +190,21 @@ class ExtensionResource extends Resource
                 /*TextColumn::make('activity_date')->label('Timestamp')
                 ->sortable()->searchable() ->date('F d, Y'),*/
                 TextColumn::make('name')->label('Full Names')
-                    ->sortable()->searchable()
-                    ->limit(20) // Only show first 20 characters
+                    ->sortable()
                     ->tooltip(fn($state) => $state),
                 TextColumn::make('extension_involvement')->label('Type of Extension Involvement')
                     ->sortable()->searchable(),
                 TextColumn::make('event_title')->label('Event Title')
                     ->sortable()->searchable()
-                    ->limit(20) // Only show first 20 characters
-                    ->tooltip(fn($state) => $state), // Show full name on hover,
+                    ->limit(20) 
+                    ->tooltip(fn($state) => $state), 
                 TextColumn::make('created_at')->label('Start Date')
                     ->sortable()->searchable(),
                 TextColumn::make('extensiontype')->label('Type of Extension')
                     ->sortable()->searchable(),
                 TextColumn::make('venue')->label('Event Venue')
                     ->sortable()->searchable()
-                    ->limit(20) // Only show first 20 characters
+                    ->limit(20) 
                     ->tooltip(fn($state) => $state),
                 TextColumn::make('date_end')->label('End Date')
                     ->sortable()->searchable(),

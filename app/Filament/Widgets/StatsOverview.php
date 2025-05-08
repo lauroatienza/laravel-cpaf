@@ -16,7 +16,6 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Models\Publication;
 
 class StatsOverview extends BaseWidget
 {
@@ -36,8 +35,8 @@ class StatsOverview extends BaseWidget
         $endDate = Carbon::parse($this->filters['EndDate'] ?? now());
 
 
-        \Log::info('Start Date: ' . $startDate);
-        \Log::info('End Date: ' . $endDate);
+        Log::info('Start Date: ' . $startDate);
+        Log::info('End Date: ' . $endDate);
 
         // If the user is an admin, count all records
         if ($user->hasRole(['super-admin', 'admin'])) {
@@ -58,7 +57,6 @@ class StatsOverview extends BaseWidget
                     ->chart([1, 3, 5])
                     ->color('secondary'),
 
-                Stat::make('Total: Publications', Publication::count())
                 Stat::make('Total: Publications', Publication::count())
                     ->chart([1, 3, 5])
                     ->color('secondary'),
