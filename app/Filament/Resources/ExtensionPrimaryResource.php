@@ -225,28 +225,6 @@ class ExtensionPrimaryResource extends Resource
                 TextColumn::make('pbms_upload_status')->label('PBMS Uploading Status')->sortable(),
             ])
             ->filters([])
-
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Extension Program')
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-
-                Action::make('exportAll')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->label('Export Format')
-                            ->required(),
-                    ])
-                    ->action(fn (array $data) => static::exportData(ExtensionPrime::all(), $data['format'])),
-            ])
-
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),

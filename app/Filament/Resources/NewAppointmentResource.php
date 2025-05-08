@@ -217,38 +217,7 @@ public static function table(Table $table): Table
                 ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Create Appointment')
-                    ->icon('heroicon-o-pencil-square')
-                    ->color('secondary'),
-            
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Forms\Components\Select::make('format')
-                            ->label('Export Format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->required(),
-                    ])
-                    ->action(function (array $data) {
-                        $appointments = NewAppointment::all([
-                            'full_name',
-                            'type_of_appointments',
-                            'position',
-                            'appointment',
-                            'appointment_effectivity_date'
-                        ]);
-            
-                        return static::exportData($appointments, $data['format']);
-                    }),
-            ])
-            
+            ])            
             ->bulkActions([
                 Tables\Actions\BulkAction::make('delete')
                     ->label('Delete Selected')

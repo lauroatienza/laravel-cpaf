@@ -114,7 +114,7 @@ class ResearchResource extends Resource
                 ->options([
                     'Completed' => 'Completed',
                     'On-going' => 'On-going',
-                ])->required()->default('On-going'),
+                ])->required(),
 
                 TextInput::make('title')->label('Title')->required(),
 
@@ -136,10 +136,9 @@ class ResearchResource extends Resource
                 ])->default('no'),
 
 
-
                 RichEditor::make('objectives')->columnSpan('full'),
                 RichEditor::make('expected_output')->columnSpan('full'),
-                TextInput::make('no_months_orig_timeframe')->default('N/A')->label('Months No. from original timeframe'),
+                TextInput::make('no_months_orig_timeframe')->label('Months No. from original timeframe'),
                 TextInput::make('name_of_researchers')->required()->placeholder('Use comma to separate names'),
 
                 TextInput::make('source_funding')->required(),
@@ -171,13 +170,13 @@ class ResearchResource extends Resource
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
-                ])->required()->default("no"),
+                ])->required(),
 
                 Select::make('disaster_risk_reduction')->label('Disaster Risk Reduction')
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
-                ])->required()->default("no"),
+                ])->required(),
 
                 Select::make('flagship_theme')->label('UP Flagship Theme')
                 ->options([
@@ -197,7 +196,7 @@ class ResearchResource extends Resource
                 ->options([
                     'uploaded' => 'Uploaded',
                     'pending' => 'Pending',
-                ])->required()->default("pending"),
+                ])->required(),
 
             ]);
     }
@@ -248,7 +247,7 @@ class ResearchResource extends Resource
                     ->sortable()->searchable(),
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
                     ->sortable()->searchable(),
-                IconColumn::make('pbms_upload_status')
+                IconColumn::make('pbms_upload_status')->label('PMBS Upload Status')
                      ->icon(fn (string $state): string => match ($state) {
                             'uploaded' => 'heroicon-o-check-badge',
                             'pending' => 'heroicon-o-clock',
