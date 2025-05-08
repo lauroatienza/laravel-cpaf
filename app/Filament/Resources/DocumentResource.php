@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use League\Csv\Writer;
+use Illuminate\Support\Str;
 
 class DocumentResource extends Resource
 {
@@ -24,6 +25,7 @@ class DocumentResource extends Resource
     protected static ?string $navigationLabel = 'MOU and MOA';
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'heroicon-o-document';
+    protected static ?string $label = 'MOU and MOA';
 
     public static function getNavigationBadge(): ?string
     {
@@ -102,7 +104,10 @@ class DocumentResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('contributing_unit')->sortable()->label('Contributing Unit')->searchable(),
-                BadgeColumn::make('partnership_type')->label('Partnership Type')->sortable(),
+                BadgeColumn::make('partnership_type')
+                    ->label('Partnership Type')
+                    ->sortable(),
+
                 TextColumn::make('extension_title')
                     ->searchable()
                     ->label('Extension Title')
@@ -111,13 +116,71 @@ class DocumentResource extends Resource
                 TextColumn::make('partner_stakeholder')->label('Partner Stakeholder')->searchable(),
                 TextColumn::make('start_date')->date('Y-m-d')->sortable(),
                 TextColumn::make('end_date')->date('Y-m-d')->sortable(),
-                BadgeColumn::make('training_courses')->label('Training Courses')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('technical_advisory_service')->label('Technical/Advisory Service')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('information_dissemination')->label('Info Dissemination')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('consultancy')->label('Consultancy')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('community_outreach')->label('Community Outreach')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('technology_transfer')->label('Technology Transfer')->colors(['success' => 'Yes', 'danger' => 'No']),
-                BadgeColumn::make('organizing_events')->label('Organizing Events')->colors(['success' => 'Yes', 'danger' => 'No']),
+                
+                BadgeColumn::make('training_courses')
+                    ->label('Training Courses')
+                    ->alignCenter()
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('technical_advisory_service')
+                    ->label('Technical/Advisory Service')
+                    ->alignCenter()
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('information_dissemination')
+                    ->label('Info Dissemination')
+                    ->alignCenter()
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('consultancy')
+                    ->label('Consultancy')
+                    ->alignCenter()
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('community_outreach')
+                    ->label('Community Outreach')
+                    ->alignCenter()
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('technology_transfer')
+                    ->label('Technology Transfer')
+                    ->alignCenter()
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                BadgeColumn::make('organizing_events')
+                    ->label('Organizing Events')
+                    ->alignCenter()
+                    ->color(fn ($state) => match (strtolower(trim($state))) {
+                        'yes' => 'success',
+                        'no' => 'warning',
+                        default => 'secondary',
+                    }),
+
+                
                 TextColumn::make('documents_file_path')
                     ->label('File')
                     ->formatStateUsing(fn ($state) => $state ? '🔗 View File' : 'None')
@@ -136,44 +199,6 @@ class DocumentResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->color('secondary')
-                    ->icon('heroicon-o-pencil-square'),
-                Tables\Actions\Action::make('export')
-                    ->label('Export')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Select::make('type')
-                            ->label('Document Type')
-                            ->options([
-                                'ALL' => 'All Documents',
-                                'MOA' => 'MOA',
-                                'MOU' => 'MOU',
-                            ])
-                            ->default('ALL'),
-                        Select::make('format')
-                            ->label('Export Format')
-                            ->options([
-                                'csv' => 'CSV',
-                                'pdf' => 'PDF',
-                            ])
-                            ->required(),
-                    ])
-                    ->action(function (array $data) {
-                        $query = Document::query();
-
-                        if ($data['type'] === 'MOA') {
-                            $query->where('partnership_type', 'Memorandum of Agreement (MOA)');
-                        } elseif ($data['type'] === 'MOU') {
-                            $query->where('partnership_type', 'Memorandum of Understanding (MOU)');
-                        }
-
-                        $records = $query->get();
-
-                        return static::exportData($records, $data['format'], $data['type']);
-                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('exportBulk')

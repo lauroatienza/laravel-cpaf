@@ -57,6 +57,10 @@ class StatsOverview extends BaseWidget
                     ->chart([1, 3, 5])
                     ->color('secondary'),
 
+<<<<<<< HEAD
+            
+=======
+>>>>>>> 9bde5b35ab9ad4906d7571709652e8dcc756896d
                 Stat::make('Total: Publications', Publication::count())
                     ->chart([1, 3, 5])
                     ->color('secondary'),
