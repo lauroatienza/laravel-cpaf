@@ -253,10 +253,53 @@ class ExtensionPrimaryResource extends Resource
 
     public static function exportData($records, $format)
     {
+        $user = Auth::user();
+    
+        // Admins can see all records
+        if (!$user->hasRole(['super-admin', 'admin'])) {
+            $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+            $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+            $simpleName = trim("{$user->name} {$user->last_name}");
+            $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+            if ($user->middle_name) {
+                $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+            }
+            $reversedInitialsName = "{$user->last_name}, {$initials}";
+            $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+            $normalizeName = function ($name) use ($titles, $user) {
+                $nameWithoutTitles = str_ireplace($titles, '', $name);
+                if ($user->middle_name) {
+                    $middleInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                    $nameWithoutTitles = str_ireplace($user->middle_name, $middleInitial, $nameWithoutTitles);
+                }
+                return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+            };
+    
+            $nameVariants = [
+                $normalizeName($fullName),
+                $normalizeName($fullNameReversed),
+                $normalizeName($simpleName),
+                $normalizeName($reversedInitialsName),
+            ];
+    
+            $records = $records->filter(function ($record) use ($nameVariants, $normalizeName) {
+                foreach (['researcher_names', 'project_leader'] as $field) {
+                    $fieldValue = $normalizeName($record->$field ?? '');
+                    foreach ($nameVariants as $variant) {
+                        if (stripos($fieldValue, $variant) !== false) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+        }
+    
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-
+    
         if ($format === 'csv') {
             return response()->streamDownload(function () use ($records) {
                 $handle = fopen('php://output', 'w');
@@ -278,7 +321,7 @@ class ExtensionPrimaryResource extends Resource
                     'Fund Code',
                     'PBMS Upload Status',
                 ]);
-
+    
                 foreach ($records as $record) {
                     fputcsv($handle, [
                         $record->contributing_unit,
@@ -299,11 +342,11 @@ class ExtensionPrimaryResource extends Resource
                         $record->pbms_upload_status,
                     ]);
                 }
-
+    
                 fclose($handle);
             }, 'extension_programs.csv');
         }
-
+    
         if ($format === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.extensionprimary', ['records' => $records]);
             return response()->streamDownload(fn () => print($pdf->output()), 'extensionprimary.pdf');
