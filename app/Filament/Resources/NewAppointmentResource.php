@@ -115,6 +115,12 @@ class NewAppointmentResource extends Resource
             ->schema([
                 TextInput::make('full_name')
                     ->label('Name')
+                    ->default(function () {
+                        return preg_replace('/\s+/', ' ', trim(Auth::user()->name . ' ' . Auth::user()->last_name));
+                    })
+
+                    ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
+                    ->dehydrated()
                     ->required(),
 
                 Select::make('type_of_appointments')

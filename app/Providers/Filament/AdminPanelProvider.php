@@ -64,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             ->colors([
-                'primary' => '#367ab3   ',
+                'primary' => '#367ab3',
                 'secondary' => '#00573e',
 
             ])

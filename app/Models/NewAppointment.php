@@ -11,13 +11,19 @@ class NewAppointment extends Model
 {
     use HasFactory;
 
-    protected static function boot()
-    {
-        parent::boot();
+    public static function booted()
+{
+    static::creating(function ($model) {
+        if ($model->full_name) {
+            $model->full_name = preg_replace('/\s+/', ' ', trim($model->full_name));
+        }
+    });
 
-        static::creating(function ($appointment) {
-            $appointment->full_name = Auth::user()->name . ' ' . Auth::user()->last_name;
-        });
+    static::updating(function ($model) {
+        if ($model->full_name) {
+            $model->full_name = preg_replace('/\s+/', ' ', trim($model->full_name));
+        }
+    });
         
     }
 
