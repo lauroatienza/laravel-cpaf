@@ -44,48 +44,48 @@ class ResearchResource extends Resource
     }
 
     public static function getNavigationBadge(): ?string
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // If the user is an admin, show the total count
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return static::$model::count();
-    }
-
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-    // List of titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-    // Function to normalize names by removing titles and extra spaces
-    $normalizeName = function ($name) use ($titles, $user) {
-        // Remove titles
-        $nameWithoutTitles = str_ireplace($titles, '', $name);
-
-        // If the middle name exists and is not already an initial, replace it with the initial
-        if ($user->middle_name) {
-            $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
-            $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+        // If the user is an admin, show the total count
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
         }
 
-        // Replace multiple spaces with a single space
-        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-    };
+        // Build possible name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
 
-    // Normalize names
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
+        // List of titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
 
-    return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-        $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-              ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
-    })->count();
-}
+        // Function to normalize names by removing titles and extra spaces
+        $normalizeName = function ($name) use ($titles, $user) {
+            // Remove titles
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+            // If the middle name exists and is not already an initial, replace it with the initial
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+
+            // Replace multiple spaces with a single space
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+        // Normalize names
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+
+        return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
+            $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
+        })->count();
+    }
 
     public static function getNavigationBadgeColor(): string
     {
@@ -97,28 +97,28 @@ class ResearchResource extends Resource
         return $form
             ->schema([
                 Select::make('contributing_unit')->label('Contributing unit')
-                ->options([
-                    'CSPPS' => 'CSPPS',
-                    'CISC' => 'CISC',
-                    'CPAf' => 'CPAf',
-                    'IGRD' => 'IGRD',
-                ])->required()->default('CPAf'),
+                    ->options([
+                        'CSPPS' => 'CSPPS',
+                        'CISC' => 'CISC',
+                        'CPAf' => 'CPAf',
+                        'IGRD' => 'IGRD',
+                    ])->required()->default('CPAf'),
 
                 DatePicker::make('start_date')->label('Start Date')
                     ->format('Y/m/d')->required(),
 
                 DatePicker::make('end_date')->label('End Date')
-                ->format('Y/m/d')->required(),
+                    ->format('Y/m/d')->required(),
 
                 Select::make('status')->label('Status')
-                ->options([
-                    'Completed' => 'Completed',
-                    'On-going' => 'On-going',
-                ])->required(),
+                    ->options([
+                        'Completed' => 'Completed',
+                        'On-going' => 'On-going',
+                    ])->required(),
 
                 TextInput::make('title')->label('Title')->required(),
 
-                
+
 
 
 
@@ -129,10 +129,10 @@ class ResearchResource extends Resource
                 RichEditor::make('event_highlight')->columnSpan('full')->label('Event Highlight'),
 
                 Select::make('has_gender_component')->label('Has Gender Component')
-                ->options([
-                    'yes' => 'Yes',
-                    'no' => 'No',
-                ])->default('no'),
+                    ->options([
+                        'yes' => 'Yes',
+                        'no' => 'No',
+                    ])->default('no'),
 
 
                 RichEditor::make('objectives')->columnSpan('full'),
@@ -142,21 +142,21 @@ class ResearchResource extends Resource
 
                 TextInput::make('source_funding')->required()->label('Source Funding'),
                 Select::make('category_source_funding')->label('Source of Funding Category')
-                ->options([
-                    'UP Entity' => 'UP Entity',
-                    'RP Gov' => 'RP Government Entity or Public Sector Entity',
-                    'RP Priv' => 'RP Private Sector Entity',
-                    'Foreign Non-Dom' => 'Foreign or Non-Domestic Entity',
-                ])->required(),
+                    ->options([
+                        'UP Entity' => 'UP Entity',
+                        'RP Gov' => 'RP Government Entity or Public Sector Entity',
+                        'RP Priv' => 'RP Private Sector Entity',
+                        'Foreign Non-Dom' => 'Foreign or Non-Domestic Entity',
+                    ])->required(),
 
                 TextInput::make('budget')->numeric()->label('Budget (in Philippine Peso)'),
                 Select::make('type_funding')->label('Type of Funding')
-                ->options([
-                    'Externally Funded' => 'Externally Funded',
-                    'UPLB Basic Research' => 'UPLB Basic Research',
-                    'UP System' => 'UP System',
-                    'In-house' => 'In-house',
-                ])->required(),
+                    ->options([
+                        'Externally Funded' => 'Externally Funded',
+                        'UPLB Basic Research' => 'UPLB Basic Research',
+                        'UP System' => 'UP System',
+                        'In-house' => 'In-house',
+                    ])->required(),
 
                 FileUpload::make('pdf_image_1')->preserveFilenames()->label('PDF Image 1'),
                 DatePicker::make('completed_date')->label('Completed Date')
@@ -166,36 +166,36 @@ class ResearchResource extends Resource
                 TextInput::make('agora_theme')->default('N/A')->label('AGORA Theme'),
 
                 Select::make('climate_ccam_initiative')->label('Climate Initiative')
-                ->options([
-                    'yes' => 'Yes',
-                    'no' => 'No',
-                ])->required(),
+                    ->options([
+                        'yes' => 'Yes',
+                        'no' => 'No',
+                    ])->required(),
 
                 Select::make('disaster_risk_reduction')->label('Disaster Risk Reduction')
-                ->options([
-                    'yes' => 'Yes',
-                    'no' => 'No',
-                ])->required(),
+                    ->options([
+                        'yes' => 'Yes',
+                        'no' => 'No',
+                    ])->required(),
 
                 Select::make('flagship_theme')->label('UP Flagship Theme')
-                ->options([
-                    'FP1' => 'FP1: Academic Excellence',
-                    'FP2' => 'FP2: Inclusive University Admissions',
-                    'FP3' => 'FP3: Innovation Hubs, S&T Parks',
-                    'FP4' => 'FP4: ODeL',
-                    'FP5' => 'FP5: Archipelagic & Ocean Virtual University',
-                    'FP6' => 'FP6: Active and Collaborative Partnerships',
-                    'FP7' => 'FP7: Arts and Culture',
-                    'FP8' => 'FP8: Expansion of Public Service',
-                    'FP9' => 'FP9: QMSQA',
-                    'FP10' => 'FP10: Digital Transformation',
-                ])->required()->nullable(),
+                    ->options([
+                        'FP1' => 'FP1: Academic Excellence',
+                        'FP2' => 'FP2: Inclusive University Admissions',
+                        'FP3' => 'FP3: Innovation Hubs, S&T Parks',
+                        'FP4' => 'FP4: ODeL',
+                        'FP5' => 'FP5: Archipelagic & Ocean Virtual University',
+                        'FP6' => 'FP6: Active and Collaborative Partnerships',
+                        'FP7' => 'FP7: Arts and Culture',
+                        'FP8' => 'FP8: Expansion of Public Service',
+                        'FP9' => 'FP9: QMSQA',
+                        'FP10' => 'FP10: Digital Transformation',
+                    ])->required()->nullable(),
 
                 Select::make('pbms_upload_status')->label('PBMS Upload Status')
-                ->options([
-                    'uploaded' => 'Uploaded',
-                    'pending' => 'Pending',
-                ])->required(),
+                    ->options([
+                        'uploaded' => 'Uploaded',
+                        'pending' => 'Pending',
+                    ])->required(),
 
             ]);
     }
@@ -210,10 +210,10 @@ class ResearchResource extends Resource
                     ->sortable()->searchable(),
                 TextColumn::make('end_date')
                     ->sortable()->searchable(),
-                    BadgeColumn::make('status')
+                BadgeColumn::make('status')
                     ->sortable()
                     ->searchable()
-                    ->color(fn ($state) => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'Completed' => 'success',  // Green
                         'On-going' => 'warning',   // Orange
                         default => 'secondary',    // Gray
@@ -221,62 +221,62 @@ class ResearchResource extends Resource
 
                 TextColumn::make('title')->label('Title')
                     ->sortable()->searchable()->limit(18)
-                    ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('objectives')->label('Objectives')
-                ->sortable()->searchable()->limit(18)
-                ->tooltip(fn ($state) => $state),
+                    ->sortable()->searchable()->limit(18)
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('expected_output')->label('Expected Output')
                     ->sortable()->searchable()->limit(18) // Only show first 20 characters
-                    ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('name_of_researchers')->label("Name of Researchers")
                     ->sortable()->searchable()
                     ->limit(10) // Only show first 20 characters
-                ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('poject_leader')->label("Project Leader")
                     ->sortable()->searchable()
                     ->limit(10) // Only show first 20 characters
-                ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('source_funding')->label('Source of Funding')
                     ->sortable()->searchable(),
                 BadgeColumn::make('category_source_funding')->label('Category of Source of Funding')
                     ->sortable()->searchable()->color('gray'),
                 TextColumn::make('budget')->label('Budget')
-                ->sortable()->searchable(),
+                    ->sortable()->searchable(),
                 TextColumn::make('type_funding')->label('Type of Funding')
                     ->sortable()->searchable(),
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
                     ->sortable()->searchable(),
                 IconColumn::make('pbms_upload_status')->label('PMBS Upload Status')
-                     ->icon(fn (string $state): string => match ($state) {
-                            'uploaded' => 'heroicon-o-check-badge',
-                            'pending' => 'heroicon-o-clock',
-                })
+                    ->icon(fn(string $state): string => match ($state) {
+                        'uploaded' => 'heroicon-o-check-badge',
+                        'pending' => 'heroicon-o-clock',
+                    })
 
 
-              //  $table->foreignId('faculty_id');
-            //    $table->foreignId('reps_id');
+                //  $table->foreignId('faculty_id');
+                //    $table->foreignId('reps_id');
 
-         //       $table->time('extension_date');
-          //      $table->text('event_highlight');
-           //     $table->boolean('has_gender_component');
-            //    $table->text('status');
-             //   $table->text('objectives');
-         //       $table->text('expected_output');
-          //      $table->text('no_months_orig_timeframe');
-           //     $table->text('name_of_researchers');
-            //    $table->text('source_funding');
-             //   $table->text('category_source_funding');
-              //  $table->integer('budget');
-             //   $table->text('type_funding');
-              //  $table->text('pdf_image_1');
-           //     $table->time('completed_date');
-             //   $table->text('sdg_theme');
-           //     $table->text('agora_theme');
-           //     $table->boolean('climate_ccam_initiative');
-           //     $table->boolean('disaster_risk_reduction');
-           //     $table->text('flagship_theme');
-            //    $table->text('pbms_upload_status');
-             //   $table->timestamps();
+                //       $table->time('extension_date');
+                //      $table->text('event_highlight');
+                //     $table->boolean('has_gender_component');
+                //    $table->text('status');
+                //   $table->text('objectives');
+                //       $table->text('expected_output');
+                //      $table->text('no_months_orig_timeframe');
+                //     $table->text('name_of_researchers');
+                //    $table->text('source_funding');
+                //   $table->text('category_source_funding');
+                //  $table->integer('budget');
+                //   $table->text('type_funding');
+                //  $table->text('pdf_image_1');
+                //     $table->time('completed_date');
+                //   $table->text('sdg_theme');
+                //     $table->text('agora_theme');
+                //     $table->boolean('climate_ccam_initiative');
+                //     $table->boolean('disaster_risk_reduction');
+                //     $table->text('flagship_theme');
+                //    $table->text('pbms_upload_status');
+                //   $table->timestamps();
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('contributing_unit')
@@ -295,12 +295,12 @@ class ResearchResource extends Resource
             ->bulkActions([
                 BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    
+
                     BulkAction::make('exportBulk')
                         ->label('Export Selected')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->requiresConfirmation()
-                        ->action(fn (array $data, $records) => static::exportData($records)),
+                        ->action(fn(array $data, $records) => static::exportData($records)),
                 ]),
             ]);
     }
@@ -314,7 +314,21 @@ class ResearchResource extends Resource
         return response()->streamDownload(function () use ($records) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
-                'Contributing Unit', 'Start Date', 'End Date', 'Status', 'Title', 'Objectives', 'Expected Output', 'Name of Researchers', 'Project Leader', 'Source of Funding', 'Category of Source of Funding', 'Budget', 'Type of Funding', 'SDG Theme', 'Upload Status'
+                'Contributing Unit',
+                'Start Date',
+                'End Date',
+                'Status',
+                'Title',
+                'Objectives',
+                'Expected Output',
+                'Name of Researchers',
+                'Project Leader',
+                'Source of Funding',
+                'Category of Source of Funding',
+                'Budget',
+                'Type of Funding',
+                'SDG Theme',
+                'Upload Status'
             ]);
 
             foreach ($records as $record) {
@@ -359,48 +373,67 @@ class ResearchResource extends Resource
     }
 
     public static function getEloquentQuery(): Builder
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // If the user is an admin, return all records
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return parent::getEloquentQuery();
-    }
-
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-    // List of titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-    // Function to normalize names by removing titles and converting middle name to initial
-    $normalizeName = function ($name) use ($titles, $user) {
-        // Remove titles
-        $nameWithoutTitles = str_ireplace($titles, '', $name);
-
-        // If the middle name exists and is not already an initial, replace it with the initial
-        if ($user->middle_name) {
-            $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
-            $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+        // If the user is an admin, return all records
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
         }
 
-        // Replace multiple spaces with a single space
-        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-    };
+        // Build name variations
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
 
-    // Normalize names
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
+        // Titles to strip from name columns
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
 
-    return parent::getEloquentQuery()
-        ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-            $query->whereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                  ->orWhereRaw("LOWER(REPLACE(name_of_researchers, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
-        });
-}
+        // Function to normalize names
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+        // Normalize name formats
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+        // Columns to check
+        $columns = ['poject_leader', 'name_of_researchers'];
+
+        // Build dynamic title-free column expressions
+        $replacers = [];
+        foreach ($columns as $column) {
+            $cleanedColumn = $column;
+            foreach ($titles as $title) {
+                $cleanedColumn = "REPLACE($cleanedColumn, '$title', '')";
+            }
+            $replacers[$column] = $cleanedColumn;
+        }
+
+        // Apply filters to both columns with all name formats
+        return parent::getEloquentQuery()
+            ->where(function ($query) use ($replacers, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $normalizedReversedInitials) {
+                foreach ($replacers as $columnExpr) {
+                    $query->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                        ->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                        ->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                        ->orWhereRaw("LOWER($columnExpr) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+                }
+            });
+
+    }
 
 }
