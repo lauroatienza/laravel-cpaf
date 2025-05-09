@@ -9,6 +9,7 @@ use App\Models\Users;
 use Doctrine\DBAL\Schema\Column;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -158,10 +159,11 @@ class ExtensionResource extends Resource
                 ->label("Venue and Location")
                 ->required(),
 
-            DatePicker::make('activity_date')
-                ->label('Activity Date')
-                ->required(),
-
+                Section::make('Activity Date')
+                ->schema([
+                    Forms\Components\DatePicker::make('start_date'),
+                    Forms\Components\DatePicker::make('end_date'),
+                ])->columns(2),
         ])->columns(2);
 }
 
