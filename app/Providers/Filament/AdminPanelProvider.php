@@ -20,6 +20,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Filament\Navigation\MenuItem;
 use Filament\Navigation\UserMenuItem;
+use Filament\Support\Facades\FilamentView;
 
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
@@ -93,8 +94,8 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->brandName('CPAf Intranet');
+            ->brandName('CPAf Intranet')
+            ->theme(asset('css/filament/admin/theme.css'));
 
     }
-
 }
