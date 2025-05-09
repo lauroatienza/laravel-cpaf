@@ -13,7 +13,7 @@ class ListPermissions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->color('secondary')->label('Create New Permission')->icon('heroicon-o-pencil-square')
         ];
     }
 }

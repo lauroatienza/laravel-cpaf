@@ -41,7 +41,7 @@ class StatsOverview extends BaseWidget
         // If the user is an admin, count all records
         if ($user->hasRole(['super-admin', 'admin'])) {
             return [
-                Stat::make('Total: Faculty and REPS', User::whereIn('staff', ['faculty', 'representatives'])->count())
+                Stat::make('Total: Faculty and REPS', User::whereIn('staff', ['faculty', 'REPS'])->count())
                     ->chart([1, 3, 5])
                     ->color('primary'),
 
@@ -87,7 +87,7 @@ class StatsOverview extends BaseWidget
         $normalizedSimpleName = $normalizeName($simpleName);
 
         return [
-            Stat::make('Total: Faculty and REPS', User::whereIn('staff', ['faculty', 'representatives', 'admin'])
+            Stat::make('Total: Faculty and REPS', User::whereIn('staff', ['faculty', 'REPS', 'admin'])
                 ->where('id', $user->id) // Only count the logged-in user
                 ->count())
                 ->chart([1, 3, 5])
