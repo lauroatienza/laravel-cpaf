@@ -14,18 +14,24 @@ class NewAppointment extends Model
     public static function booted()
 {
     static::creating(function ($model) {
-        if ($model->full_name) {
-            $model->full_name = preg_replace('/\s+/', ' ', trim($model->full_name));
-        }
+        $model->full_name = self::normalizeName($model->full_name);
     });
 
     static::updating(function ($model) {
-        if ($model->full_name) {
-            $model->full_name = preg_replace('/\s+/', ' ', trim($model->full_name));
-        }
+        $model->full_name = self::normalizeName($model->full_name);
     });
-        
-    }
+}
+
+protected static function normalizeName($name)
+{
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Remove titles and normalize spacing
+    $name = str_ireplace($titles, '', $name);
+    $name = preg_replace('/\s+/', ' ', trim($name));
+
+    return $name;
+}
 
     protected $table = 'new_appointments'; 
 
