@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class TrainingAttended extends Model
 {
@@ -15,8 +16,10 @@ class TrainingAttended extends Model
         parent::boot();
 
         static::creating(function ($training) {
-            $training->user_id = \Illuminate\Support\Facades\Auth::id(); // Automatically assign the logged-in user
+            $training->user_id = Auth::id();
+            $training->full_name = Auth::user()->name . ' ' . Auth::user()->last_name;
         });
+        
     }
 
     protected $fillable = [

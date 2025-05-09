@@ -111,7 +111,15 @@ class NewAppointmentResource extends Resource
         ->schema([
             TextInput::make('full_name')
                 ->label('Name')
-                ->required(),
+                ->default(function () {
+                    $user = Auth::user();
+                    return implode(' ', array_filter([
+                        trim($user->name),
+                        trim($user->last_name),
+                ]));
+            })
+            ->dehydrated()
+            ->required(),
 
             Select::make('type_of_appointments')
                 ->label('Type of Appointment')

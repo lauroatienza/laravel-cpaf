@@ -82,6 +82,8 @@ class TrainingAttendedResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('full_name')
                     ->label('Full Name')
+                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
+                    ->dehydrated()
                     ->required(),
 
                 Forms\Components\Select::make('unit_center')
