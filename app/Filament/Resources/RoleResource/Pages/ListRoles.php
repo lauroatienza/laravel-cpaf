@@ -13,7 +13,7 @@ class ListRoles extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->color('secondary')->label('Create New Role')->icon('heroicon-o-pencil-square')
         ];
     }
 }

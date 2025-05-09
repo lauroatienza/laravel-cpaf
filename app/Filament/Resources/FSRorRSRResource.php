@@ -23,6 +23,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Hidden;
 use Barryvdh\DomPDF\Facade\Pdf;
 
+
 class FSRorRSRResource extends Resource
 {
     protected static ?string $model = FSRorRSR::class;
@@ -36,13 +37,15 @@ class FSRorRSRResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
+        $user = Auth::user();
+         if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
         return parent::getEloquentQuery()->where('user_id', Auth::id());
         
 
         // Admins see everything
-        if ($user->hasRole(['super-admin', 'admin'])) {
-            return parent::getEloquentQuery();
-        }
+       
     }
 
     public static function getNavigationBadge(): ?string
@@ -214,6 +217,9 @@ class FSRorRSRResource extends Resource
             'edit' => Pages\EditFSRorRSR::route('/{record}/edit'),
         ];
     }
+
+ 
+
 }
 
 

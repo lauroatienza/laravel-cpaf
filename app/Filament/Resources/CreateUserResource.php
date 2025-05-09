@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\BadgeColumn;
@@ -252,50 +253,61 @@ class CreateUserResource extends Resource
 
 
             ])
-
-            ->headerActions([
-
-                Tables\Actions\CreateAction::make()->label('Create New User')
-                    ->color('secondary')->icon('heroicon-o-pencil-square'),
-
-
-                Action::make('Export')
-                    ->form([
-                        Forms\Components\Select::make('role')
-                            ->label('Export Type')
-                            ->options([
-                                'admin' => 'Admin',
-                                'faculty' => 'Faculty',
-                                'REPS' => 'REPS',
-                            ])
-                            ->required(),
-                    ])
-                    ->modalButton('Download')
-                    ->color('primary')
-                    ->action(function (array $data) {
-                        $users = User::where('staff', $data['role'])->get();
-                        $title = ucfirst($data['role']) . ' List';
-                        $pdf = Pdf::loadView('exports.faculty', compact('users', 'title'));
-
-
-                        return response()->streamDownload(
-                            fn() => print($pdf->output()),
-                            "{$data['role']}_list.pdf"
-                        );
-                    }),
-
-
-
-
-            ])
-            ->searchable()
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
                     ->action(fn(Collection $records) => $records->each->forceDelete())
                     ->label('Delete Permanently')
                     ->requiresConfirmation(),
+            
+                BulkAction::make('exportSelected')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Forms\Components\Select::make('format')
+                            ->label('Export Format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'pdf' => 'PDF',
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (Collection $records, array $data) {
+                        if ($records->isEmpty()) {
+                            return;
+                        }
+            
+                        if ($data['format'] === 'csv') {
+                            return response()->streamDownload(function () use ($records) {
+                                $handle = fopen('php://output', 'w');
+                                fputcsv($handle, ['Name', 'Role']);
+            
+                                foreach ($records as $record) {
+                                    fputcsv($handle, [
+                                        $record->name,
+                                        $record->staff,
+                                    ]);
+                                }
+            
+                                fclose($handle);
+                            }, 'users.csv');
+                        }
+            
+                        if ($data['format'] === 'pdf') {
+                            $title = 'Users';
+                            $pdf = Pdf::loadView('exports.faculty', [
+                                'users' => $records,
+                                'title' => $title,
+                            ]);
+            
+                            return response()->streamDownload(
+                                fn() => print($pdf->output()),
+                                'users.pdf'
+                            );
+                        }
+            
+                        return null;
+                    }),
             ]);
-
 
     }
 
