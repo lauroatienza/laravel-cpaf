@@ -126,17 +126,17 @@ class ResearchResource extends Resource
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
 
-                RichEditor::make('event_highlight')->columnSpan('full')->label('Event Highlight'),
+                RichEditor::make('event_highlight')->columnSpan('full')->label('Event Highlight')->nullable(),
 
                 Select::make('has_gender_component')->label('Has Gender Component')
                 ->options([
                     'yes' => 'Yes',
                     'no' => 'No',
-                ])->default('no'),
+                ])->default('no')->nullable(),
 
 
-                RichEditor::make('objectives')->columnSpan('full'),
-                RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output'),
+                RichEditor::make('objectives')->columnSpan('full')->nullable(),
+                RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output')->nullable(),
                 TextInput::make('no_months_orig_timeframe')->label('Months No. from Original Timeframe'),
                 TextInput::make('name_of_researchers')->required()->label('Name of Researchers')->placeholder('Use comma to separate names'),
 
@@ -222,12 +222,16 @@ class ResearchResource extends Resource
                 TextColumn::make('title')->label('Title')
                     ->sortable()->searchable()->limit(18)
                     ->tooltip(fn ($state) => $state),
-                TextColumn::make('objectives')->label('Objectives')
-                ->sortable()->searchable()->limit(18)
-                ->tooltip(fn ($state) => $state),
-                TextColumn::make('expected_output')->label('Expected Output')
-                    ->sortable()->searchable()->limit(18) // Only show first 20 characters
-                    ->tooltip(fn ($state) => $state),
+                TextColumn::make('objectives')
+                    ->label('Objectives')
+                    ->formatStateUsing(fn ($state) => strip_tags($state))
+                    ->tooltip(fn ($record) => strip_tags($record->objectives))
+                    ->limit(18),
+                TextColumn::make('expected_output')
+                    ->label('Expected Output')
+                    ->formatStateUsing(fn ($state) => strip_tags($state))
+                    ->tooltip(fn ($record) => strip_tags($record->expected_output))
+                    ->limit(18),
                 TextColumn::make('name_of_researchers')->label("Name of Researchers")
                     ->sortable()->searchable()
                     ->limit(10) // Only show first 20 characters
@@ -307,16 +311,65 @@ class ResearchResource extends Resource
 
     public static function exportData($records)
     {
+        $user = Auth::user();
+    
+        // Restrict non-admins to their own records
+        if (!$user->hasRole(['super-admin', 'admin'])) {
+            $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+            $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+            $simpleName = trim("{$user->name} {$user->last_name}");
+            $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+            if ($user->middle_name) {
+                $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+            }
+            $reversedInitialsName = "{$user->last_name}, {$initials}";
+    
+            $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+            $normalizeName = function ($name) use ($titles, $user) {
+                $nameWithoutTitles = str_ireplace($titles, '', $name);
+                if ($user->middle_name) {
+                    $middleInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                    $nameWithoutTitles = str_ireplace($user->middle_name, $middleInitial, $nameWithoutTitles);
+                }
+                return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+            };
+    
+            $nameVariants = [
+                $normalizeName($fullName),
+                $normalizeName($fullNameReversed),
+                $normalizeName($simpleName),
+                $normalizeName($reversedInitialsName),
+            ];
+    
+            $records = $records->filter(function ($record) use ($nameVariants, $normalizeName) {
+                $researchers = $normalizeName($record->name_of_researchers ?? '');
+                $leader = $normalizeName($record->project_leader ?? '');
+    
+                foreach ($nameVariants as $variant) {
+                    if (
+                        stripos($researchers, $variant) !== false ||
+                        stripos($leader, $variant) !== false
+                    ) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+    
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-
+    
         return response()->streamDownload(function () use ($records) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
-                'Contributing Unit', 'Start Date', 'End Date', 'Status', 'Title', 'Objectives', 'Expected Output', 'Name of Researchers', 'Project Leader', 'Source of Funding', 'Category of Source of Funding', 'Budget', 'Type of Funding', 'SDG Theme', 'Upload Status'
+                'Contributing Unit', 'Start Date', 'End Date', 'Status', 'Title', 'Objectives', 'Expected Output',
+                'Name of Researchers', 'Project Leader', 'Source of Funding', 'Category of Source of Funding',
+                'Budget', 'Type of Funding', 'SDG Theme', 'Upload Status'
             ]);
-
+    
             foreach ($records as $record) {
                 fputcsv($handle, [
                     $record->contributing_unit,
@@ -336,11 +389,11 @@ class ResearchResource extends Resource
                     $record->pbms_upload_status
                 ]);
             }
-
+    
             fclose($handle);
         }, 'research_data.csv');
     }
-
+    
     public static function getRelations(): array
     {
         return [

@@ -179,6 +179,13 @@ class FSRorRSRResource extends Resource
             return back()->with('error', 'No records selected for export.');
         }
     
+        $user = Auth::user();
+    
+        // Apply user-based filtering manually for export if not admin
+        if (!$user->hasRole(['super-admin', 'admin'])) {
+            $records = $records->where('user_id', $user->id);
+        }
+    
         $records = $records->load('user');
     
         if ($format === 'csv') {
@@ -188,7 +195,7 @@ class FSRorRSRResource extends Resource
     
                 foreach ($records as $record) {
                     fputcsv($handle, [
-                        $record->user ? $record->user->name . ' ' . $record->user->last_name : 'N/A', 
+                        $record->user ? $record->user->name . ' ' . $record->user->last_name : 'N/A',
                         $record->year,
                         $record->sem,
                         asset('storage/' . $record->file_upload),
@@ -203,9 +210,9 @@ class FSRorRSRResource extends Resource
             $pdf = Pdf::loadView('exports.fsr_or_rsr_attachments', ['records' => $records]);
             return response()->streamDownload(fn () => print($pdf->output()), 'fsr_or_rsr_attachments.pdf');
         }
-    }    
+    }
+      
     
-
     public static function getPages(): array
     {
         return [

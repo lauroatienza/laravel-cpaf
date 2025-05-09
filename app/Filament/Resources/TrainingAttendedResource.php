@@ -233,16 +233,62 @@ class TrainingAttendedResource extends Resource
 
     public static function exportData($records)
     {
+        $user = Auth::user();
+    
+        // Only allow all records for admins
+        if (!$user->hasRole(['super-admin', 'admin'])) {
+            // Build name variations
+            $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+            $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+            $simpleName = trim("{$user->name} {$user->last_name}");
+            $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+            if ($user->middle_name) {
+                $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+            }
+            $reversedInitialsName = "{$user->last_name}, {$initials}";
+    
+            // Define titles to strip
+            $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+            $normalizeName = function ($name) use ($titles, $user) {
+                $nameWithoutTitles = str_ireplace($titles, '', $name);
+                if ($user->middle_name) {
+                    $middleInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                    $nameWithoutTitles = str_ireplace($user->middle_name, $middleInitial, $nameWithoutTitles);
+                }
+                return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+            };
+    
+            // Normalize user name variants
+            $nameVariants = [
+                $normalizeName($fullName),
+                $normalizeName($fullNameReversed),
+                $normalizeName($simpleName),
+                $normalizeName($reversedInitialsName),
+            ];
+    
+            // Filter records to user's own entries
+            $records = $records->filter(function ($record) use ($nameVariants, $titles, $normalizeName) {
+                $recordName = $normalizeName(str_ireplace($titles, '', $record->full_name ?? ''));
+                foreach ($nameVariants as $variant) {
+                    if (stripos($recordName, $variant) !== false) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+    
         if ($records->isEmpty()) {
             return back()->with('error', 'No records selected for export.');
         }
-
+    
+        // Proceed with export
         return response()->streamDownload(function () use ($records) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
                 'Full Name', 'Unit/Center', 'Start Date', 'End Date', 'Category', 'Training Title', 'Gender Component', 'Total Hours'
             ]);
-
+    
             foreach ($records as $record) {
                 fputcsv($handle, [
                     $record->full_name,
@@ -255,10 +301,11 @@ class TrainingAttendedResource extends Resource
                     $record->total_hours,
                 ]);
             }
-
+    
             fclose($handle);
         }, 'training_attended_data.csv');
     }
+    
 
     public static function getRelations(): array
     {
