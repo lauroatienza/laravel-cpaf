@@ -9,6 +9,7 @@ use App\Models\Users;
 use Doctrine\DBAL\Schema\Column;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -31,6 +32,8 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 
 
 class ExtensionResource extends Resource
@@ -108,6 +111,8 @@ class ExtensionResource extends Resource
             TextInput::make('name')
                 ->label('Full Name')
                 ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
+                ->disabled()
+                ->dehydrated()
                 ->required(),
 
             Select::make('extension_involvement')
@@ -123,16 +128,25 @@ class ExtensionResource extends Resource
                     'Examiner' => 'Examiner',
                     'Other' => 'Other (Specify)',
                 ])
-                ->reactive()
-                ->required(),
+                ->required()
+                ->live()
+                ->afterStateUpdated(function (Set $set, $state) {
+                    if ($state !== 'Other') {
+                        $set('other_type', null);
+                    }
+                }),
+            TextInput::make('other_type')
+                ->label('Specify Other Type of Extension')
+                ->maxLength(255)
+                ->visible(fn (Get $get) => $get('extension_involvement') === 'Other')
+                ->afterStateUpdated(function (Set $set, Get $get, $state) {
+                    if ($get('extension_involvement') === 'Other') {
+                        $set('extension_involvement', $state);
+                    }
+                }),
 
-            TextInput::make('custom_involvement')
-                ->label('Specify Other Involvement')
-                ->hidden(fn($get) => $get('extension_involvement') !== 'Other')
-                ->required(fn($get) => $get('extension_involvement') === 'Other')
-                ->maxLength(255),
 
-            Select::make('location')
+            Select::make('extensiontype')
                 ->label('Type of Extension')
                 ->options([
                     'Training' => 'Training',
@@ -142,13 +156,24 @@ class ExtensionResource extends Resource
                     'Other' => 'Other (Specify)',
                 ])
                 ->reactive()
-                ->required(),
+                ->live()
+                ->afterStateUpdated(function (Set $set, $state) {
+                    if ($state !== 'Other') {
+                        $set('other_types', null);
+                    }
+                }),
 
-            TextInput::make('custom_location')
+            TextInput::make('other_types')
                 ->label('Specify Other Type of Extension')
-                ->hidden(fn($get) => $get('location') !== 'Other')
-                ->required(fn($get) => $get('location') === 'Other')
-                ->maxLength(255),
+                ->maxLength(255)
+                ->visible(fn (Get $get) => $get('extensiontype') === 'Other')
+                ->afterStateUpdated(function (Set $set, Get $get, $state) {
+                    if ($get('extensiontype') === 'Other') {
+                        $set('extensiontype', $state);
+                    }
+                }),
+
+
 
             TextInput::make('event_title')
                 ->label("Event Title")
@@ -158,10 +183,11 @@ class ExtensionResource extends Resource
                 ->label("Venue and Location")
                 ->required(),
 
-            DatePicker::make('activity_date')
-                ->label('Activity Date')
-                ->required(),
-
+                Section::make('Activity Date')
+                ->schema([
+                    Forms\Components\DatePicker::make('start_date'),
+                    Forms\Components\DatePicker::make('end_date'),
+                ])->columns(2),
         ])->columns(2);
 }
 

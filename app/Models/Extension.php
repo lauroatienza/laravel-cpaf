@@ -13,13 +13,13 @@ class Extension extends Model
     protected $table = 'extensionnew'; 
 
     protected $fillable = [
-        'activity_date',
+        'start_date',
         'created_at',
-        'date_end',
         'event_title',
         'extension_involvement',
         'extensiontype',
         'full_name',
+        'end_date',
         'id',
         'location',
         'name',

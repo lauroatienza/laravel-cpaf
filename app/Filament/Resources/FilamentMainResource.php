@@ -1,82 +1,113 @@
 <?php
 
-    namespace App\Filament\Resources;
+namespace App\Filament\Resources;
 
-    use App\Models\Publication;
-    use App\Filament\Resources\PublicationResource\Pages;
-    use Illuminate\Support\Str;
-    use Filament\Forms;
-    use Filament\Forms\Form;
-    use Filament\Tables;
-    use Filament\Tables\Table;
-    use Filament\Resources\Resource;
-    use Filament\Tables\Columns\TextColumn;
-    use Filament\Forms\Components\Grid;
-    use Filament\Forms\Components\TextInput;
-    use Filament\Forms\Components\Radio;
-    use Filament\Forms\Components\Select;
-    use Filament\Forms\Components\Section;
-    use Filament\Forms\Components\DatePicker;
-    use Filament\Forms\Components\Textarea;
-    use Filament\Forms\Components\Placeholder;
-    use Filament\Tables\Actions\DeleteBulkAction;
-    use Filament\Tables\Actions\BulkAction;
-    use Filament\Tables\Actions\EditAction;
-    use Filament\Tables\Actions\DeleteAction;
-    use Filament\Tables\Actions\ViewAction;
-    use Filament\Tables\Columns\BadgeColumn;
-    use League\Csv\Writer;
-    use SplTempFileObject;
-    use Illuminate\Support\Facades\Auth;
-    use Filament\Forms\Get;
-    use Filament\Forms\Set;
-    use Illuminate\Contracts\View\View;
-    use Filament\Tables\Columns\CheckboxColumn;
-    use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Resources\FilamentMainResource\Pages;
+use App\Filament\Resources\FilamentMainResource\RelationManagers;
+use App\Models\FilamentMain;
+use Filament\Forms;
+use Filament\Forms\Form;
+use App\Models\Publication;
 
-    class PublicationResource extends Resource
-    {
-        protected static ?string $model = Publication::class;
-        protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
-        protected static ?string $navigationGroup = 'Accomplishments';
-        protected static ?string $label = 'Publication';
-        protected static ?int $navigationSort = 1;
+use Illuminate\Support\Str;
 
-        public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Placeholder;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\BadgeColumn;
+use League\Csv\Writer;
+use SplTempFileObject;
+use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Illuminate\Contracts\View\View;
+use Filament\Tables\Columns\CheckboxColumn;
+use Filament\Tables\Filters\SelectFilter;
+
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class FilamentMainResource extends Resource
+{
+    protected static ?string $model = Publication::class;
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
+    protected static ?string $navigationGroup = 'Accomplishments';
+    protected static ?string $label = 'Publication';
+    protected static ?int $navigationSort = 1;
+    
+    public static function getNavigationBadge(): ?string
     {
         $user = Auth::user();
 
-        // Admins see everything
-        if ($user && $user->hasRole(['super-admin', 'admin'])) {
-            return parent::getEloquentQuery();
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
         }
 
-        // Non-admins see only their own
-        return parent::getEloquentQuery()->where('user_id', $user?->id);
-    }
+        // Name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
 
+        // New: Lastname, F.M. format
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
 
-        public static function getNavigationBadge(): ?string
-        {
-            $user = Auth::user();
+        // Titles to strip
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
 
-            if ($user->hasRole(['super-admin', 'admin'])) {
-                return static::$model::count();
+        // Prepare SQL REPLACE chain
+        $replacer = 'name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
+
+        // Normalizer function
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
             }
 
-            // Only return records belonging to the logged-in user
-            return static::$model::where('user_id', $user->id)->count();
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
 
-        }
+        // Normalize all formats
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
 
-        public static function getNavigationBadgeColor(): string
-        {
-            return 'primary';
-        }
+        // Final query
+        return static::$model::where(function ($query) use ($replacer, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $normalizedReversedInitials) {
+            $query->whereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+        })->count();
 
-        public static function form(Form $form): Form
-        {
-            return $form
+    }
+    public static function form(Form $form): Form
+    {
+        return $form
                 ->schema([
                     Section::make('Section 1')
                     ->schema([
@@ -179,10 +210,10 @@
                         ]),
                         ]),
 
-                ]);
-        }
+            ]);
+    }
 
-        public static function table(Table $table): Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
@@ -210,10 +241,11 @@
                 //COPY DOI OR LINK TO OTHER LINKS FROM SECTION 4
                 TextColumn::make('doi_or_link')
                     ->label('DOI / Link')
-                    ->url(fn ($record) =>
+                    ->url(
+                        fn($record) =>
                         str_starts_with($record->doi_or_link, 'http')
-                            ? $record->doi_or_link
-                            : 'https://doi.org/' . ltrim($record->doi_or_link, '/')
+                        ? $record->doi_or_link
+                        : 'https://doi.org/' . ltrim($record->doi_or_link, '/')
                     )
                     ->openUrlInNewTab()
                     ->limit(30)
@@ -226,11 +258,11 @@
 
                 // SECTION 3 of 5: Indexing and Citations
                 TextColumn::make('collection_database')->label('Collection Database')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
-                TextColumn::make('web_science')->label('Web Science')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
-                TextColumn::make('scopus')->label('Scopus')->alignCenter()->sortable()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
-                TextColumn::make('science_direct')->label('Science Direct')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
-                TextColumn::make('pubmed')->label('PubMed/MEDLINE')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
-                TextColumn::make('ched_journals')->label('CHED-Recognized Journals')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger'),
+                TextColumn::make('web_science')->label('Web Science')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
+                TextColumn::make('scopus')->label('Scopus')->alignCenter()->sortable()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
+                TextColumn::make('science_direct')->label('Science Direct')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
+                TextColumn::make('pubmed')->label('PubMed/MEDLINE')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
+                TextColumn::make('ched_journals')->label('CHED-Recognized Journals')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
                 TextColumn::make('other_reputable_collection')->label('Other Reputable Collection/Database')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('citations')->label('Citations')->sortable()->sortable()->limit(20)->tooltip(fn($state) => $state)->alignCenter(),
 
@@ -238,10 +270,10 @@
                 TextColumn::make('pdf_proof_1')
                     ->label('PDF Proof 1')
                     ->sortable()
-                    ->url(fn ($record) =>
+                    ->url(fn($record) =>
                         str_starts_with($record->pdf_proof_1, 'http')
-                            ? $record->pdf_proof_1
-                            : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/'))
+                        ? $record->pdf_proof_1
+                        : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/'))
                     ->openUrlInNewTab()
                     ->limit(20)
                     ->searchable()
@@ -250,10 +282,11 @@
                 TextColumn::make('pdf_proof_2')
                     ->label('PDF Proof 2')
                     ->sortable()
-                    ->url(fn ($record) =>
+                    ->url(
+                        fn($record) =>
                         str_starts_with($record->pdf_proof_2, 'http')
-                            ? $record->pdf_proof_2
-                            : 'https://drive.google.com/' . ltrim($record->pdf_proof_2, '/')
+                        ? $record->pdf_proof_2
+                        : 'https://drive.google.com/' . ltrim($record->pdf_proof_2, '/')
                     )
                     ->openUrlInNewTab()
                     ->limit(30)
@@ -261,35 +294,16 @@
                     ->tooltip(fn($state) => $state),
 
                 // SECTION 5 of 5: Awards
-                TextColumn::make('received_award')->sortable()->label('Received Award')->badge()->formatStateUsing(fn ($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn ($state) => $state === 'YES' ? 'success' : 'danger')->alignCenter(),
+                TextColumn::make('received_award')->sortable()->label('Received Award')->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger')->alignCenter(),
                 TextColumn::make('award_title')->sortable()->label('Award Title')->searchable()->tooltip(fn($state) => $state),
                 TextColumn::make('date_awarded')->sortable()->label('Date Awarded')->date(),
             ])
-
             ->filters([
-                SelectFilter::make('contributing_unit')
-                    ->label('Contributing Unit')
-                    ->options([
-                        'CISC' => 'CISC',
-                        'CSPPS' => 'CSPPS',
-                        'CPAF' => 'CPAF',
-                        'IGRD' => 'IGRD',
-                    ])
-                    ->query(function ($query, $data) {
-                        if (!empty($data['value'])) {
-                            return $query->where('contributing_unit', $data['value']);
-                        }
-                        return $query;
-                    }),
+                //
             ])
-
-
             ->actions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
-
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\BulkAction::make('exportSelected')
@@ -378,19 +392,87 @@
         }, 'Publications_' . now()->format('Ymd_His') . '.csv');
     })
     ->requiresConfirmation(),
-        ]);
+            ]);
     }
+
     public static function getRelations(): array
-        {
-            return [];
-        }
+    {
+        return [
+            //
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPublications::route('/'),
-            'create' => Pages\CreatePublication::route('/create'),
-            'edit' => Pages\EditPublication::route('/{record}/edit'),
+            'index' => Pages\ListFilamentMains::route('/'),
+            'create' => Pages\CreateFilamentMain::route('/create'),
+            'edit' => Pages\EditFilamentMain::route('/{record}/edit'),
         ];
-        }
     }
 
+    public static function getEloquentQuery(): Builder
+{
+    $user = Auth::user();
+
+    // If the user is an admin, return all records
+    if ($user->hasRole(['super-admin', 'admin'])) {
+        return parent::getEloquentQuery();
+    }
+
+    // Build possible name formats
+    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+    $simpleName = trim("{$user->name} {$user->last_name}");
+
+    // New format: Lastname, F.M.
+    $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+    if ($user->middle_name) {
+        $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+    }
+    $reversedInitialsName = "{$user->last_name}, {$initials}";
+
+    // Titles to remove
+    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+    // Function to normalize names
+    $normalizeName = function ($name) use ($titles, $user) {
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+        if ($user->middle_name) {
+            $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+            $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+        }
+
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+    };
+
+    // Normalize each name variant
+    $normalizedFullName = $normalizeName($fullName);
+    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+    $normalizedSimpleName = $normalizeName($simpleName);
+    $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+    // Create full REPLACE chain for SQL title-stripping
+    $replacer = 'name';
+    foreach ($titles as $title) {
+        $replacer = "REPLACE($replacer, '$title', '')";
+    }
+
+    return parent::getEloquentQuery()
+        ->where(function ($query) use (
+            $replacer,
+            $normalizedFullName,
+            $normalizedFullNameReversed,
+            $normalizedSimpleName,
+            $normalizedReversedInitials
+        ) {
+            $query->whereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                  ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                  ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                  ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+        });
+
+
+}
+}

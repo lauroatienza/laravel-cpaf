@@ -315,64 +315,63 @@ class AwardsRecognitionsResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $user = Auth::user();
-
-    // If the user is an admin, return all records
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return parent::getEloquentQuery();
-    }
-
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-    // New format: Lastname, F.M.
-    $initials = strtoupper(substr($user->name, 0, 1)) . '.';
-    if ($user->middle_name) {
-        $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
-    }
-    $reversedInitialsName = "{$user->last_name}, {$initials}";
-
-    // Titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-    // Function to normalize names
-    $normalizeName = function ($name) use ($titles, $user) {
-        $nameWithoutTitles = str_ireplace($titles, '', $name);
-
-        if ($user->middle_name) {
-            $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
-            $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+    
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
         }
-
-        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-    };
-
-    // Normalize each name variant
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
-    $normalizedReversedInitials = $normalizeName($reversedInitialsName);
-
-    // Create full REPLACE chain for SQL title-stripping
-    $replacer = 'name';
-    foreach ($titles as $title) {
-        $replacer = "REPLACE($replacer, '$title', '')";
+    
+        // Name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+    
+        // Initials: Lastname, F.M.
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
+    
+        // Titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+        // SQL REPLACE chain for removing titles
+        $replacer = 'name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
+    
+        // Normalize function (same as in badge)
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+    
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+    
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+    
+        // Normalize all name formats
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+    
+        return parent::getEloquentQuery()
+            ->where(function ($query) use (
+                $replacer,
+                $normalizedFullName,
+                $normalizedFullNameReversed,
+                $normalizedSimpleName,
+                $normalizedReversedInitials
+            ) {
+                $query->whereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                      ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                      ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                      ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+            });
     }
-
-    return parent::getEloquentQuery()
-        ->where(function ($query) use (
-            $replacer,
-            $normalizedFullName,
-            $normalizedFullNameReversed,
-            $normalizedSimpleName,
-            $normalizedReversedInitials
-        ) {
-            $query->whereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                  ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                  ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
-                  ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
-        });
-
-    }
+    
 }

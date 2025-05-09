@@ -103,7 +103,7 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Training Details')
                     ->schema([
                         TextInput::make('full_name')
-                            ->label('Full Name (First Name, MI, Last Name)'),
+                            ->label('Full Name (First Name MI. Last Name)'),
 
                         Select::make('contributing_unit')->label('Contributing Unit')
                             ->options([

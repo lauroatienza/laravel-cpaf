@@ -14,6 +14,7 @@ use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Forms\Components\Section;
 
 
 class TrainingAttendedResource extends Resource
@@ -29,48 +30,68 @@ class TrainingAttendedResource extends Resource
     protected static ?string $navigationGroup = 'Accomplishments';
 
     public static function getPluralLabel(): string
-{
-    return 'Training Attended';
-}
+    {
+        return 'Training Attended';
+    }
 
 
 
     public static function getNavigationBadge(): ?string
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // If the user is an admin, show the total count
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return static::$model::count();
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return static::$model::count();
+        }
+
+        // Name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+
+        // New: Lastname, F.M. format
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
+
+        // Titles to strip
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+        // Prepare SQL REPLACE chain
+        $replacer = 'full_name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
+
+        // Normalizer function
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+        // Normalize all formats
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+        // Final query
+        return static::$model::where(function ($query) use ($replacer, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $normalizedReversedInitials) {
+            $query->whereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                ->orWhereRaw("LOWER(($replacer)) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+        })->count();
+
     }
-
-    // Build possible name formats
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-    // List of titles to remove
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-    // Function to normalize names by removing titles and extra spaces
-    $normalizeName = function ($name) use ($titles) {
-        // Remove titles
-        $nameWithoutTitles = str_ireplace($titles, '', $name);
-        // Replace multiple spaces with a single space
-        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-    };
-
-    // Normalize names
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
-
-    return static::$model::where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-        $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-        ->orWhereRaw("LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(full_name, 'Dr.', ''), 'Prof.', ''), 'Engr.', ''), 'Sir', ''), 'Ms.', ''), 'Mr.', ''), 'Mrs.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"]); // Modified line
-    })->count();
-}
-
     public static function getNavigationBadgeColor(): string
     {
         return 'primary';
@@ -93,10 +114,11 @@ class TrainingAttendedResource extends Resource
                         'CPAF' => 'CPAF',
                     ])
                     ->required(),
-
-                Forms\Components\DatePicker::make('start_date')->required(),
-                Forms\Components\DatePicker::make('end_date')->required(),
-
+                Section::make('Section 2')
+                    ->schema([
+                        Forms\Components\DatePicker::make('start_date')->required(),
+                        Forms\Components\DatePicker::make('end_date')->required(),
+                    ])->columns(1),
                 Forms\Components\Select::make('category')
                     ->label('Category')
                     ->options([
@@ -119,7 +141,7 @@ class TrainingAttendedResource extends Resource
                 Forms\Components\TextInput::make('other_category')
                     ->label('Please specify')
                     ->maxLength(255)
-                    ->visible(fn (Get $get) => $get('category') === 'Other')
+                    ->visible(fn(Get $get) => $get('category') === 'Other')
                     ->afterStateUpdated(function (Set $set, $state, Get $get) {
                         if ($get('category') === 'Other') {
                             $set('category', $state);
@@ -153,7 +175,7 @@ class TrainingAttendedResource extends Resource
                     ->numeric()
                     ->placeholder("Please put '0' if you have no answer. Thank you")
                     ->nullable(),
-            ]);
+            ])->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -165,7 +187,7 @@ class TrainingAttendedResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->limit(20)
-                    ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
 
                 Tables\Columns\BadgeColumn::make('unit_center')
                     ->label('Unit/Center')
@@ -189,13 +211,13 @@ class TrainingAttendedResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->limit(20)
-                    ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
 
                 Tables\Columns\TextColumn::make('highlights')
                     ->label('Highlights of the Event')
                     ->sortable()
                     ->limit(20)
-                    ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
 
                 Tables\Columns\BooleanColumn::make('has_gender_component')
                     ->label('Gender Component')
@@ -203,7 +225,7 @@ class TrainingAttendedResource extends Resource
 
                 Tables\Columns\TextColumn::make('total_hours')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => rtrim(rtrim(number_format($state, 1, '.', ''), '0'), '.')),
+                    ->formatStateUsing(fn($state) => rtrim(rtrim(number_format($state, 1, '.', ''), '0'), '.')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('unit_center')
@@ -222,12 +244,12 @@ class TrainingAttendedResource extends Resource
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('exportBulk')
-                        ->label('Export Selected')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->requiresConfirmation()
-                        ->action(fn ($records) => static::exportData($records)),
+                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('exportBulk')
+                    ->label('Export Selected')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->requiresConfirmation()
+                    ->action(fn($records) => static::exportData($records)),
             ]);
     }
 
@@ -286,7 +308,14 @@ class TrainingAttendedResource extends Resource
         return response()->streamDownload(function () use ($records) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
-                'Full Name', 'Unit/Center', 'Start Date', 'End Date', 'Category', 'Training Title', 'Gender Component', 'Total Hours'
+                'Full Name',
+                'Unit/Center',
+                'Start Date',
+                'End Date',
+                'Category',
+                'Training Title',
+                'Gender Component',
+                'Total Hours'
             ]);
     
             foreach ($records as $record) {
@@ -321,41 +350,63 @@ class TrainingAttendedResource extends Resource
         ];
     }
     public static function getEloquentQuery(): Builder
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    if ($user->hasRole(['super-admin', 'admin'])) {
-        return parent::getEloquentQuery();
+        // If the user is an admin, return all records
+        if ($user->hasRole(['super-admin', 'admin'])) {
+            return parent::getEloquentQuery();
+        }
+
+        // Build possible name formats
+        $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+        $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+        $simpleName = trim("{$user->name} {$user->last_name}");
+
+        // New format: Lastname, F.M.
+        $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+        if ($user->middle_name) {
+            $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
+        }
+        $reversedInitialsName = "{$user->last_name}, {$initials}";
+
+        // Titles to remove
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+
+        // Function to normalize names
+        $normalizeName = function ($name) use ($titles, $user) {
+            $nameWithoutTitles = str_ireplace($titles, '', $name);
+
+            if ($user->middle_name) {
+                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
+                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
+            }
+
+            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        };
+
+        // Normalize each name variant
+        $normalizedFullName = $normalizeName($fullName);
+        $normalizedFullNameReversed = $normalizeName($fullNameReversed);
+        $normalizedSimpleName = $normalizeName($simpleName);
+        $normalizedReversedInitials = $normalizeName($reversedInitialsName);
+
+        // Create full REPLACE chain for SQL title-stripping
+        $replacer = 'full_name';
+        foreach ($titles as $title) {
+            $replacer = "REPLACE($replacer, '$title', '')";
+        }
+
+        return parent::getEloquentQuery()
+            ->where(function ($query) use ($replacer, $normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName, $normalizedReversedInitials) {
+                $query->whereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullName%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedSimpleName%"])
+                    ->orWhereRaw("LOWER($replacer) LIKE LOWER(?)", ["%$normalizedReversedInitials%"]);
+            });
+
+
     }
-
-
-    $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
-    $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
-    $simpleName = trim("{$user->name} {$user->last_name}");
-
-
-    $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-
-
-    $normalizeName = function ($name) use ($titles) {
-
-        $nameWithoutTitles = str_ireplace($titles, '', $name);
-
-        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
-    };
-
-
-    $normalizedFullName = $normalizeName($fullName);
-    $normalizedFullNameReversed = $normalizeName($fullNameReversed);
-    $normalizedSimpleName = $normalizeName($simpleName);
-
-    return parent::getEloquentQuery()
-        ->where(function ($query) use ($normalizedFullName, $normalizedFullNameReversed, $normalizedSimpleName) {
-            $query->whereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullName%"])
-                  ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedFullNameReversed%"])
-                  ->orWhereRaw("LOWER(REPLACE(full_name, 'Dr.', '')) LIKE LOWER(?)", ["%$normalizedSimpleName%"]);
-        });
-}
 
 
 }
