@@ -30,7 +30,6 @@ class ListFilamentMains extends ListRecords
                 ->action(function () {
                     $user = Auth::user();
     
-                    // If user is admin, export all
                     $query = Publication::query();
     
                     if (!$user->hasRole(['super-admin', 'admin'])) {
