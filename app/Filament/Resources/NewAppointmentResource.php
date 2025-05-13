@@ -116,12 +116,15 @@ class NewAppointmentResource extends Resource
                 TextInput::make('full_name')
                     ->label('Name')
                     ->default(function () {
-                        return preg_replace('/\s+/', ' ', trim(Auth::user()->name . ' ' . Auth::user()->last_name));
+                        $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                        $cleaned = str_ireplace($titles, '', $name);
+                        return preg_replace('/\s+/', ' ', trim($cleaned));
                     })
-
                     ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
                     ->dehydrated()
                     ->required(),
+
 
                 Select::make('type_of_appointments')
                     ->label('Type of Appointment')
