@@ -110,24 +110,33 @@ class NewAppointmentResource extends Resource
 
 
     public static function form(Form $form): Form
-{
-    return $form
-        ->schema([
-            TextInput::make('full_name')
-                ->label('Name')
-                ->required(),
+    {
+        return $form
+            ->schema([
+                TextInput::make('full_name')
+                    ->label('Name')
+                    ->default(function () {
+                        $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                        $cleaned = str_ireplace($titles, '', $name);
+                        return preg_replace('/\s+/', ' ', trim($cleaned));
+                    })
+                    ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
+                    ->dehydrated()
+                    ->required(),
 
-            Select::make('type_of_appointments')
-                ->label('Type of Appointment')
-                ->required()
-                ->options([
-                    'Affiliate Faculty' => 'Affiliate Faculty',
-                    'Adjunct Faculty' => 'Adjunct Faculty',
-                    'Lecturer' => 'Lecturer',
-                    'Administrator' => 'Administrator',
-                    'Other' => 'Other (Specify)',
-                ])
-                ->reactive(),
+
+                Select::make('type_of_appointments')
+                    ->label('Type of Appointment')
+                    ->required()
+                    ->options([
+                        'Affiliate Faculty' => 'Affiliate Faculty',
+                        'Adjunct Faculty' => 'Adjunct Faculty',
+                        'Lecturer' => 'Lecturer',
+                        'Administrator' => 'Administrator',
+                        'Other' => 'Other (Specify)',
+                    ])
+                    ->reactive(),
 
             TextInput::make('type_of_appointments_other')
                 ->label('Please specify your type of appointment')
@@ -256,35 +265,76 @@ public static function table(Table $table): Table
 
     public static function exportData($records, $format)
     {
-        if ($format === 'csv') {
-            $csv = Writer::createFromFileObject(new \SplTempFileObject());
-            $csv->insertOne(['Full Name', 'Type of Appointment', 'Position', 'Appointment', 'Effectivity Date']);
-
-            foreach ($records as $appointment) {
-                $csv->insertOne([
-                    $appointment->full_name,
-                    $appointment->type_of_appointments,
-                    $appointment->position,
-                    $appointment->appointment,
-                    $appointment->appointment_effectivity_date,
-                ]);
+        $user = Auth::user();
+    
+        // If not admin, filter the records manually
+        if (!$user->hasRole(['super-admin', 'admin'])) {
+            $fullName = trim("{$user->name} " . ($user->middle_name ? "{$user->middle_name} " : "") . "{$user->last_name}");
+            $fullNameReversed = trim("{$user->last_name}, {$user->name}" . ($user->middle_name ? " {$user->middle_name}" : ""));
+            $simpleName = trim("{$user->name} {$user->last_name}");
+    
+            $initials = strtoupper(substr($user->name, 0, 1)) . '.';
+            if ($user->middle_name) {
+                $initials .= strtoupper(substr($user->middle_name, 0, 1)) . '.';
             }
-
-            return response()->streamDownload(function () use ($csv) {
-                echo $csv->toString();
+            $reversedInitialsName = "{$user->last_name}, {$initials}";
+    
+            $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+    
+            $normalize = function ($name) use ($titles, $user) {
+                $name = str_ireplace($titles, '', $name);
+                if ($user->middle_name) {
+                    $name = str_ireplace($user->middle_name, strtoupper(substr($user->middle_name, 0, 1)) . '.', $name);
+                }
+                return preg_replace('/\s+/', ' ', trim($name));
+            };
+    
+            $allowedNames = [
+                strtolower($normalize($fullName)),
+                strtolower($normalize($fullNameReversed)),
+                strtolower($normalize($simpleName)),
+                strtolower($normalize($reversedInitialsName)),
+            ];
+    
+            // Filter records by normalized full_name
+            $records = $records->filter(function ($record) use ($allowedNames, $normalize) {
+                return in_array(strtolower($normalize($record->full_name)), $allowedNames);
+            });
+        }
+    
+        if ($records->isEmpty()) {
+            return back()->with('error', 'No records available for export.');
+        }
+    
+        if ($format === 'csv') {
+            return response()->streamDownload(function () use ($records) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['Full Name', 'Type of Appointment', 'Position', 'Appointment', 'Effectivity Date']);
+    
+                foreach ($records as $appointment) {
+                    fputcsv($handle, [
+                        $appointment->full_name,
+                        $appointment->type_of_appointments,
+                        $appointment->position,
+                        $appointment->appointment,
+                        $appointment->appointment_effectivity_date,
+                    ]);
+                }
+    
+                fclose($handle);
             }, 'appointments_export_' . now()->format('Ymd_His') . '.csv');
         }
-
+    
         if ($format === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.new_appointments', [
                 'appointments' => $records,
             ]);
-
+    
             return response()->streamDownload(function () use ($pdf) {
-                echo $pdf->stream();
+                echo $pdf->output();
             }, 'appointments_export_' . now()->format('Ymd_His') . '.pdf');
         }
-    }
+    }    
 
 
     public static function getRelations(): array
