@@ -21,7 +21,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Filament\Navigation\MenuItem;
 use Filament\Navigation\UserMenuItem;
 use Filament\Support\Facades\FilamentView;
-
+use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 
@@ -50,6 +50,10 @@ class AdminPanelProvider extends PanelProvider
                     ->url('https://cpaf.uplb.edu.ph/')
                     ->icon('heroicon-o-book-open')
                     ->openUrlInNewTab(),
+                'profile' => MenuItem::make()
+                    ->label(fn() => auth()->user()->name)
+                    ->url(fn(): string => EditProfilePage::getUrl())
+                    ->icon('heroicon-m-user-circle')
             ])
 
             //->registration(Register::class) 
@@ -64,7 +68,7 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             ->colors([
-                'primary' => '#367ab3   ',
+                'primary' => '#367ab3',
                 'secondary' => '#00573e',
 
             ])
@@ -95,6 +99,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->brandName('CPAf Intranet');
-             
+
     }
 }

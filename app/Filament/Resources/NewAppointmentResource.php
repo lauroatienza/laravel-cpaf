@@ -104,116 +104,116 @@ class NewAppointmentResource extends Resource
 
 
     public static function getNavigationBadgeColor(): string
-    {
-        return 'primary';
-    }
+{
+    return 'primary';
+}
 
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('full_name')
-                    ->label('Name')
-                    ->required(),
+{
+    return $form
+        ->schema([
+            TextInput::make('full_name')
+                ->label('Name')
+                ->required(),
 
-                Select::make('type_of_appointments')
-                    ->label('Type of Appointment')
-                    ->required()
-                    ->options([
-                        'Affiliate Faculty' => 'Affiliate Faculty',
-                        'Adjunct Faculty' => 'Adjunct Faculty',
-                        'Lecturer' => 'Lecturer',
-                        'Administrator' => 'Administrator',
-                        'Other' => 'Other (Specify)',
-                    ])
-                    ->reactive(),
+            Select::make('type_of_appointments')
+                ->label('Type of Appointment')
+                ->required()
+                ->options([
+                    'Affiliate Faculty' => 'Affiliate Faculty',
+                    'Adjunct Faculty' => 'Adjunct Faculty',
+                    'Lecturer' => 'Lecturer',
+                    'Administrator' => 'Administrator',
+                    'Other' => 'Other (Specify)',
+                ])
+                ->reactive(),
 
-                TextInput::make('type_of_appointments_other')
-                    ->label('Please specify your type of appointment')
-                    ->visible(fn($get) => $get('type_of_appointments') === 'Other')
-                    ->required(fn($get) => $get('type_of_appointments') === 'Other')
-                    ->afterStateUpdated(fn($state, callable $set) => $set('type_of_appointments', $state)),
+            TextInput::make('type_of_appointments_other')
+                ->label('Please specify your type of appointment')
+                ->visible(fn($get) => $get('type_of_appointments') === 'Other')
+                ->required(fn($get) => $get('type_of_appointments') === 'Other')
+                ->afterStateUpdated(fn($state, callable $set) => $set('type_of_appointments', $state)),
 
-                TextInput::make('position')
-                    ->label('Position')
-                    ->required(),
+            TextInput::make('position')
+                ->label('Position')
+                ->required(),
 
-                Select::make('appointment')
-                    ->label('Appointment')
-                    ->required()
-                    ->options([
-                        'Assistant Professor' => 'Assistant Professor',
-                        'Associate Professor' => 'Associate Professor',
-                        'Professor' => 'Professor',
-                        'Lecturer' => 'Lecturer',
-                        'Dean' => 'Dean',
-                        'Director' => 'Director',
-                        'Head' => 'Head',
-                        'Other' => 'Other (Specify)',
-                    ])
-                    ->reactive(),
+            Select::make('appointment')
+                ->label('Appointment')
+                ->required()
+                ->options([
+                    'Assistant Professor' => 'Assistant Professor',
+                    'Associate Professor' => 'Associate Professor',
+                    'Professor' => 'Professor',
+                    'Lecturer' => 'Lecturer',
+                    'Dean' => 'Dean',
+                    'Director' => 'Director',
+                    'Head' => 'Head',
+                    'Other' => 'Other (Specify)',
+                ])
+                ->reactive(),
 
-                TextInput::make('appointment_other')
-                    ->label('Please specify your appointment')
-                    ->visible(fn($get) => $get('appointment') === 'Other')
-                    ->required(fn($get) => $get('appointment') === 'Other')
-                    ->afterStateUpdated(fn($state, callable $set) => $set('appointment', $state)),
+            TextInput::make('appointment_other')
+                ->label('Please specify your appointment')
+                ->visible(fn($get) => $get('appointment') === 'Other')
+                ->required(fn($get) => $get('appointment') === 'Other')
+                ->afterStateUpdated(fn($state, callable $set) => $set('appointment', $state)),
 
-                DatePicker::make('appointment_effectivity_date')
-                    ->label('Appointment Effectivity Date')
-                    ->required(),
+            DatePicker::make('appointment_effectivity_date')
+                ->label('Appointment Effectivity Date')
+                ->required(),
 
-                TextInput::make('new_appointment_file_path')
-                    ->label('Appointment File URL')
-                    ->placeholder('https://drive.google.com/...')
-                    ->url()
-                    ->maxLength(500),
-            ]);
-    }
+            TextInput::make('new_appointment_file_path')
+                ->label('Appointment File URL')
+                ->placeholder('https://drive.google.com/...')
+                ->url()
+                ->maxLength(500),
+        ]);
+}
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('full_name')
-                    ->label('Full Name')
-                    ->sortable()
-                    ->searchable(),
+public static function table(Table $table): Table
+{
+    return $table
+        ->columns([
+            TextColumn::make('full_name')
+                ->label('Full Name')
+                ->sortable()
+                ->searchable(),
 
-                BadgeColumn::make('type_of_appointments')
-                    ->label('Type of Appointment')
-                    ->sortable()
-                    ->searchable()
-                    ->formatStateUsing(function ($state, $record) {
-                        return $state === 'Other' ? $record->type_of_appointments_other : $state;
-                    }),
+            BadgeColumn::make('type_of_appointments')
+                ->label('Type of Appointment')
+                ->sortable()
+                ->searchable()
+                ->formatStateUsing(function ($state, $record) {
+                    return $state === 'Other' ? $record->type_of_appointments_other : $state;
+                }),
 
-                BadgeColumn::make('position')
-                    ->label('Position')
-                    ->sortable()
-                    ->searchable(),
+            BadgeColumn::make('position')
+                ->label('Position')
+                ->sortable()
+                ->searchable(),
 
-                BadgeColumn::make('appointment')
-                    ->label('Appointment')
-                    ->sortable()
-                    ->searchable()
-                    ->formatStateUsing(function ($state, $record) {
-                        return $state === 'Other' ? $record->appointment_other : $state;
-                    }),
+            BadgeColumn::make('appointment')
+                ->label('Appointment')
+                ->sortable()
+                ->searchable()
+                ->formatStateUsing(function ($state, $record) {
+                    return $state === 'Other' ? $record->appointment_other : $state;
+                }),
 
-                TextColumn::make('appointment_effectivity_date')
-                    ->label('Appointment Effectivity Date')
-                    ->sortable()
-                    ->searchable(),
+            TextColumn::make('appointment_effectivity_date')
+                ->label('Appointment Effectivity Date')
+                ->sortable()
+                ->searchable(),
 
-                TextColumn::make('new_appointment_file_path')
-                    ->label('File')
-                    ->formatStateUsing(fn($state) => $state ? '🔗 View File' : 'None')
-                    ->url(fn($record) => $record->new_appointment_file_path ?: null)
-                    ->openUrlInNewTab()
-                    ->color('primary'),
-            ])
+            TextColumn::make('new_appointment_file_path')
+                ->label('File')
+                ->formatStateUsing(fn ($state) => $state ? '🔗 View File' : 'None')
+                ->url(fn ($record) => $record->new_appointment_file_path ?: null)
+                ->openUrlInNewTab()
+                ->color('primary'),
+        ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type_of_appointments')
                     ->options([
@@ -227,15 +227,15 @@ class NewAppointmentResource extends Resource
                 ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
-            ])
+            ])            
             ->bulkActions([
                 Tables\Actions\BulkAction::make('delete')
                     ->label('Delete Selected')
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation()
                     ->color('danger')
-                    ->action(fn($records) => $records->each->delete()),
-
+                    ->action(fn ($records) => $records->each->delete()),
+            
                 Tables\Actions\BulkAction::make('exportBulk')
                     ->label('Export Selected')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -249,9 +249,9 @@ class NewAppointmentResource extends Resource
                             ->label('Export Format')
                             ->required(),
                     ])
-                    ->action(fn(array $data, $records) => static::exportData($records, $data['format'])),
+                    ->action(fn (array $data, $records) => static::exportData($records, $data['format'])),
             ])
-            ->selectable();
+            ->selectable(); 
     }
 
     public static function exportData($records, $format)
