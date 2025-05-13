@@ -80,9 +80,14 @@ class FSRorRSRResource extends Resource
 
                 TextInput::make('full_name')
                     ->label('Full Name')
-                    ->disabled()
-                    ->dehydrated(false) 
-                    ->formatStateUsing(fn ($record) => $record?->full_name ?? Auth::user()->name . ' ' . Auth::user()->last_name)
+                    ->default(function () {
+                        $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                        $cleaned = str_ireplace($titles, '', $name);
+                        return preg_replace('/\s+/', ' ', trim($cleaned));
+                    })
+                    ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
+                    ->dehydrated()
                     ->required(),
             
                 TextInput::make('year')
