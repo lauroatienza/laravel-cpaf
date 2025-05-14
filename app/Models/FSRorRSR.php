@@ -4,21 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class FSRorRSR extends Model
 {
     use HasFactory;
 
-    public static function booted()
-{
-    static::creating(function ($model) {
-        $model->full_name = self::normalizeName($model->full_name);
-    });
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('super_admin')) {
+                $model->full_name = self::normalizeName($model->full_name);
+            }
+        });
 
-    static::updating(function ($model) {
-        $model->full_name = self::normalizeName($model->full_name);
-    });
-}
+        static::updating(function ($model) {
+            if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('super_admin')) {
+                $model->full_name = self::normalizeName($model->full_name);
+            }
+        });
+    }
+
 
 protected static function normalizeName($name)
 {

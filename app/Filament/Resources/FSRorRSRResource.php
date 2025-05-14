@@ -80,16 +80,20 @@ class FSRorRSRResource extends Resource
 
                 TextInput::make('full_name')
                     ->label('Full Name')
-                    ->default(function () {
-                        $name = Auth::user()->name . ' ' . Auth::user()->last_name;
-                        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-                        $cleaned = str_ireplace($titles, '', $name);
-                        return preg_replace('/\s+/', ' ', trim($cleaned));
+                    ->default(function (?FSRorRSR $record) {
+                        if (!$record || !$record->exists) {
+                            $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                            $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                            $cleaned = str_ireplace($titles, '', $name);
+                            return preg_replace('/\s+/', ' ', trim($cleaned));
+                        }
+
+                        return $record->full_name;
                     })
-                    ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
-                    ->dehydrated()
+                    ->readOnly(fn () => !Auth::user()->hasAnyRole(['admin', 'super_admin']))
+                    ->dehydrated(fn () => Auth::user()->hasAnyRole(['admin', 'super_admin'])) 
                     ->required(),
-            
+  
                 TextInput::make('year')
                     ->label('Year')
                     ->required(),
