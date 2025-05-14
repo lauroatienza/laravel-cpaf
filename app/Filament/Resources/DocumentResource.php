@@ -201,6 +201,7 @@ class DocumentResource extends Resource
                     ->options([
                         'Memorandum of Agreement (MOA)' => 'MOA',
                         'Memorandum of Understanding (MOU)' => 'MOU',
+                        'Others' => 'Others',
                     ]),
             ])
             ->actions([
