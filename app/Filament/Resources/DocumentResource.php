@@ -53,9 +53,16 @@ class DocumentResource extends Resource
                 ->options([
                     'Memorandum of Agreement (MOA)' => 'Memorandum of Agreement (MOA)',
                     'Memorandum of Understanding (MOU)' => 'Memorandum of Understanding (MOU)',
+                    'Others' => 'Others',
                 ])
                 ->required()
-                ->label('Type of Partnership Agreement'),
+                ->label('Type of Partnership Agreement')
+                ->reactive(),
+                
+            TextInput::make('partnership_type_other')
+                ->label('Specify Other Partnership Type')
+                ->visible(fn ($get) => $get('partnership_type') === 'Others')
+                ->required(fn ($get) => $get('partnership_type') === 'Others'),
 
             TextInput::make('extension_title')->required(),
             TextInput::make('partner_stakeholder')->required(),

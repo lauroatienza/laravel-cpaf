@@ -16,13 +16,11 @@ class ListDocuments extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Create button
             Actions\CreateAction::make()
                 ->color('secondary')
                 ->icon('heroicon-o-pencil-square')
                 ->label('Create New Document'),
 
-            // Export button
             Actions\Action::make('export')
             ->label('Export')
             ->color('primary')
@@ -34,6 +32,7 @@ class ListDocuments extends ListRecords
                         'ALL' => 'All Documents',
                         'MOA' => 'MOA',
                         'MOU' => 'MOU',
+                        'OTHERS' => 'Others',
                     ])
                     ->default('ALL'),
                 Select::make('format')
@@ -52,6 +51,9 @@ class ListDocuments extends ListRecords
                     $query->where('partnership_type', 'Memorandum of Agreement (MOA)');
                 } elseif ($data['type'] === 'MOU') {
                     $query->where('partnership_type', 'Memorandum of Understanding (MOU)');
+                }
+                elseif ($data['type'] === 'OTHERS') {
+                    $query->where('partnership_type', 'Others');
                 }
 
                 // Get the records to be exported
