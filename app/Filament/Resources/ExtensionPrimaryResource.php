@@ -224,7 +224,28 @@ class ExtensionPrimaryResource extends Resource
 
                 TextColumn::make('pbms_upload_status')->label('PBMS Uploading Status')->sortable(),
             ])
-            ->filters([])
+            ->filters([
+                Tables\Filters\SelectFilter::make('contributing_unit')
+                    ->options([
+                        'CSPPS' => 'CSPPS',
+                        'CISC' => 'CISC',
+                        'CPAf' => 'CPAf',
+                        'IGRD' => 'IGRD',
+                    ]),
+                Tables\Filters\Filter::make('start_date_range')
+                    ->form([
+                        DatePicker::make('from')->label('Start Date From'),
+                        DatePicker::make('until')->label('Start Date To'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn (Builder $query, $date) => 
+                                $query->whereDate('start_date', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => 
+                                $query->whereDate('start_date', '<=', $date));
+                    }),
+            ])
+
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),

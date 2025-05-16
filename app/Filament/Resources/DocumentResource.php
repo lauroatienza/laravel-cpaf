@@ -203,6 +203,17 @@ class DocumentResource extends Resource
                         'Memorandum of Understanding (MOU)' => 'MOU',
                         'Others' => 'Others',
                     ]),
+                 Tables\Filters\Filter::make('start_date_range')
+                    ->form([
+                        DatePicker::make('start_from')->label('Start Date From'),
+                        DatePicker::make('start_until')->label('Start Date Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['start_from'], fn ($q) => $q->whereDate('start_date', '>=', $data['start_from']))
+                            ->when($data['start_until'], fn ($q) => $q->whereDate('start_date', '<=', $data['start_until']));
+                    })
+                    ->label('Start Date Range'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

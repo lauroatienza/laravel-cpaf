@@ -31,11 +31,8 @@ use Illuminate\Database\Eloquent\Model;
 class ResearchResource extends Resource
 {
     protected static ?string $model = Research::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-beaker';
-
     protected static ?string $navigationGroup = 'Programs';
-
     protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'title';
     public static function getGloballySearchableAttributes(): array
@@ -117,11 +114,6 @@ class ResearchResource extends Resource
                     ])->required(),
 
                 TextInput::make('title')->label('Title')->required(),
-
-
-
-
-
 
                 DatePicker::make('extension_date')->label('Extension Date')
                     ->format('Y/m/d')->nullable(),
@@ -290,6 +282,17 @@ class ResearchResource extends Resource
                         'CPAf' => 'CPAf',
                         'IGRD' => 'IGRD',
                     ]),
+
+                Filter::make('date_range')
+                    ->form([
+                        DatePicker::make('start')->label('From'),
+                        DatePicker::make('end')->label('Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['start'], fn ($q, $date) => $q->whereDate('start_date', '>=', $date))
+                            ->when($data['end'], fn ($q, $date) => $q->whereDate('end_date', '<=', $date));
+                     }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
