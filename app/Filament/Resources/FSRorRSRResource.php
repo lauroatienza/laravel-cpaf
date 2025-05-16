@@ -79,20 +79,17 @@ class FSRorRSRResource extends Resource
                     ->default(Auth::id()),
 
                 TextInput::make('full_name')
-                    ->label('Full Name')
-                    ->default(function (?FSRorRSR $record) {
-                        if (!$record || !$record->exists) {
-                            $name = Auth::user()->name . ' ' . Auth::user()->last_name;
-                            $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
-                            $cleaned = str_ireplace($titles, '', $name);
-                            return preg_replace('/\s+/', ' ', trim($cleaned));
-                        }
-
-                        return $record->full_name;
+                    ->label('Name')
+                    ->default(function () {
+                        $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                        $cleaned = str_ireplace($titles, '', $name);
+                        return preg_replace('/\s+/', ' ', trim($cleaned));
                     })
-                    ->readOnly(fn () => !Auth::user()->hasAnyRole(['admin', 'super_admin']))
-                    ->dehydrated(fn () => Auth::user()->hasAnyRole(['admin', 'super_admin'])) 
+                    ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
+                    ->dehydrated()
                     ->required(),
+
   
                 TextInput::make('year')
                     ->label('Year')
@@ -121,11 +118,10 @@ class FSRorRSRResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('full_name')
                     ->label('Name')
                     ->sortable()
-                    ->searchable()
-                    ->getStateUsing(fn($record) => $record->user->name . ' ' . $record->user->last_name),
+                    ->searchable(),
 
                 BadgeColumn::make('year')
                     ->sortable()

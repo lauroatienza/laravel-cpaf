@@ -10,21 +10,16 @@ class FSRorRSR extends Model
 {
     use HasFactory;
 
-    protected static function booted()
-    {
-        static::creating(function ($model) {
-            if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('super_admin')) {
-                $model->full_name = self::normalizeName($model->full_name);
-            }
-        });
+    public static function booted()
+{
+    static::creating(function ($model) {
+        $model->full_name = self::normalizeName($model->full_name);
+    });
 
-        static::updating(function ($model) {
-            if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('super_admin')) {
-                $model->full_name = self::normalizeName($model->full_name);
-            }
-        });
-    }
-
+    static::updating(function ($model) {
+        $model->full_name = self::normalizeName($model->full_name);
+    });
+}
 
 protected static function normalizeName($name)
 {
@@ -38,11 +33,11 @@ protected static function normalizeName($name)
 }
 
     protected $fillable = [
-        "user_id",
-        "year",
-        "sem",
-        "drive_link",
-        "full_name",
+        'user_id',
+        'year',
+        'sem',
+        'drive_link',
+        'full_name',
     ];
 
     public function user()
