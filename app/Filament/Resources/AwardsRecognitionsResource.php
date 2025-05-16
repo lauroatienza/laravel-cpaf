@@ -22,6 +22,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AwardsRecognitionsExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+
 
 
 class AwardsRecognitionsResource extends Resource
@@ -182,6 +184,17 @@ class AwardsRecognitionsResource extends Resource
                             return $query->where('award_type', $data['value']);
                         }
                         return $query;
+                    }),
+                Filter::make('date_awarded')
+                    ->label('Date Awarded')
+                    ->form([
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('until')->label('Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->whereDate('date_awarded', '>=', $data['from']))
+                            ->when($data['until'], fn ($q) => $q->whereDate('date_awarded', '<=', $data['until']));
                     }),
             ])
 

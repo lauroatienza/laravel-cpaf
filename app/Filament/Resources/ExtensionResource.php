@@ -240,6 +240,22 @@ class ExtensionResource extends Resource
 
             ])
             ->filters([
+                Tables\Filters\Filter::make('activity_date_range')
+                    ->form([
+                        DatePicker::make('start_date')
+                            ->label('Start Date From'),
+                        DatePicker::make('end_date')
+                            ->label('End Date To'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['start_date'], fn ($query, $date) => 
+                                $query->whereDate('start_date', '>=', $date)
+                            )
+                            ->when($data['end_date'], fn ($query, $date) => 
+                                $query->whereDate('end_date', '<=', $date)
+                            );
+                    }),
 
             ])
             ->actions([

@@ -8,7 +8,7 @@ use App\Models\FilamentMain;
 use Filament\Forms;
 use Filament\Forms\Form;
 use App\Models\Publication;
-
+use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Str;
 
 use Filament\Tables;
@@ -299,7 +299,16 @@ class FilamentMainResource extends Resource
                 TextColumn::make('date_awarded')->sortable()->label('Date Awarded')->date(),
             ])
             ->filters([
-                //
+                Filter::make('date_published')
+                    ->form([
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('until')->label('Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn ($query, $date) => $query->whereDate('date_published', '>=', $date))
+                            ->when($data['until'], fn ($query, $date) => $query->whereDate('date_published', '<=', $date));
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Components\Section;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
 
 
 class TrainingAttendedResource extends Resource
@@ -239,6 +241,16 @@ class TrainingAttendedResource extends Resource
                         'IGRD' => 'IGRD',
                         'CPAF' => 'CPAF',
                     ]),
+                Filter::make('start_date_range')
+                    ->form([
+                        DatePicker::make('start_date_from')->label('Start Date From'),
+                        DatePicker::make('start_date_until')->label('Start Date Until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['start_date_from'], fn ($q) => $q->whereDate('start_date', '>=', $data['start_date_from']))
+                            ->when($data['start_date_until'], fn ($q) => $q->whereDate('start_date', '<=', $data['start_date_until']));
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
