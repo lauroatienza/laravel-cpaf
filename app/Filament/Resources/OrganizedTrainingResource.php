@@ -103,7 +103,15 @@ class OrganizedTrainingResource extends Resource
                 Section::make('Training Details')
                     ->schema([
                         TextInput::make('full_name')
-                            ->label('Full Name (First Name MI. Last Name)'),
+                            ->label('Full Name (First Name MI. Last Name)')
+                            ->default(function () {
+                                $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                                $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                                $cleaned = str_ireplace($titles, '', $name);
+                                return preg_replace('/\s+/', ' ', trim($cleaned));
+                            })
+                            ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
+                            ->dehydrated(),
 
                         Select::make('contributing_unit')->label('Contributing Unit')
                             ->options([

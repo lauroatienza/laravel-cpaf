@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 
+/**
+ * @method bool hasRole(string|array $roles)
+ * @method \Illuminate\Support\Collection getRoleNames()
+ * @method \Spatie\Permission\Models\Role assignRole(...$roles)
+ */
+
 
 class User extends Authenticatable implements HasAvatar
 {
@@ -27,7 +33,7 @@ class User extends Authenticatable implements HasAvatar
         'designation',
         'unit',
         'ms_phd',
-        'systemrole', // ✅ Ensure systemrole is handled properly
+        'systemrole', 
         'fulltime_partime',
         'avatar_url',
         'research_interests',

@@ -110,10 +110,15 @@ class ExtensionResource extends Resource
 
             TextInput::make('name')
                 ->label('Full Name')
-                ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
-                ->disabled()
-                ->dehydrated()
-                ->required(),
+                ->default(function () {
+                        $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                        $cleaned = str_ireplace($titles, '', $name);
+                        return preg_replace('/\s+/', ' ', trim($cleaned));
+                    })
+                    ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
+                    ->dehydrated()
+                    ->required(),
 
             Select::make('extension_involvement')
                 ->label('Type of Extension Involvement')

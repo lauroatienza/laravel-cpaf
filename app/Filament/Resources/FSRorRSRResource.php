@@ -79,7 +79,7 @@ class FSRorRSRResource extends Resource
                     ->default(Auth::id()),
 
                 TextInput::make('full_name')
-                    ->label('Full Name')
+                    ->label('Name')
                     ->default(function () {
                         $name = Auth::user()->name . ' ' . Auth::user()->last_name;
                         $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
@@ -89,7 +89,8 @@ class FSRorRSRResource extends Resource
                     ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
                     ->dehydrated()
                     ->required(),
-            
+
+  
                 TextInput::make('year')
                     ->label('Year')
                     ->required(),
@@ -108,7 +109,6 @@ class FSRorRSRResource extends Resource
                     ->label('Google Drive Shared Link')
                     ->placeholder('https://drive.google.com/...')
                     ->url()
-                    ->required()
                     ->maxLength(500),
             ]);
     }
@@ -117,11 +117,10 @@ class FSRorRSRResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('full_name')
                     ->label('Name')
                     ->sortable()
-                    ->searchable()
-                    ->getStateUsing(fn($record) => $record->user->name . ' ' . $record->user->last_name),
+                    ->searchable(),
 
                 BadgeColumn::make('year')
                     ->sortable()
