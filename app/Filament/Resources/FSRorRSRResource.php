@@ -109,7 +109,6 @@ class FSRorRSRResource extends Resource
                     ->label('Google Drive Shared Link')
                     ->placeholder('https://drive.google.com/...')
                     ->url()
-                    ->required()
                     ->maxLength(500),
             ]);
     }
