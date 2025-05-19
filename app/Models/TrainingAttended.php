@@ -11,15 +11,29 @@ class TrainingAttended extends Model
 {
     use HasFactory;
 
-    protected static function boot()
+    protected static function booted()
     {
-        parent::boot();
+        static::creating(function ($model) {
+            // Set user_id if not already set
+            if (Auth::check() && empty($model->user_id)) {
+                $model->user_id = Auth::id();
+            }
 
-        static::creating(function ($training) {
-            $training->user_id = Auth::id();
-            $training->full_name = Auth::user()->name . ' ' . Auth::user()->last_name;
+            // Normalize name using input value
+            $model->full_name = self::normalizeName($model->full_name);
         });
-        
+
+        static::updating(function ($model) {
+            $model->full_name = self::normalizeName($model->full_name);
+        });
+    }
+
+    protected static function normalizeName($name)
+    {
+        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+        $name = str_ireplace($titles, '', $name);
+        $name = preg_replace('/\s+/', ' ', trim($name));
+        return $name;
     }
 
     protected $fillable = [

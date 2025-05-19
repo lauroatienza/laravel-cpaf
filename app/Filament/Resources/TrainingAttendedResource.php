@@ -17,6 +17,8 @@ use Filament\Forms\Set;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
 
 
 class TrainingAttendedResource extends Resource
@@ -105,7 +107,13 @@ class TrainingAttendedResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('full_name')
                     ->label('Full Name')
-                    ->default(Auth::user()->name . ' ' . Auth::user()->last_name)
+                    ->default(function () {
+                        $name = Auth::user()->name . ' ' . Auth::user()->last_name;
+                        $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
+                        $cleaned = str_ireplace($titles, '', $name);
+                        return preg_replace('/\s+/', ' ', trim($cleaned));
+                    })
+                    ->formatStateUsing(fn ($state) => preg_replace('/\s+/', ' ', trim($state)))
                     ->dehydrated()
                     ->required(),
 
@@ -186,38 +194,38 @@ class TrainingAttendedResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('full_name')
+                TextColumn::make('full_name')
                     ->label('Full Name')
                     ->searchable()
                     ->sortable()
-                    ->limit(20)
+                    ->limit(40)
                     ->tooltip(fn($state) => $state),
 
-                Tables\Columns\BadgeColumn::make('unit_center')
+                BadgeColumn::make('unit_center')
                     ->label('Unit/Center')
                     ->sortable()
                     ->alignCenter(),
 
-                Tables\Columns\TextColumn::make('start_date')
+                TextColumn::make('start_date')
                     ->date()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('end_date')
+                TextColumn::make('end_date')
                     ->date()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('category')
+                TextColumn::make('category')
                     ->label('Category')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('training_title')
+                TextColumn::make('training_title')
                     ->label('Specific Title')
                     ->sortable()
                     ->searchable()
                     ->limit(20)
                     ->tooltip(fn($state) => $state),
 
-                Tables\Columns\TextColumn::make('highlights')
+                TextColumn::make('highlights')
                     ->label('Highlights of the Event')
                     ->sortable()
                     ->limit(20)
@@ -227,7 +235,7 @@ class TrainingAttendedResource extends Resource
                     ->label('Gender Component')
                     ->alignCenter(),
 
-                Tables\Columns\TextColumn::make('total_hours')
+                TextColumn::make('total_hours')
                     ->sortable()
                     ->formatStateUsing(fn($state) => rtrim(rtrim(number_format($state, 1, '.', ''), '0'), '.')),
             ])
