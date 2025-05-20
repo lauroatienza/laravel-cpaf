@@ -63,7 +63,7 @@ class AdminPanelProvider extends PanelProvider
                     ->setIcon('heroicon-o-user')
                     ->shouldShowAvatarForm(
                         value: true,
-                        directory: 'avatars'
+                        directory: 'public/avatars'
                     )
             ])
 
