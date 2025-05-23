@@ -130,7 +130,7 @@ class ResearchResource extends Resource
                 RichEditor::make('objectives')->columnSpan('full')->nullable(),
                 RichEditor::make('expected_output')->columnSpan('full')->label('Expected Output')->nullable(),
                 TextInput::make('no_months_orig_timeframe')->label('Months No. from Original Timeframe'),
-                TextInput::make('name_of_researchers')->required()->label('Project Leader'),
+                TextInput::make('poject_leader')->required()->label('Project Leader'),
                 TextInput::make('name_of_researchers')->required()->label('Name of Researchers')->placeholder('Use comma to separate names'),
 
                 TextInput::make('source_funding')->required()->label('Source Funding'),
