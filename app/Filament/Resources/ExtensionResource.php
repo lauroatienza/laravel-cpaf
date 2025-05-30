@@ -239,7 +239,7 @@ class ExtensionResource extends Resource
                     ->sortable()->searchable()
                     ->limit(20)
                     ->tooltip(fn($state) => $state),
-                TextColumn::make('date_end')->label('End Date')
+                TextColumn::make('end_date')->label('End Date')
                     ->sortable()->searchable(),
 
 
