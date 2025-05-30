@@ -58,18 +58,29 @@ class ResearchResource extends Resource
         $titles = ['Dr.', 'Prof.', 'Engr.', 'Sir', 'Ms.', 'Mr.', 'Mrs.'];
 
         // Function to normalize names by removing titles and extra spaces
+
         $normalizeName = function ($name) use ($titles, $user) {
-            // Remove titles
-            $nameWithoutTitles = str_ireplace($titles, '', $name);
+        $nameWithoutTitles = str_ireplace($titles, '', $name);
 
-            // If the middle name exists and is not already an initial, replace it with the initial
-            if ($user->middle_name) {
-                $middleNameInitial = strtoupper(substr($user->middle_name, 0, 1)) . '.';
-                $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitial, $nameWithoutTitles);
-            }
+        if ($user->middle_name) {
+        // Split middle name into parts (e.g., Dela Torres → [Dela, Torres])
+        $middleNameParts = explode(' ', $user->middle_name);
 
-            // Replace multiple spaces with a single space
-            return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
+        // Build initials (e.g., D + T)
+        $middleNameInitials = '';
+        foreach ($middleNameParts as $part) {
+            $middleNameInitials .= strtoupper(substr($part, 0, 1));
+        }
+
+        // Add period after initials
+        $middleNameInitials .= '.';
+
+        // Replace full middle name in the name string
+        $nameWithoutTitles = str_ireplace($user->middle_name, $middleNameInitials, $nameWithoutTitles);
+        }
+
+        // Clean up extra spaces
+        return preg_replace('/\s+/', ' ', trim($nameWithoutTitles));
         };
 
         // Normalize names
