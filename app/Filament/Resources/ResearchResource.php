@@ -254,6 +254,12 @@ class ResearchResource extends Resource
                     ->sortable()->searchable(),
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
                     ->sortable()->searchable(),
+                      
+                Tables\Columns\TextColumn::make('pdf_image_1')
+                    ->label('PDF Image 1')
+                    ->formatStateUsing(fn ($state) => $state ? '<a href="' . Storage::url($state) . '" target="_blank">' . basename($state) . '</a>' : '-')
+                    ->html(),
+                      
                 IconColumn::make('pbms_upload_status')->label('PMBS Upload Status')
                     ->icon(fn(string $state): string => match ($state) {
                         'uploaded' => 'heroicon-o-check-badge',
