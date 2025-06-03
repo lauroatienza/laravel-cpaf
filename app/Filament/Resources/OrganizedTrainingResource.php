@@ -181,19 +181,12 @@ class OrganizedTrainingResource extends Resource
                                 ->pluck('title_of_extension_program', 'id');
                         })
                         ->searchable(),
-        
     
-                        
-                        Grid::make('2')->schema([
-                            TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Input the link of the PDF File'),
-                            TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('Input the link of the PDF File (if applicable)')
-                    ]),
-
+                        TextInput::make('pdf_file_1')->label('PDF File 1')->placeholder('Proof of conduct of training such as schedule, attendance sheets and activity reports must be properly endorsed by the Dean/Head of Unit.'),
+                        TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('In a single PDF file, maximum of ten (10) survey questionnaires with actual responses or feedback.'),
                         TextInput::make('relevant_documents')->label('Documents Link'),
-
                         TextInput::make('project_title')
                             ->label('Project Title')
-
 
                     ]),
 
