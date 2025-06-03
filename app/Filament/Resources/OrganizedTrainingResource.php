@@ -186,7 +186,7 @@ class OrganizedTrainingResource extends Resource
                         TextInput::make('pdf_file_2')->label('PDF File 2')->placeholder('In a single PDF file, maximum of ten (10) survey questionnaires with actual responses or feedback.'),
                         TextInput::make('relevant_documents')->label('Documents Link'),
                         TextInput::make('project_title')
-                            ->label('Project Title')
+                            ->label('Project Title')->placeholder('If under Project, include here the title of the Project.')
 
                     ]),
 
