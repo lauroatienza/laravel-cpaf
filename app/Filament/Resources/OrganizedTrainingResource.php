@@ -190,18 +190,18 @@ class OrganizedTrainingResource extends Resource
 
                     ]),
 
-                    Select::make('related_research_program')
-                    ->label('Related Research Program')
-                    ->options(function (?Model $record) {
-                        if (!$record) {
+                    // Select::make('related_research_program')
+                  //  ->label('Related Research Program')
+                  //  ->options(function (?Model $record) {
+                 //       if (!$record) {
                             // No record yet, maybe during creation — return all or empty
-                            return [];
+                    //        return [];
                         }
-        
-                        return Research::where('contributing_unit', $record->contributing_unit)
+        //
+                 //       return Research::where('contributing_unit', $record->contributing_unit)
                             ->pluck('title', 'id');
-                    })
-                    ->searchable(),
+                  //  })
+                //    ->searchable(),
                 
 
             ]);
