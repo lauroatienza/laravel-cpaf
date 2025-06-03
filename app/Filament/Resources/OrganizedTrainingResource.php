@@ -217,7 +217,20 @@ class OrganizedTrainingResource extends Resource
                 TextColumn::make('title')->label('Title')->searchable()->limit(30)->sortable()->tooltip(fn($state) => $state),
                 TextColumn::make('start_date')->label('Start Date')->date('Y-m-d')->sortable(),
                 TextColumn::make('end_date')->label('End Date')->date('Y-m-d')->sortable(),
-                
+
+                TextColumn::make('pdf_file_1')
+                    ->label('File')
+                    ->formatStateUsing(fn ($state) => $state ? '🔗 View Link' : 'None')
+                    ->url(fn ($record) => $record->pdf_file_1)
+                    ->openUrlInNewTab()
+                    ->color('primary'),
+
+                TextColumn::make('pdf_file_2')
+                    ->label('File')
+                    ->formatStateUsing(fn ($state) => $state ? '🔗 View Link' : 'None')
+                    ->url(fn ($record) => $record->pdf_file_2)
+                    ->openUrlInNewTab()
+                    ->color('primary'),
 
             ])
             ->filters([
