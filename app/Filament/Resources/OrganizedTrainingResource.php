@@ -196,10 +196,10 @@ class OrganizedTrainingResource extends Resource
                  //       if (!$record) {
                             // No record yet, maybe during creation — return all or empty
                     //        return [];
-                        }
+                    //    }
         //
                  //       return Research::where('contributing_unit', $record->contributing_unit)
-                            ->pluck('title', 'id');
+                 //           ->pluck('title', 'id');
                   //  })
                 //    ->searchable(),
                 
