@@ -143,6 +143,7 @@ class ExtensionResource extends Resource
                     'Editor' => 'Editor',
                     'Examiner' => 'Examiner',
                     'Guest Lecturer' => 'Guest Lecturer',
+                    'Judge' => 'Judge',
                     'Other' => 'Other (Specify)',
                 ])
                 ->required()
