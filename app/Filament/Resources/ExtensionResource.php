@@ -142,6 +142,7 @@ class ExtensionResource extends Resource
                     'Session Chair' => 'Session Chair',
                     'Editor' => 'Editor',
                     'Examiner' => 'Examiner',
+                    'Guest Lecturer' => 'Guest Lecturer',
                     'Other' => 'Other (Specify)',
                 ])
                 ->required()
@@ -169,6 +170,7 @@ class ExtensionResource extends Resource
                     'Conference' => 'Conference',
                     'Editorial Team/Board' => 'Editorial Team/Board',
                     'Workshop' => 'Workshop',
+                    'Class' => 'Class',
                     'Other' => 'Other (Specify)',
                 ])
                 ->reactive()
