@@ -15,6 +15,7 @@ class AwardsRecognitions extends Model
         "faculty_id",
         'granting_organization',
         "date_awarded",
+        "drive_link",
     ];
 }
 
