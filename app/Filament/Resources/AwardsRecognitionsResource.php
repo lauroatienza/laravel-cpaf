@@ -133,7 +133,7 @@ class AwardsRecognitionsResource extends Resource
                     ->required(),
         
                  TextInput::make('drive_link')
-                    ->label('Google Drive Shared Link')
+                    ->label('Proof(Link to Certificate of Award)')
                     ->placeholder('https://drive.google.com/...')
                     ->url()
                     ->maxLength(500),
@@ -179,7 +179,7 @@ class AwardsRecognitionsResource extends Resource
                     ->placeholder('N/A'),
                 
                 TextColumn::make('drive_link')
-                    ->label('File')
+                    ->label('Certificate of Award')
                     ->formatStateUsing(fn ($record) => $record->drive_link ? '🔗 View File' : 'None')
                     ->url(fn ($record) => $record->drive_link, true)
                     ->openUrlInNewTab()
