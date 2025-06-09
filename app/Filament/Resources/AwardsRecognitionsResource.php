@@ -177,7 +177,8 @@ class AwardsRecognitionsResource extends Resource
                     ->date()
                     ->sortable()
                     ->placeholder('N/A'),
-            ])
+            ]);
+            
             ->filters([
                 SelectFilter::make('award_type')
                     ->label('Type of Awards')
