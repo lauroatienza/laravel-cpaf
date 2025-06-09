@@ -133,7 +133,7 @@ class AwardsRecognitionsResource extends Resource
                     ->required(),
         
                  TextInput::make('drive_link')
-                    ->label('Proof(Link to Certificate of Award)')
+                    ->label('Proof (Link to Certificate of Award)')
                     ->placeholder('https://drive.google.com/...')
                     ->url()
                     ->maxLength(500),
