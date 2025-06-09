@@ -131,6 +131,13 @@ class AwardsRecognitionsResource extends Resource
                 DatePicker::make('date_awarded')
                     ->label('Date Awarded')
                     ->required(),
+        
+                 TextInput::make('drive_link')
+                    ->label('Google Drive Shared Link')
+                    ->placeholder('https://drive.google.com/...')
+                    ->url()
+                    ->maxLength(500),
+                     
             ]);
     }
 
@@ -196,6 +203,12 @@ class AwardsRecognitionsResource extends Resource
                             ->when($data['from'], fn ($q) => $q->whereDate('date_awarded', '>=', $data['from']))
                             ->when($data['until'], fn ($q) => $q->whereDate('date_awarded', '<=', $data['until']));
                     }),
+                    TextColumn::make('drive_link')
+                            ->label('File')
+                            ->formatStateUsing(fn ($record) => $record->drive_link ? '🔗 View File' : 'None')
+                            ->url(fn ($record) => $record->drive_link, true)
+                            ->openUrlInNewTab()
+                            ->color('primary'),
             ])
 
             ->bulkActions([
