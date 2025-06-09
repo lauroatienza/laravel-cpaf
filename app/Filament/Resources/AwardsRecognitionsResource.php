@@ -138,7 +138,7 @@ class AwardsRecognitionsResource extends Resource
                     ->url()
                     ->maxLength(500),
                      
-            ]);
+             ]);
     }
 
     public static function table(Tables\Table $table): Tables\Table
