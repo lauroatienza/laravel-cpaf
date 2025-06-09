@@ -218,6 +218,7 @@ class AwardsRecognitionsResource extends Resource
                     ->label('Delete Selected')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
+                    ->requiresConfirmation()
                     ->action(fn ($records) => $records->each->delete()),
 
                 BulkAction::make('exportBulk')
