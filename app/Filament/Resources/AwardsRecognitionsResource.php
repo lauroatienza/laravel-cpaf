@@ -177,7 +177,14 @@ class AwardsRecognitionsResource extends Resource
                     ->date()
                     ->sortable()
                     ->placeholder('N/A'),
-            ]);
+                
+                TextColumn::make('drive_link')
+                    ->label('File')
+                    ->formatStateUsing(fn ($record) => $record->drive_link ? '🔗 View File' : 'None')
+                    ->url(fn ($record) => $record->drive_link, true)
+                    ->openUrlInNewTab()
+                    ->color('primary'), 
+            ])
             
             ->filters([
                 SelectFilter::make('award_type')
@@ -204,12 +211,6 @@ class AwardsRecognitionsResource extends Resource
                             ->when($data['from'], fn ($q) => $q->whereDate('date_awarded', '>=', $data['from']))
                             ->when($data['until'], fn ($q) => $q->whereDate('date_awarded', '<=', $data['until']));
                     }),
-                    TextColumn::make('drive_link')
-                            ->label('File')
-                            ->formatStateUsing(fn ($record) => $record->drive_link ? '🔗 View File' : 'None')
-                            ->url(fn ($record) => $record->drive_link, true)
-                            ->openUrlInNewTab()
-                            ->color('primary'),
             ])
 
             ->bulkActions([
