@@ -182,9 +182,11 @@ class FilamentMainResource extends Resource
                             ])->columns(2),
 
                     Section::make('Section 3')
+                        ->description('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized.')
                         ->schema([
 
-                            Textarea::make('collection_database')->placeholder('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized')->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')->required(),
+                            // Textarea::make('collection_database')->placeholder('Indicate the Collection/Database where this Journal/Book/Conference Publication has been indexed/catalogued/recognized')->helperText('Do not leave the box blank. Please put "NA" if you have no answers. Thank you!')->required(),
+                            
                             Radio::make('web_science')->label('Web Science (formerly ISI)')->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('scopus')->label("Elsevier's Scopus")->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
                             Radio::make('science_direct')->label("Elsevier's ScienceDirect")->options(['YES' => 'YES', 'NO' => 'NO'])->inline()->required(),
@@ -257,7 +259,7 @@ class FilamentMainResource extends Resource
                 TextColumn::make('isbn_issn')->label('ISBN/ISSN')->searchable()->sortable(),
 
                 // SECTION 3 of 5: Indexing and Citations
-                TextColumn::make('collection_database')->label('Collection Database')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
+                // TextColumn::make('collection_database')->label('Collection Database')->sortable()->searchable()->limit(20)->tooltip(fn($state) => $state),
                 TextColumn::make('web_science')->label('Web Science')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
                 TextColumn::make('scopus')->label('Scopus')->alignCenter()->sortable()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
                 TextColumn::make('science_direct')->label('Science Direct')->sortable()->alignCenter()->searchable()->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger'),
