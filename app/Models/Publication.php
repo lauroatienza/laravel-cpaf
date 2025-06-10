@@ -35,7 +35,7 @@ class Publication extends Model
         'doi_or_link',
         'isbn_issn',
 
-        'collection_database',
+        /** 'collection_database', **/
         'web_science',
         'scopus',
         'science_direct',
