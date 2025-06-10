@@ -269,31 +269,45 @@ class FilamentMainResource extends Resource
                 TextColumn::make('citations')->label('Citations')->sortable()->sortable()->limit(20)->tooltip(fn($state) => $state)->alignCenter(),
 
                 // SECTION 4 of 5: Proofs
-                TextColumn::make('pdf_proof_1')
+                //TextColumn::make('pdf_proof_1')
+                 //   ->label('PDF Proof 1')
+                 //   ->sortable()
+                 //   ->url(fn($record) =>
+                 //       str_starts_with($record->pdf_proof_1, 'http')
+                 //       ? $record->pdf_proof_1
+                 //       : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/'))
+                 //   ->openUrlInNewTab()
+                 //   ->limit(20)
+                 //   ->searchable()
+                 //   ->tooltip(fn($state) => $state),
+
+                      TextColumn::make('pdf_proof_1')
                     ->label('PDF Proof 1')
-                    ->sortable()
-                    ->url(fn($record) =>
-                        str_starts_with($record->pdf_proof_1, 'http')
-                        ? $record->pdf_proof_1
-                        : 'https://drive.google.com/' . ltrim($record->pdf_proof_1, '/'))
+                    ->formatStateUsing(fn ($state) => $state ? '🔗 View Link' : 'None')
+                    ->url(fn ($record) => $record->pdf_proof_1)
                     ->openUrlInNewTab()
-                    ->limit(20)
-                    ->searchable()
-                    ->tooltip(fn($state) => $state),
+                    ->color('primary'),
+
+              //  TextColumn::make('pdf_proof_2')
+               //     ->label('PDF Proof 2')
+               //     ->sortable()
+               //     ->url(
+               //         fn($record) =>
+              //          str_starts_with($record->pdf_proof_2, 'http')
+               //         ? $record->pdf_proof_2
+               //         : 'https://drive.google.com/' . ltrim($record->pdf_proof_2, '/')
+              //      )
+              //      ->openUrlInNewTab()
+               //     ->limit(30)
+               //     ->searchable()
+              //      ->tooltip(fn($state) => $state),
 
                 TextColumn::make('pdf_proof_2')
-                    ->label('PDF Proof 2')
-                    ->sortable()
-                    ->url(
-                        fn($record) =>
-                        str_starts_with($record->pdf_proof_2, 'http')
-                        ? $record->pdf_proof_2
-                        : 'https://drive.google.com/' . ltrim($record->pdf_proof_2, '/')
-                    )
+                    ->label('PDF Proof 1')
+                    ->formatStateUsing(fn ($state) => $state ? '🔗 View Link' : 'None')
+                    ->url(fn ($record) => $record->pdf_proof_2)
                     ->openUrlInNewTab()
-                    ->limit(30)
-                    ->searchable()
-                    ->tooltip(fn($state) => $state),
+                    ->color('primary'),
 
                 // SECTION 5 of 5: Awards
                 TextColumn::make('received_award')->sortable()->label('Received Award')->badge()->formatStateUsing(fn($state) => $state === 'YES' ? 'Yes' : 'No')->color(fn($state) => $state === 'YES' ? 'success' : 'danger')->alignCenter(),
