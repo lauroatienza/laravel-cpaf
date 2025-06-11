@@ -264,11 +264,13 @@ class ResearchResource extends Resource
                  //   ->html(),
 
                 TextColumn::make('pdf_image_1')
-                    ->label('PDF File')
-                    ->formatStateUsing(fn ($state) => $state ? '🔗 View File' : 'None')
-                    ->url(fn ($record) => $record->pdf_image_1)
-                    ->openUrlInNewTab()
-                    ->color('primary'),
+                    ->label('PDF Image 1')
+                    ->formatStateUsing(function ($state) {
+                        return $state
+                        ? '<a href="' . Storage::url($state) . '" download target="_blank">' . basename($state) . '</a>'
+                        : '-';
+    })
+    ->html(),
                       
                 IconColumn::make('pbms_upload_status')->label('PMBS Upload Status')
                     ->icon(fn(string $state): string => match ($state) {
