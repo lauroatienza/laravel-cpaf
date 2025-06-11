@@ -248,15 +248,15 @@ class ResearchResource extends Resource
                     ->limit(10) // Only show first 20 characters
                     ->tooltip(fn($state) => $state),
                 TextColumn::make('source_funding')->label('Source of Funding')
-                    ->sortable()->searchable(),
+                    ->sortable()->searchable()->limit(18),
                 BadgeColumn::make('category_source_funding')->label('Category of Source of Funding')
                     ->sortable()->searchable()->color('gray'),
                 TextColumn::make('budget')->label('Budget')
-                    ->sortable()->searchable(),
+                    ->sortable()->searchable()->limit(18),
                 TextColumn::make('type_funding')->label('Type of Funding')
                     ->sortable()->searchable(),
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
-                    ->sortable()->searchable(),
+                    ->sortable()->searchable()->limit(18),
                       
                 Tables\Columns\TextColumn::make('pdf_image_1')
                     ->label('PDF Image 1')
