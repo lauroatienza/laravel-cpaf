@@ -258,10 +258,17 @@ class ResearchResource extends Resource
                 TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
                     ->sortable()->searchable()->limit(18),
                       
-                Tables\Columns\TextColumn::make('pdf_image_1')
-                    ->label('PDF Image 1')
-                    ->formatStateUsing(fn ($state) => $state ? '<a href="' . Storage::url($state) . '" target="_blank">' . basename($state) . '</a>' : '-')
-                    ->html(),
+               // Tables\Columns\TextColumn::make('pdf_image_1')
+                 //   ->label('PDF Image 1')
+                 //   ->formatStateUsing(fn ($state) => $state ? '<a href="' . Storage::url($state) . '" target="_blank">' . basename($state) . '</a>' : '-')
+                 //   ->html(),
+
+                TextColumn::make('pdf_image_1')
+                    ->label('PDF File')
+                    ->formatStateUsing(fn ($state) => $state ? '🔗 View File' : 'None')
+                    ->url(fn ($record) => $record->pdf_image_1)
+                    ->openUrlInNewTab()
+                    ->color('primary'),
                       
                 IconColumn::make('pbms_upload_status')->label('PMBS Upload Status')
                     ->icon(fn(string $state): string => match ($state) {
