@@ -41,7 +41,7 @@ class StatsOverview extends BaseWidget
         // If the user is an admin, count all records
         if ($user->hasRole(['super-admin', 'admin'])) {
             return [
-                Stat::make('Total: Faculty and REPS', User::whereIn('staff', ['faculty', 'REPS'])->count())
+                Stat::make('Total: Staff', User::whereIn('staff', ['faculty', 'REPS', 'Admin'])->count())
                     ->chart([1, 3, 5])
                     ->color('primary'),
 
