@@ -267,7 +267,7 @@ class ResearchResource extends Resource
                     ->label('PDF Image 1')
                     ->formatStateUsing(function ($state) {
                         return $state
-                        ? '<a href="' . Storage::url($state) . '" download target="_blank"> View File</a>'
+                        ? '<a href="' . Storage::url($state) . '" download target="_blank">🔗 View File</a>'
                         : '-';
     })
     ->html(),
