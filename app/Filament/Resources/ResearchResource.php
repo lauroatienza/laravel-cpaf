@@ -256,7 +256,7 @@ class ResearchResource extends Resource
                 TextColumn::make('type_funding')->label('Type of Funding')
                     ->sortable()->searchable(),
                 TextColumn::make('sdg_theme')->label('SDG Theme')
-                    ->sortable()->searchable()->limit(18),
+                    ->sortable()->searchable()->limit(18)->tooltip(fn($state) => $state),
                       
                // Tables\Columns\TextColumn::make('pdf_image_1')
                  //   ->label('PDF Image 1')
