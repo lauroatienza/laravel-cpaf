@@ -255,7 +255,7 @@ class ResearchResource extends Resource
                     ->sortable()->searchable()->limit(18),
                 TextColumn::make('type_funding')->label('Type of Funding')
                     ->sortable()->searchable(),
-                TextColumn::make('sdg_theme')->label('Year Completed') //the column go into sdg theme sorry huhu
+                TextColumn::make('sdg_theme')->label('SDG Theme')
                     ->sortable()->searchable()->limit(18),
                       
                // Tables\Columns\TextColumn::make('pdf_image_1')
