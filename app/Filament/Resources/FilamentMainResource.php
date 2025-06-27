@@ -127,6 +127,7 @@ class FilamentMainResource extends Resource
                                 'Paper Publication (Peer-Reviewed/Refereed)' => 'Paper Publication (Peer-Reviewed/Refereed)',
                                 'Paper Publication (Indexed Journal)' => 'Paper Publication (Indexed Journal)',
                                 'Journal Article (Peer-Reviewed)' => 'Journal Article (Peer-Reviewed)',
+                                'Policy Brief' => 'Policy Brief',
                                 'Other' => 'Other...',
                             ])
                             ->live()
@@ -169,7 +170,7 @@ class FilamentMainResource extends Resource
                             Textarea::make('editors')->label('Name of Editor(s)')->placeholder("Separate editors' names with semi-colons.\nExample: John Doe; Jane Smith; Alex Johnson ")->rows(3),
                             TextInput::make('volume_issue')->label('Volume No. and Issue No.')->placeholder('Ex: Volume 1 Issue 3')->maxLength(255),
                             Grid::make(3)->schema([
-                                DatePicker::make('date_published')->label('Date Published or Accepted')->placeholder('Select date')->required(),
+                                DatePicker::make('date_published')->label('Date Published or Accepted')->placeholder('Select date'),
                                 DatePicker::make('conference_start_date')->label('Conference START Date')->placeholder('Select start date'),
                                 DatePicker::make('conference_end_date')->label('Conference END Date')->placeholder('Select end date'),
                             ]),
