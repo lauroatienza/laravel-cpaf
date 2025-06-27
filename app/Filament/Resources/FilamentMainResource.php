@@ -150,7 +150,7 @@ class FilamentMainResource extends Resource
 
                         TextInput::make('title_of_publication')->label('Title of Publication')->placeholder('Enter the title of the publication')->required()->maxLength(255),
                         Textarea::make('co_authors')->label('Co-author(s)')->placeholder("Specify the lead author first. Separate co-authors with semi-colons.\nExample: John Doe; Jane Smith; Alex Johnson")->helperText('')->required()->rows(3),
-                    ])->columns(2)->extraAttributes(['class' => 'bg-blue-100 rounded-t-lg px-4 py-2', ]),
+                    ])->columns(2),
 
                     Section::make('Section 2')
                         ->schema([
