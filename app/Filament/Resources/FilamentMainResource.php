@@ -153,10 +153,10 @@ class FilamentMainResource extends Resource
 
                     Section::make('Section 2')
                         ->schema([
-                            Textarea::make('research_conference_publisher_details')->label('Research/Conference/Publisher details')->placeholder("Do not leave the box blank. Please put 'NA' if you have no answers. Thank you!")->required()->rows(2),
+                            Textarea::make('research_conference_publisher_details')->label('Research/Conference/Publisher')->placeholder("Do not leave the box blank. Please put 'NA' if you have no answers. Thank you!")->required()->rows(2),
                             Textarea::make('study_research_project')->label('Study/Research Project where the publication resulted from')->placeholder('Enter details')->rows(2),
                             Textarea::make('journal_book_conference')->label('Name of Journal/Book/Conference Publication')->placeholder('Enter the name')->rows(2),
-                            Textarea::make('publisher_organizer')->label('Publisher/Name of Organizer')->placeholder('Enter the name')->maxLength(255)->rows(2),
+                            Textarea::make('publisher_organizer')->label('Name of Organizer')->placeholder('Enter the name')->maxLength(255)->rows(2),
                             Select::make('type_of_publisher')->label('Type of Publisher')->options([
                                 'Commercial' => 'Commercial',
                                 'Learned Society and Association' => 'Learned Society and Association',
